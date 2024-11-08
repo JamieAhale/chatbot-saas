@@ -1,0 +1,92 @@
+<!-- app/views/assistants/documents.html.erb -->
+<h1>Documents</h1>
+
+<% if flash[:error] %>
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <%= flash[:error] %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% end %>
+
+<% if flash[:success] %>
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <%= flash[:success] %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% end %>
+
+<%= form_with url: upload_document_path, local: true, html: { multipart: true }, class: 'mb-4' do |form| %>
+  <div class="row g-2 align-items-center mt-4">
+    <div class="col-auto col-md-11">
+      <%= form.file_field :file, class: 'form-control' %>
+    </div>
+    <div class="col-auto col-md-1">
+      <%= form.submit "Upload", class: 'btn btn-primary' %>
+    </div>
+  </div>
+<% end %>
+
+<% if @files.any? %>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Status</th>
+        <th>Uploaded</th>
+        <th> </th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @files.each do |file| %>
+        <tr>
+          <td><%= file['name'] %></td>
+          <td>
+            <% status_class = case file['status']
+              when 'Available' then 'badge bg-success'
+              when 'Processing' then 'badge bg-warning text-dark'
+              when 'Deleting' then 'badge bg-danger'
+              else 'badge bg-secondary'
+            end %>
+            <span class="<%= status_class %>"><%= file['status'].capitalize %></span>
+          </td>
+          <td><%= DateTime.parse(file['updated_on']).strftime("%I:%M%P on %-m/%-d/%y") %></td>
+          <td class="text-center align-middle">
+            <div class="dropdown">
+              <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton<%= file['id'] %>" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 25px; color: #333; font-weight: bold;">
+                &#x22EE;
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton<%= file['id'] %>">
+                <li>
+                  <%= link_to 'View', view_document_path(file_id: file['id']), class: 'dropdown-item', target: '_blank' %>
+                </li>
+                <li>
+                  <%= link_to 'Check Status', check_status_path(file_id: file['id']), class: 'dropdown-item' %>
+                </li>
+                <li>
+                  <%= button_to 'Delete', delete_document_path(file_id: file['id']), method: :post, class: 'dropdown-item', onclick: "return confirm('Are you sure you want to delete this document?');" %>
+                </li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No documents found.</p>
+<% end %>
+
+<style>
+  .dropdown-toggle {
+    background-color: transparent !important;
+    border: none !important; /* Remove the border */
+    color: #333 !important;
+    font-size: 10px; /* Keep the font size at 30 */
+    font-weight: bold;
+    padding: 0; /* Remove padding */
+    text-decoration: none !important; /* Remove underline */
+  }
+  .dropdown-toggle::after {
+    display: none !important; /* Remove the default arrow */
+  }
+</style>

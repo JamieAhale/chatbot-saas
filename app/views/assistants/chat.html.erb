@@ -1,0 +1,67 @@
+<!-- app/views/assistants/chat.html.erb -->
+<div class="container mt-5">
+  <h1 class="text-center mb-4">Chat with Assistant</h1>
+  
+  <div id="chat-window" class="border rounded p-3 mb-3" style="height: 300px; overflow-y: auto;">
+    <!-- Chat messages will be appended here -->
+  </div>
+
+  <%= form_with url: chat_path, method: :get, local: true, id: 'chat-form', class: 'd-flex' do |form| %>
+    <%= form.text_field :user_input, size: 50, id: 'user-input', class: 'form-control me-2', placeholder: 'Enter your message...' %>
+    <%= form.submit "Send", class: 'btn btn-primary' %>
+  <% end %>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('chat-form');
+    const chatWindow = document.getElementById('chat-window');
+
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const userInput = document.getElementById('user-input').value;
+      if (userInput.trim() === '') {
+        return;
+      }
+
+      // Append user's message to the chat window
+      const userMessage = document.createElement('p');
+      userMessage.innerHTML = `<strong>You:</strong> ${userInput}`;
+      userMessage.classList.add('text-end', 'bg-light', 'p-2', 'rounded', 'mb-2');
+      chatWindow.appendChild(userMessage);
+
+      fetch(form.action + `?user_input=${encodeURIComponent(userInput)}`, {
+        method: 'GET',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        const assistantMessage = document.createElement('p');
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+          let messageContent = data.choices[0].message.content;
+          const referenceIndex = messageContent.indexOf("[1, pp. 1]");
+          if (referenceIndex !== -1) {
+            messageContent = messageContent.substring(0, referenceIndex).trim();
+          }
+          assistantMessage.innerHTML = `<strong>Assistant:</strong> ${messageContent}`;
+        } else {
+          assistantMessage.innerHTML = '<strong>Assistant:</strong> No valid response received.';
+        }
+        assistantMessage.classList.add('text-start', 'bg-secondary', 'text-white', 'p-2', 'rounded', 'mb-2');
+        chatWindow.appendChild(assistantMessage);
+      })
+      .catch(error => {
+        const errorMessage = document.createElement('p');
+        errorMessage.innerHTML = '<strong>Error:</strong> Unable to get a response from the assistant.';
+        errorMessage.classList.add('text-start', 'bg-danger', 'text-white', 'p-2', 'rounded', 'mb-2');
+        chatWindow.appendChild(errorMessage);
+      });
+
+      document.getElementById('user-input').value = '';
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    });
+  });
+</script>

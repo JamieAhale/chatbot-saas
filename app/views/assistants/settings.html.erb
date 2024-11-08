@@ -1,0 +1,80 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>Assistant Settings</h1>
+  <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#editInstructionsModal">
+    Edit Assistant
+  </button>
+</div>
+
+<% if flash[:error] %>
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <%= flash[:error] %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% end %>
+
+<% if @assistant_info.present? %>
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row mb-3">
+        <div class="col-md-2">
+          <h3 class="h6"><strong>Name</strong></h3>
+        </div>
+        <div class="col-md-10">
+          <p class="mb-0"><strong><%= @assistant_info['name'] %></strong></p>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-2">
+          <h3 class="h6"><strong>Instructions</strong></h3>
+        </div>
+        <div class="col-md-10">
+          <p class="mb-0"><%= @assistant_info['instructions'] %></p>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-2">
+          <h3 class="h6"><strong>Status</strong></h3>
+        </div>
+        <div class="col-md-10">
+          <% status_class = @assistant_info['status'] == 'Ready' ? 'bg-success text-light' : 'bg-warning text-dark' %>
+          <p class="mb-0"><span class="badge <%= status_class %>"><%= @assistant_info['status'] %></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="editInstructionsModal" tabindex="-1" aria-labelledby="editInstructionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editInstructionsModalLabel">Edit Instructions</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <%= form_with url: update_instructions_path, method: :patch, local: true do |form| %>
+            <div class="mb-3">
+              <%= form.label :instructions, "Instructions", class: 'form-label' %>
+              <%= form.text_area :instructions, value: @assistant_info['instructions'], class: 'form-control', rows: 4 %>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <%= form.submit "Save Changes", class: 'btn btn-primary' %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% else %>
+  <div class="alert alert-info" role="alert">
+    No assistant information available.
+  </div>
+<% end %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Bootstrap modal
+    var editInstructionsModal = new bootstrap.Modal(document.getElementById('editInstructionsModal'));
+  });
+</script>
