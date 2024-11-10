@@ -11,40 +11,66 @@ class AssistantsController < ApplicationController
       assistant_name = ENV['PINECONE_ASSISTANT_NAME']
       url = "https://prod-1-data.ke.pinecone.io/assistant/chat/#{assistant_name}/chat/completions"
 
+      # Retrieve or create the current conversation
+      conversation = if session[:conversation_id]
+                       Conversation.find(session[:conversation_id])
+                     else
+                       new_conversation = Conversation.create
+                       session[:conversation_id] = new_conversation.id
+                       new_conversation
+                     end
+  
       user_input = params[:user_input]
-      puts "User input: #{user_input}"
-
+  
+      # Prepare the conversation history for the API request
+      messages = conversation.query_and_responses.map do |qr|
+        [
+          { role: 'user', content: qr.user_query },
+          { role: 'assistant', content: qr.assistant_response }
+        ]
+      end.flatten
+  
+      # Append the current user input
+      messages << { role: 'user', content: user_input }
+  
+      # API request to Pinecone Assistant
       response = Faraday.post(url) do |req|
         req.headers['Api-Key'] = api_key
         req.headers['Content-Type'] = 'application/json'
         req.body = {
           model: 'gpt-4o',
           streaming: false,
-          messages: [
-            {
-              role: 'user',
-              content: user_input
-            }
-          ]
+          messages: messages
         }.to_json
       end
 
-      puts "Response status: #{response.status}"
-      puts "Response body: #{response.body}"
-
-      parsed_response = JSON.parse(response.body)
-      # Directly access the content of the assistant's message
-      puts "Response content: #{parsed_response['choices'][0]['message']['content']}"
-
+      puts "response: #{response.inspect}"
+  
       if response.success?
-        render json: JSON.parse(response.body)
+        parsed_response = JSON.parse(response.body)
+        assistant_response = parsed_response['choices'][0]['message']['content']
+        citations = assistant_response.scan(/\[([^\]]+)\]\(([^)]+)\)/)
+        puts "citations: #{citations.inspect}"
+        if citations.empty?
+          conversation.flagged_for_review = true
+          conversation.save!
+        end
+
+        puts "conversation: #{conversation.inspect}"
+  
+        # Save the query and response
+        conversation.query_and_responses.create(
+          user_query: user_input,
+          assistant_response: assistant_response
+        )
+  
+        render json: parsed_response
       else
         error_message = "Error: #{response.status} - #{response.reason_phrase}"
         Rails.logger.error(error_message)
         render json: { error: error_message }, status: :bad_request
       end
     else
-      # Render the view without any response data
       render :chat
     end
   end
@@ -147,7 +173,8 @@ class AssistantsController < ApplicationController
 
     if response.success?
       # TODO: Replace with the actual signed_url
-      test_url = "https://www.google.com"
+      # test_url = "https://www.google.com"
+      test_url = "https://storage.googleapis.com/knowledge-prod-files/9cced6da-8cdd-4430-befe-0e06b8e681be%2F8411e046-6c05-4960-9cae-2b7f9a6bfe1f%2Feb457909-4d35-45c8-9a83-27d508747578.pdf?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=ke-prod-1%40pc-knowledge-prod.iam.gserviceaccount.com%2F20241110%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20241110T085714Z&X-Goog-Expires=3600&X-Goog-SignedHeaders=host&response-content-disposition=inline&response-content-type=application%2Fpdf&X-Goog-Signature=097474794cc583c406381117b89074129f86cc3f39edbd1edebd5334ef0bc147ed0a1a1dc613417be712425dec043b6359c264f1c05554d2da60fa52bae04ec8380fcc07c55cdf7700958ee31c4f4d6973407c36b27ab74df20b324999decbbeaf3d142d7ff56cc77d4b964329a152edbfb820e6d74ce91083edcd6d4279d78a18d88d9e851f8c56a0f434e35d678596f9b4bc5fb10d79d1158a0ace82b8d9eb6984be1fbb26c157bf8d6ecd5b6d410ca835de5fe8aff7633862cbcd0bd1286b64b7e5e727e3673cd42afc47442b0db3b931d49a0ff6d0dd2cc0c245a3f4f1e621c17f3b6eec9bf21691b703620ca1364624dc3d2ed7a3d62c23138069875912"
       redirect_to test_url, allow_other_host: true
     else
       flash[:error] = "Failed to fetch document: #{response.code} - #{response.message}"
@@ -218,6 +245,42 @@ class AssistantsController < ApplicationController
     end
 
     redirect_to assistant_settings_path
+  end
+
+  def conversations
+    @conversations = Conversation.order(created_at: :desc)
+  end
+
+  def show_conversation
+    @conversation = Conversation.find(params[:id])
+    @messages = @conversation.query_and_responses.order(created_at: :asc)
+  end
+
+  def destroy_conversation
+    @conversation = Conversation.find(params[:id])
+    @conversation.destroy
+    redirect_to conversations_path, notice: 'Conversation has been deleted.'
+  end
+
+  def conversations_for_review
+    @conversations = Conversation.where(flagged_for_review: true).order(created_at: :desc)
+  end
+
+  def show_conversation_for_review
+    @conversation = Conversation.find(params[:id])
+    @messages = @conversation.query_and_responses.order(created_at: :asc)
+  end
+
+  def mark_resolved
+    @conversation = Conversation.find(params[:id])
+    @conversation.update(flagged_for_review: false)
+    redirect_to conversations_for_review_path, notice: 'Conversation marked as resolved.'
+  end
+
+  def dismiss
+    @conversation = Conversation.find(params[:id])
+    @conversation.update(flagged_for_review: false)
+    redirect_to conversations_for_review_path, notice: 'Conversation dismissed.'
   end
 
 end

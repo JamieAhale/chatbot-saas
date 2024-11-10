@@ -23,6 +23,27 @@ Rails.application.routes.draw do
   # Define a named route for the update_instructions action
   patch 'assistants/update_instructions', to: 'assistants#update_instructions', as: :update_instructions
 
+  # Define a named route for the conversations action
+  get 'assistants/conversations', to: 'assistants#conversations', as: :conversations
+
+  # Define a named route for the show_conversation action
+  get 'assistants/conversations/:id', to: 'assistants#show_conversation', as: :show_conversation
+
+  # Define a named route for the destroy_conversation action
+  delete 'assistants/conversations/:id', to: 'assistants#destroy_conversation', as: :conversation
+
+  # Define a named route for the conversations_for_review action
+  get 'assistants/conversations_for_review', to: 'assistants#conversations_for_review', as: :conversations_for_review
+
+  # Define a named route for the show_conversation_for_review action
+  get 'assistants/conversations_for_review/:id', to: 'assistants#show_conversation_for_review', as: :show_conversation_for_review
+
+  # Define a named route for the mark_resolved_conversation action
+  patch 'assistants/conversations/:id/mark_resolved', to: 'assistants#mark_resolved', as: :mark_resolved_conversation
+
+  # Define a named route for the dismiss_conversation action
+  patch 'assistants/conversations/:id/dismiss', to: 'assistants#dismiss', as: :dismiss_conversation
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

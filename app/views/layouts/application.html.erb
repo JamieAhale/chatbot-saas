@@ -14,27 +14,34 @@
   </head>
 
   <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">AI Assistant</a>
+        <a class="navbar-brand" href="<%= root_path %>">AI Assistant</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav">
             <li class="nav-item">
-              <%= link_to 'Chat', chat_path, class: 'nav-link' %>
+              <%= link_to 'Chat', chat_path, class: "nav-link #{'active' if current_page?(chat_path)}" %>
             </li>
             <li class="nav-item">
-              <%= link_to 'Documents', documents_path, class: 'nav-link' %>
+              <%= link_to 'Documents', documents_path, class: "nav-link #{'active' if current_page?(documents_path)}" %>
             </li>
             <li class="nav-item">
-              <%= link_to 'Assistant Settings', assistant_settings_path, class: 'nav-link' %>
+              <%= link_to 'Conversations', conversations_path, class: "nav-link #{'active' if current_page?(conversations_path) || (request.path.include?('/assistants/conversations') && !request.path.include?('/assistants/conversations_for_review'))}" %>
+            </li>
+            <li class="nav-item">
+              <%= link_to 'Conversations for Review', conversations_for_review_path, class: "nav-link #{'active' if current_page?(conversations_for_review_path) || request.path.include?('/assistants/conversations_for_review')}" %>
+            </li>
+            <li class="nav-item">
+              <%= link_to 'Assistant Settings', assistant_settings_path, class: "nav-link #{'active' if current_page?(assistant_settings_path)}" %>
             </li>
           </ul>
         </div>
       </div>
     </nav>
+
 
     <div class="container mt-4">
       <%= yield %>
