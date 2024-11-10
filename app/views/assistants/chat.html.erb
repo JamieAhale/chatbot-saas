@@ -1,8 +1,8 @@
 <!-- app/views/assistants/chat.html.erb -->
-<div class="container mt-5">
-  <h1 class="text-center mb-4">Chat with Assistant</h1>
+<div class="container mt-5" style="max-width: 600px;">
+  <h1 class="text-center mb-4">Chat with AI Assistant</h1>
   
-  <div id="chat-window" class="border rounded p-3 mb-3" style="height: 300px; overflow-y: auto;">
+  <div id="chat-window" class="border rounded p-3 mb-3" style="height: 500px; overflow-y: auto;">
     <!-- Chat messages will be appended here -->
   </div>
 
@@ -25,10 +25,10 @@
         return;
       }
 
-      // Append user's message to the chat window
-      const userMessage = document.createElement('p');
-      userMessage.innerHTML = `<strong>You:</strong> ${userInput}`;
-      userMessage.classList.add('text-end', 'bg-light', 'p-2', 'rounded', 'mb-2');
+      // Append user's message to the chat window (right-aligned)
+      const userMessage = document.createElement('div');
+      userMessage.innerHTML = `<p class="bg-light text-dark p-2 rounded d-inline-block text-end mb-2" style="max-width: 75%;"><strong>You:</strong> ${userInput}</p>`;
+      userMessage.classList.add('d-flex', 'justify-content-end');
       chatWindow.appendChild(userMessage);
 
       fetch(form.action + `?user_input=${encodeURIComponent(userInput)}`, {
@@ -39,29 +39,37 @@
       })
       .then(response => response.json())
       .then(data => {
-        const assistantMessage = document.createElement('p');
+        // Append assistant's message to the chat window (left-aligned)
+        const assistantMessage = document.createElement('div');
         if (data.choices && data.choices[0] && data.choices[0].message) {
           let messageContent = data.choices[0].message.content;
           const referenceIndex = messageContent.indexOf("[1, pp. 1]");
           if (referenceIndex !== -1) {
             messageContent = messageContent.substring(0, referenceIndex).trim();
           }
-          assistantMessage.innerHTML = `<strong>Assistant:</strong> ${messageContent}`;
+          assistantMessage.innerHTML = `<p class="bg-secondary text-white p-2 rounded d-inline-block text-start mb-2" style="max-width: 75%;"><strong>Assistant:</strong> ${messageContent}</p>`;
         } else {
-          assistantMessage.innerHTML = '<strong>Assistant:</strong> No valid response received.';
+          assistantMessage.innerHTML = '<p class="bg-secondary text-white p-2 rounded d-inline-block text-start mb-2" style="max-width: 75%;"><strong>Assistant:</strong> No valid response received.</p>';
         }
-        assistantMessage.classList.add('text-start', 'bg-secondary', 'text-white', 'p-2', 'rounded', 'mb-2');
+        assistantMessage.classList.add('d-flex', 'justify-content-start');
         chatWindow.appendChild(assistantMessage);
+
+        // Scroll to the latest message
+        chatWindow.scrollTop = chatWindow.scrollHeight;
       })
       .catch(error => {
-        const errorMessage = document.createElement('p');
-        errorMessage.innerHTML = '<strong>Error:</strong> Unable to get a response from the assistant.';
-        errorMessage.classList.add('text-start', 'bg-danger', 'text-white', 'p-2', 'rounded', 'mb-2');
+        // Append error message (left-aligned)
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = '<p class="bg-danger text-white p-2 rounded d-inline-block text-start mb-2" style="max-width: 75%;"><strong>Error:</strong> Unable to get a response from the assistant.</p>';
+        errorMessage.classList.add('d-flex', 'justify-content-start');
         chatWindow.appendChild(errorMessage);
+
+        // Scroll to the latest message
+        chatWindow.scrollTop = chatWindow.scrollHeight;
       });
 
+      // Clear the input field after sending the message
       document.getElementById('user-input').value = '';
-      chatWindow.scrollTop = chatWindow.scrollHeight;
     });
   });
 </script>

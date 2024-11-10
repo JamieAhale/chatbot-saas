@@ -1,0 +1,43 @@
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center">
+      <h1 class="mb-0 me-3">Conversation #<%= @conversation.id %></h1>
+      <div class="dropdown me-3">
+        <button class="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 25px; color: #333; font-weight: bold;">
+          &#x22EE;
+        </button>
+        <ul class="dropdown-menu">
+          <li>
+            <%= button_to "Delete", conversation_path(@conversation), 
+                method: :delete, 
+                class: "dropdown-item text-danger",
+                onclick: "return confirm('This cannot be undone. Are you sure?');" %>
+          </li>
+        </ul>
+      </div>
+      <%= button_to "Mark as Resolved", mark_resolved_conversation_path(@conversation), method: :patch, class: "btn btn-success me-2", onClick: "return confirm('Are you sure you want to mark this conversation as resolved?');" %>
+      <%= button_to "Dismiss", dismiss_conversation_path(@conversation), method: :patch, class: "btn btn-secondary", onClick: "return confirm('Are you sure you want to dismiss this conversation?');" %>
+    </div>
+    <%= link_to "Back to Conversations", conversations_for_review_path, class: "btn btn-outline-secondary" %>
+  </div>
+
+  <!-- Chat messages container with scrollable area -->
+  <div class="border rounded p-3 mb-3" style="height: 500px; overflow-y: auto;">
+    <% @messages.each do |message| %>
+      <!-- User message bubble (left-aligned) -->
+      <div class="d-flex justify-content-start mb-3">
+        <p class="bg-light p-2 rounded d-inline-block text-break" style="max-width: 75%;">
+          <strong>User:</strong> <%= message.user_query %>
+        </p>
+      </div>
+      
+      <!-- Assistant message bubble (right-aligned) -->
+      <div class="d-flex justify-content-end mb-3">
+        <p class="bg-secondary text-white p-2 rounded d-inline-block text-break" style="max-width: 75%;">
+          <strong>Assistant:</strong> 
+          <%= message.assistant_response.split(/\[\d+,\s*pp\.|\[cite:/).first&.strip %>
+        </p>
+      </div>
+    <% end %>
+  </div>
+</div>
