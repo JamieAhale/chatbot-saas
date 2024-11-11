@@ -17,7 +17,7 @@
               <%= link_to "Conversation " +'#'+ "#{conversation.id}", show_conversation_path(conversation), class: "fw-bold text-decoration-underline" %>
             </td>
             <td>
-              <%= conversation.query_and_responses.count %>
+              <%= conversation.query_and_responses.count * 2 %>
             </td>
             <td>
               <%= conversation.created_at.strftime("#{conversation.created_at.day.ordinalize} %B %Y") %>
