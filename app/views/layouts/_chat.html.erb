@@ -1,0 +1,104 @@
+<div id="chat-icon" class="chat-icon">
+  <button class="btn btn-primary rounded-circle" style="width: 60px; height: 60px; font-size: 1.5em;">
+    <i class="fa-solid fa-comments"></i>
+  </button>
+</div>
+
+<div id="chat-container" class="chat-container hidden">
+  <div class="container mt-4" style="max-width: 500px;">
+    <h3 class="text-center mb-3">Chat with AI Assistant</h3>
+    
+    <div id="chat-window" class="border rounded p-3 mb-3" style="height: 300px; overflow-y: auto;">
+      <!-- Chat messages will be appended here -->
+    </div>
+
+    <%= form_with url: chat_path, method: :get, local: true, id: 'chat-form', class: 'd-flex mb-3' do |form| %>
+      <%= form.text_field :user_input, id: 'user-input', class: 'form-control me-2', placeholder: 'Enter your message...', style: 'flex: 1; height: 40px;' %>
+      <%= form.button class: 'btn btn-primary rounded', style: 'width: 45px; height: 40px;' do %>
+        <i class="fa-solid fa-paper-plane"></i>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const chatIcon = document.getElementById('chat-icon');
+    const chatContainer = document.getElementById('chat-container');
+
+    chatIcon.addEventListener('click', function() {
+      chatContainer.classList.toggle('hidden');
+    });
+
+    const form = document.getElementById('chat-form');
+    const chatWindow = document.getElementById('chat-window');
+
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const userInput = document.getElementById('user-input').value;
+      if (userInput.trim() === '') {
+        return;
+      }
+
+      // Append user's message to the chat window (right-aligned)
+      const userMessage = document.createElement('div');
+      userMessage.innerHTML = `<p class="bg-light text-dark p-2 rounded d-inline-block text-end mb-2" style="max-width: 80%;"><strong>You:</strong> ${userInput}</p>`;
+      userMessage.classList.add('d-flex', 'justify-content-end');
+      chatWindow.appendChild(userMessage);
+
+      // Append "Loading..." placeholder
+      const loadingMessage = document.createElement('div');
+      loadingMessage.innerHTML = '<p class="bg-secondary text-white p-2 rounded d-inline-block text-start mb-2" style="max-width: 80%;"><i class="fa-solid fa-circle fa-bounce" style="font-size: 0.3em; animation-delay: 0s;"></i> <i class="fa-solid fa-circle fa-bounce" style="font-size: 0.3em; animation-delay: 0.2s;"></i> <i class="fa-solid fa-circle fa-bounce" style="font-size: 0.3em; animation-delay: 0.4s;"></i></p>';
+      loadingMessage.classList.add('d-flex', 'justify-content-start');
+      chatWindow.appendChild(loadingMessage);
+
+      // Send GET request with user input as a query parameter
+      fetch(`${form.action}?user_input=${encodeURIComponent(userInput)}`, {
+        method: 'GET',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Remove "Loading..." placeholder
+        chatWindow.removeChild(loadingMessage);
+
+        // Append assistant's message to the chat window (left-aligned)
+        const assistantMessage = document.createElement('div');
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+          let messageContent = data.choices[0].message.content;
+          const referenceIndex = messageContent.indexOf("[1, pp. 1]");
+          if (referenceIndex !== -1) {
+            messageContent = messageContent.substring(0, referenceIndex).trim();
+          }
+          assistantMessage.innerHTML = `<p class="bg-secondary text-white p-2 rounded d-inline-block text-start mb-2" style="max-width: 80%;"><strong>Assistant:</strong> ${messageContent}</p>`;
+        } else {
+          assistantMessage.innerHTML = '<p class="bg-secondary text-white p-2 rounded d-inline-block text-start mb-2" style="max-width: 80%;"><strong>Assistant:</strong> No valid response received.</p>';
+        }
+        assistantMessage.classList.add('d-flex', 'justify-content-start');
+        chatWindow.appendChild(assistantMessage);
+
+        // Scroll to the latest message
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+      })
+      .catch(error => {
+        // Remove "Loading..." placeholder
+        chatWindow.removeChild(loadingMessage);
+
+        // Append error message (left-aligned)
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = '<p class="bg-danger text-white p-2 rounded d-inline-block text-start mb-2" style="max-width: 70%;"><strong>Error:</strong> Unable to get a response from the assistant.</p>';
+        errorMessage.classList.add('d-flex', 'justify-content-start');
+        chatWindow.appendChild(errorMessage);
+
+        // Scroll to the latest message
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+      });
+
+      // Clear the input field after sending the message
+      document.getElementById('user-input').value = '';
+    });
+  });
+</script>
