@@ -5,7 +5,8 @@
     <table class="table table-striped mt-4">
       <thead>
         <tr>
-          <th>Conversation</th>
+          <th>Title</th>
+          <th>ID</th>
           <th>Total Messages</th>
           <th>Date</th>
         </tr>
@@ -14,7 +15,10 @@
         <% @conversations.each do |conversation| %>
           <tr>
             <td>
-                 <%= link_to "Conversation " +'#'+ "#{conversation.id}", show_conversation_for_review_path(conversation), class: "text-danger fw-bold text-decoration-underline" %>
+              <%= link_to (conversation.title.presence || "Untitled").gsub(/\A"|"\Z/, ''), show_conversation_for_review_path(conversation), class: "text-danger fw-bold text-decoration-underline" %>
+            </td>
+            <td>
+              <%= conversation.id %>
             </td>
             <td>
               <%= conversation.query_and_responses.count * 2 %>

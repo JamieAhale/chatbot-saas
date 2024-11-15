@@ -63,6 +63,23 @@ class AssistantsController < ApplicationController
           user_query: user_input,
           assistant_response: assistant_response
         )
+
+        if conversation.title.blank?
+          title_response = Faraday.post(url) do |req|
+            req.headers['Api-Key'] = api_key
+            req.headers['Content-Type'] = 'application/json'
+            req.body = {
+              model: 'gpt-4o',
+              streaming: false,
+              messages: [
+                { role: 'user', content: "Summarize this message to create a title for the conversation: #{user_input}" }
+              ]
+            }.to_json
+          end
+          parsed_title_response = JSON.parse(title_response.body)
+          conversation.title = parsed_title_response['choices'][0]['message']['content'].strip.gsub(/\A"|"\Z/, '')
+          conversation.save!
+        end
   
         render json: parsed_response
       else
