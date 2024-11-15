@@ -12,8 +12,8 @@
       <!-- Chat messages will be appended here -->
     </div>
 
-    <%= form_with url: chat_path, method: :get, local: true, id: 'chat-form', class: 'd-flex mb-3' do |form| %>
-      <%= form.text_field :user_input, id: 'user-input', class: 'form-control me-2', placeholder: 'Enter your message...', style: 'flex: 1; height: 40px;' %>
+    <%= form_with url: chat_path, method: :get, local: true, id: 'chat-form', class: 'd-flex align-items-end mb-3' do |form| %>
+      <%= form.text_area :user_input, id: 'user-input', class: 'form-control me-2', placeholder: 'Enter your message...', style: 'flex: 1; height: auto; max-height: 100px; resize: none; overflow-y: auto;' %>
       <%= form.button class: 'btn btn-primary rounded', style: 'width: 45px; height: 40px;' do %>
         <i class="fa-solid fa-paper-plane"></i>
       <% end %>
@@ -25,25 +25,56 @@
   document.addEventListener('DOMContentLoaded', function() {
     const chatIcon = document.getElementById('chat-icon');
     const chatContainer = document.getElementById('chat-container');
+    const form = document.getElementById('chat-form');
+    const chatWindow = document.getElementById('chat-window');
+    const userInput = document.getElementById('user-input');
+    let initialMessageDisplayed = false; // Flag to track if the initial message has been displayed
+
+    userInput.style.height = '20px'; // Set initial height
 
     chatIcon.addEventListener('click', function() {
       chatContainer.classList.toggle('hidden');
+      
+      // Check if the chat window is now visible and the initial message hasnt been displayed yet
+      if (!chatContainer.classList.contains('hidden') && !initialMessageDisplayed) {
+        // Append initial assistant message
+        const initialMessage = document.createElement('div');
+        initialMessage.innerHTML = '<p class="bg-secondary text-white p-2 rounded d-inline-block text-start mb-2" style="max-width: 80%;"><strong>Assistant:</strong> How can I help you today?</p>';
+        initialMessage.classList.add('d-flex', 'justify-content-start');
+        chatWindow.appendChild(initialMessage);
+
+        // Scroll to the latest message
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+
+        // Set the flag to true to prevent the message from being displayed again
+        initialMessageDisplayed = true;
+      }
     });
 
-    const form = document.getElementById('chat-form');
-    const chatWindow = document.getElementById('chat-window');
+    // Adjust textarea height based on content
+    userInput.addEventListener('input', function() {
+      this.style.height = '20px'; // Reset to initial height
+      this.style.height = Math.min(this.scrollHeight, 100) + 'px'; // Set new height, but not more than max-height
+    });
+
+    // Submit form on Enter key press
+    userInput.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault(); // Prevent newline
+        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+    });
 
     form.addEventListener('submit', function(event) {
       event.preventDefault();
 
-      const userInput = document.getElementById('user-input').value;
-      if (userInput.trim() === '') {
+      if (userInput.value.trim() === '') {
         return;
       }
 
       // Append user's message to the chat window (right-aligned)
       const userMessage = document.createElement('div');
-      userMessage.innerHTML = `<p class="bg-light text-dark p-2 rounded d-inline-block text-end mb-2" style="max-width: 80%;"><strong>You:</strong> ${userInput}</p>`;
+      userMessage.innerHTML = `<p class="bg-light text-dark p-2 rounded d-inline-block text-end mb-2" style="max-width: 80%;"><strong>You:</strong> ${userInput.value}</p>`;
       userMessage.classList.add('d-flex', 'justify-content-end');
       chatWindow.appendChild(userMessage);
 
@@ -53,8 +84,11 @@
       loadingMessage.classList.add('d-flex', 'justify-content-start');
       chatWindow.appendChild(loadingMessage);
 
+      // Scroll to the latest message
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+
       // Send GET request with user input as a query parameter
-      fetch(`${form.action}?user_input=${encodeURIComponent(userInput)}`, {
+      fetch(`${form.action}?user_input=${encodeURIComponent(userInput.value)}`, {
         method: 'GET',
         headers: {
           'X-Requested-With': 'XMLHttpRequest'
@@ -98,7 +132,8 @@
       });
 
       // Clear the input field after sending the message
-      document.getElementById('user-input').value = '';
+      userInput.value = '';
+      userInput.style.height = '20px'; // Reset height after clearing
     });
   });
 </script>
