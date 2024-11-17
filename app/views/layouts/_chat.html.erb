@@ -12,6 +12,10 @@
       <!-- Chat messages will be appended here -->
     </div>
 
+    <div id="potential-queries" class="mb-3">
+      <!-- Potential queries will be appended here -->
+    </div>
+
     <%= form_with url: chat_path, method: :get, local: true, id: 'chat-form', class: 'd-flex align-items-end mb-3' do |form| %>
       <%= form.text_area :user_input, id: 'user-input', class: 'form-control me-2', placeholder: 'Enter your message...', style: 'flex: 1; height: auto; max-height: 100px; resize: none; overflow-y: auto;' %>
       <%= form.button class: 'btn btn-primary rounded', style: 'width: 45px; height: 40px;' do %>
@@ -28,39 +32,32 @@
     const form = document.getElementById('chat-form');
     const chatWindow = document.getElementById('chat-window');
     const userInput = document.getElementById('user-input');
-    let initialMessageDisplayed = false; // Flag to track if the initial message has been displayed
+    const potentialQueriesContainer = document.getElementById('potential-queries');
+    let initialMessageDisplayed = false;
 
-    userInput.style.height = '20px'; // Set initial height
+    userInput.style.height = '20px';
 
     chatIcon.addEventListener('click', function() {
       chatContainer.classList.toggle('hidden');
       
-      // Check if the chat window is now visible and the initial message hasnt been displayed yet
       if (!chatContainer.classList.contains('hidden') && !initialMessageDisplayed) {
-        // Append initial assistant message
         const initialMessage = document.createElement('div');
         initialMessage.innerHTML = '<p class="bg-secondary text-white p-2 rounded d-inline-block text-start mb-2" style="max-width: 80%;"><strong>Assistant:</strong> How can I help you today?</p>';
         initialMessage.classList.add('d-flex', 'justify-content-start');
         chatWindow.appendChild(initialMessage);
-
-        // Scroll to the latest message
         chatWindow.scrollTop = chatWindow.scrollHeight;
-
-        // Set the flag to true to prevent the message from being displayed again
         initialMessageDisplayed = true;
       }
     });
 
-    // Adjust textarea height based on content
     userInput.addEventListener('input', function() {
-      this.style.height = '20px'; // Reset to initial height
-      this.style.height = Math.min(this.scrollHeight, 100) + 'px'; // Set new height, but not more than max-height
+      this.style.height = '20px';
+      this.style.height = Math.min(this.scrollHeight, 100) + 'px';
     });
 
-    // Submit form on Enter key press
     userInput.addEventListener('keydown', function(event) {
       if (event.key === 'Enter' && !event.shiftKey) {
-        event.preventDefault(); // Prevent newline
+        event.preventDefault();
         form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
       }
     });
@@ -72,22 +69,20 @@
         return;
       }
 
-      // Append user's message to the chat window (right-aligned)
+      // Clear potential queries
+      potentialQueriesContainer.innerHTML = '';
+
       const userMessage = document.createElement('div');
       userMessage.innerHTML = `<p class="bg-light text-dark p-2 rounded d-inline-block text-end mb-2" style="max-width: 80%;"><strong>You:</strong> ${userInput.value}</p>`;
       userMessage.classList.add('d-flex', 'justify-content-end');
       chatWindow.appendChild(userMessage);
 
-      // Append "Loading..." placeholder
       const loadingMessage = document.createElement('div');
       loadingMessage.innerHTML = '<p class="bg-secondary text-white p-2 rounded d-inline-block text-start mb-2" style="max-width: 80%;"><i class="fa-solid fa-circle fa-bounce" style="font-size: 0.3em; animation-delay: 0s;"></i> <i class="fa-solid fa-circle fa-bounce" style="font-size: 0.3em; animation-delay: 0.2s;"></i> <i class="fa-solid fa-circle fa-bounce" style="font-size: 0.3em; animation-delay: 0.4s;"></i></p>';
       loadingMessage.classList.add('d-flex', 'justify-content-start');
       chatWindow.appendChild(loadingMessage);
-
-      // Scroll to the latest message
       chatWindow.scrollTop = chatWindow.scrollHeight;
 
-      // Send GET request with user input as a query parameter
       fetch(`${form.action}?user_input=${encodeURIComponent(userInput.value)}`, {
         method: 'GET',
         headers: {
@@ -96,44 +91,61 @@
       })
       .then(response => response.json())
       .then(data => {
-        // Remove "Loading..." placeholder
         chatWindow.removeChild(loadingMessage);
 
-        // Append assistant's message to the chat window (left-aligned)
         const assistantMessage = document.createElement('div');
-        if (data.choices && data.choices[0] && data.choices[0].message) {
-          let messageContent = data.choices[0].message.content;
-          const referenceIndex = messageContent.indexOf("[1, pp. 1]");
-          if (referenceIndex !== -1) {
-            messageContent = messageContent.substring(0, referenceIndex).trim();
-          }
-          assistantMessage.innerHTML = `<p class="bg-secondary text-white p-2 rounded d-inline-block text-start mb-2" style="max-width: 80%;"><strong>Assistant:</strong> ${messageContent}</p>`;
+        if (data.response.choices && data.response.choices[0] && data.response.choices[0].message) {
+          let messageContent = data.response.choices[0].message.content
+            .split("Potential queries you might have next:")[0]
+            .replace(/\[\d+(?:,\s*pp\.\s*\d+(?:,\s*\d+)*)?\]/g, '')
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '')
+            .replace(/References:\s*\d+\.\s*/g, '')
+            .replace(/References:.*$/, '')
+            .replace(/\s+$/, '')
+            .replace(/\s+\.$/, '')
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .trim();
+          let formattedMessageContent = messageContent.replace(/\n/g, '<br>');
+          assistantMessage.innerHTML = `<p class="bg-secondary text-white p-2 rounded d-inline-block text-start mb-2" style="max-width: 80%;"><strong>Assistant:</strong> ${formattedMessageContent}</p>`;
         } else {
           assistantMessage.innerHTML = '<p class="bg-secondary text-white p-2 rounded d-inline-block text-start mb-2" style="max-width: 80%;"><strong>Assistant:</strong> No valid response received.</p>';
         }
         assistantMessage.classList.add('d-flex', 'justify-content-start');
         chatWindow.appendChild(assistantMessage);
-
-        // Scroll to the latest message
         chatWindow.scrollTop = chatWindow.scrollHeight;
+
+        // Remove numbers from potential queries
+        if (data.potential_queries && data.potential_queries.length > 0) {
+          data.potential_queries = data.potential_queries.map(query => query.replace(/^\d+\.\s*/, ''));
+        }
+
+        // Display potential queries as buttons
+        if (data.potential_queries && data.potential_queries.length > 0) {
+          data.potential_queries.forEach(query => {
+            const queryButton = document.createElement('button');
+            queryButton.className = 'btn btn-outline-primary mb-2';
+            queryButton.style.width = '100%';
+            queryButton.textContent = query;
+            queryButton.addEventListener('click', function() {
+              userInput.value = query;
+              form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            });
+            potentialQueriesContainer.appendChild(queryButton);
+          });
+        }
       })
       .catch(error => {
-        // Remove "Loading..." placeholder
         chatWindow.removeChild(loadingMessage);
 
-        // Append error message (left-aligned)
         const errorMessage = document.createElement('div');
         errorMessage.innerHTML = '<p class="bg-danger text-white p-2 rounded d-inline-block text-start mb-2" style="max-width: 70%;"><strong>Error:</strong> Unable to get a response from the assistant.</p>';
         errorMessage.classList.add('d-flex', 'justify-content-start');
         chatWindow.appendChild(errorMessage);
-
-        // Scroll to the latest message
         chatWindow.scrollTop = chatWindow.scrollHeight;
       });
 
-      // Clear the input field after sending the message
       userInput.value = '';
-      userInput.style.height = '20px'; // Reset height after clearing
+      userInput.style.height = '20px';
     });
   });
 </script>
