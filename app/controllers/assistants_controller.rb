@@ -44,24 +44,31 @@ class AssistantsController < ApplicationController
         }.to_json
       end
 
-      puts "response: #{response.inspect}"
+      # puts "response: #{response.inspect}"
   
       if response.success?
         parsed_response = JSON.parse(response.body)
         assistant_response = parsed_response['choices'][0]['message']['content']
+        puts "assistant_response: #{assistant_response}"
         citations = assistant_response.scan(/\[([^\]]+)\]\(([^)]+)\)/)
-        puts "citations: #{citations.inspect}"
+        # puts "citations: #{citations.inspect}"
         if citations.empty?
           conversation.flagged_for_review = true
           conversation.save!
         end
 
-        puts "conversation: #{conversation.inspect}"
-  
+        # Extract potential queries
+        potential_queries = assistant_response.scan(/Potential queries you might have next:\n(\d+\..+)\n(\d+\..+)/).flatten
+
+        puts "01: potential_queries: #{potential_queries.inspect}"
+
+        # Remove potential queries from the assistant's response
+        message_content = assistant_response.split("Potential queries you might have next:").first.strip
+
         # Save the query and response
         conversation.query_and_responses.create(
           user_query: user_input,
-          assistant_response: assistant_response
+          assistant_response: message_content
         )
 
         if conversation.title.blank?
@@ -77,11 +84,16 @@ class AssistantsController < ApplicationController
             }.to_json
           end
           parsed_title_response = JSON.parse(title_response.body)
-          conversation.title = parsed_title_response['choices'][0]['message']['content'].strip.gsub(/\A"|"\Z/, '')
+          full_title_content = parsed_title_response['choices'][0]['message']['content'].strip.gsub(/\A"|"\Z/, '')
+          
+          # Extract the part before "Potential queries you might have next:"
+          title_content = full_title_content.split("Potential queries you might have next:").first.strip
+          
+          conversation.title = title_content
           conversation.save!
         end
   
-        render json: parsed_response
+        render json: { response: parsed_response, potential_queries: potential_queries }
       else
         error_message = "Error: #{response.status} - #{response.reason_phrase}"
         Rails.logger.error(error_message)
