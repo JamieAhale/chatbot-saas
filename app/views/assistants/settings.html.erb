@@ -1,3 +1,11 @@
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  <strong>Note:</strong> You must include the below text at the beginning of your assistant instructions, otherwise it will not work correctly:
+  <blockquote class="blockquote mt-2">
+    "With every response to a query, I would like you to generate 2 potential queries from the users perspective that they may ask next. Begin your response on the next queries with 'Potential queries you might have next:' then provide the queries."
+  </blockquote>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h1>Assistant Settings</h1>
   <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#editInstructionsModal">

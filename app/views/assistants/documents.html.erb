@@ -60,9 +60,6 @@
                   <%= link_to 'View', view_document_path(file_id: file['id']), class: 'dropdown-item', target: '_blank' %>
                 </li>
                 <li>
-                  <%= link_to 'Check Status', check_status_path(file_id: file['id']), class: 'dropdown-item' %>
-                </li>
-                <li>
                   <%= button_to 'Delete', delete_document_path(file_id: file['id']), method: :post, class: 'dropdown-item', onclick: "return confirm('Are you sure you want to delete this document?');" %>
                 </li>
               </ul>
