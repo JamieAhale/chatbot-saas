@@ -1,6 +1,17 @@
 Rails.application.routes.draw do
+  devise_for :users, controllers: {
+    registrations: 'users/registrations'
+  }
+
+  devise_scope :user do
+    get 'account', to: 'users/registrations#show', as: :user_show
+    get 'account/edit', to: 'users/registrations#edit', as: :user_edit
+  end
+
+  root 'assistants#chat'
+
   # Define a named route for the chat action
-  get 'assistants/chat', to: 'assistants#chat', as: :chat
+  # get 'assistants/chat', to: 'assistants#chat', as: :chat
 
   # Define a named route for the documents action
   get 'assistants/documents', to: 'assistants#documents', as: :documents
@@ -51,5 +62,4 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   # Defines the root path route ("/")
-  root 'assistants#chat'
 end

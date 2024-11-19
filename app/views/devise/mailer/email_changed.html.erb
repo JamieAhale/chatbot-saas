@@ -1,0 +1,16 @@
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+  <h2 style="text-align: center; color: #333;">Email Change Notification</h2>
+
+  <p style="font-size: 16px; color: #555;">Hi <strong><%= @resource.first_name %></strong>,</p>
+
+  <% if @resource.try(:unconfirmed_email?) %>
+    <p style="font-size: 16px; color: #555;">We're contacting you to notify you that your email is being changed to <strong><%= @resource.unconfirmed_email %></strong>.</p>
+  <% else %>
+    <p style="font-size: 16px; color: #555;">We're contacting you to notify you that your email has been changed to <strong><%= @resource.email %></strong>.</p>
+  <% end %>
+
+  <p style="font-size: 16px; color: #555;">If you did not request this change, please contact our support team immediately.</p>
+
+  <p style="font-size: 16px; color: #555;">Best regards,</p>
+  <p style="font-size: 16px; color: #555;"><strong>AI Assistant Team</strong></p>
+</div>

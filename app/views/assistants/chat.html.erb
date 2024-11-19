@@ -6,7 +6,7 @@
     <!-- Chat messages will be appended here -->
   </div>
 
-  <%= form_with url: chat_path, method: :get, local: true, id: 'chat-form', class: 'd-flex' do |form| %>
+  <%= form_with url: root_path, method: :get, local: true, id: 'chat-form', class: 'd-flex' do |form| %>
     <%= form.text_field :user_input, size: 50, id: 'user-input', class: 'form-control me-2', placeholder: 'Enter your message...' %>
     <%= form.submit "Send", class: 'btn btn-primary' %>
   <% end %>

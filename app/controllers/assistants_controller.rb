@@ -5,6 +5,8 @@ class AssistantsController < ApplicationController
   require 'multipart/post'
   require 'httparty'
 
+  before_action :authenticate_user!
+
   def chat
     if params[:user_input].present?
       api_key = ENV['PINECONE_API_KEY']
@@ -189,55 +191,50 @@ class AssistantsController < ApplicationController
 
     api_key = ENV['PINECONE_API_KEY']
     assistant_name = ENV['PINECONE_ASSISTANT_NAME']
-    url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}/#{file_id}"
+    url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}/#{file_id}?include_url=true"
 
     response = HTTParty.get(
       url,
       headers: { 'Api-Key' => api_key }
     )
 
-    puts "Response: #{response.body}"
     signed_url = JSON.parse(response.body)['signed_url']
-    puts "Signed URL: #{signed_url}"
 
     if response.success?
-      # TODO: Replace with the actual signed_url
-      # test_url = "https://www.google.com"
-      test_url = "https://storage.googleapis.com/knowledge-prod-files/9cced6da-8cdd-4430-befe-0e06b8e681be%2F8411e046-6c05-4960-9cae-2b7f9a6bfe1f%2Feb457909-4d35-45c8-9a83-27d508747578.pdf?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=ke-prod-1%40pc-knowledge-prod.iam.gserviceaccount.com%2F20241110%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20241110T085714Z&X-Goog-Expires=3600&X-Goog-SignedHeaders=host&response-content-disposition=inline&response-content-type=application%2Fpdf&X-Goog-Signature=097474794cc583c406381117b89074129f86cc3f39edbd1edebd5334ef0bc147ed0a1a1dc613417be712425dec043b6359c264f1c05554d2da60fa52bae04ec8380fcc07c55cdf7700958ee31c4f4d6973407c36b27ab74df20b324999decbbeaf3d142d7ff56cc77d4b964329a152edbfb820e6d74ce91083edcd6d4279d78a18d88d9e851f8c56a0f434e35d678596f9b4bc5fb10d79d1158a0ace82b8d9eb6984be1fbb26c157bf8d6ecd5b6d410ca835de5fe8aff7633862cbcd0bd1286b64b7e5e727e3673cd42afc47442b0db3b931d49a0ff6d0dd2cc0c245a3f4f1e621c17f3b6eec9bf21691b703620ca1364624dc3d2ed7a3d62c23138069875912"
-      redirect_to test_url, allow_other_host: true
+      redirect_to signed_url, allow_other_host: true
     else
       flash[:error] = "Failed to fetch document: #{response.code} - #{response.message}"
       redirect_to documents_path
     end
   end
 
-  def check_status
-    file_id = params[:file_id]
+  # def check_status
+  #   file_id = params[:file_id]
 
-    if file_id.blank?
-      flash[:error] = "File ID is required to check status."
-      redirect_to documents_path and return
-    end
+  #   if file_id.blank?
+  #     flash[:error] = "File ID is required to check status."
+  #     redirect_to documents_path and return
+  #   end
 
-    api_key = ENV['PINECONE_API_KEY']
-    assistant_name = ENV['PINECONE_ASSISTANT_NAME']
-    url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}/#{file_id}"
+  #   api_key = ENV['PINECONE_API_KEY']
+  #   assistant_name = ENV['PINECONE_ASSISTANT_NAME']
+  #   url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}/#{file_id}"
 
-    response = HTTParty.get(
-      url,
-      headers: { 'Api-Key' => api_key }
-    )
+  #   response = HTTParty.get(
+  #     url,
+  #     headers: { 'Api-Key' => api_key }
+  #   )
 
-    puts "Check Status Response: #{response.body}"
+  #   puts "Check Status Response: #{response.body}"
 
-    if response.success?
-      flash[:success] = "Status checked successfully. Check the terminal for details."
-    else
-      flash[:error] = "Failed to check status: #{response.code} - #{response.message}"
-    end
+  #   if response.success?
+  #     flash[:success] = "Status checked successfully. Check the terminal for details."
+  #   else
+  #     flash[:error] = "Failed to check status: #{response.code} - #{response.message}"
+  #   end
 
-    redirect_to documents_path
-  end
+  #   redirect_to documents_path
+  # end
 
   def settings
     api_key = ENV['PINECONE_API_KEY']

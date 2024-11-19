@@ -16,7 +16,7 @@
       <!-- Potential queries will be appended here -->
     </div>
 
-    <%= form_with url: chat_path, method: :get, local: true, id: 'chat-form', class: 'd-flex align-items-end mb-3' do |form| %>
+    <%= form_with url: root_path, method: :get, local: true, id: 'chat-form', class: 'd-flex align-items-end mb-3' do |form| %>
       <%= form.text_area :user_input, id: 'user-input', class: 'form-control me-2', placeholder: 'Enter your message...', style: 'flex: 1; height: auto; max-height: 100px; resize: none; overflow-y: auto;' %>
       <%= form.button class: 'btn btn-primary rounded', style: 'width: 45px; height: 40px;' do %>
         <i class="fa-solid fa-paper-plane"></i>

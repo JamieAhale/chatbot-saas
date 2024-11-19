@@ -1,0 +1,22 @@
+<h2 class="text-center mb-4 mt-5">Your Account</h2>
+
+<div class="container" style="max-width: 400px;">
+  <div class="mb-3">
+    <label class="form-label">First Name</label>
+    <input type="text" class="form-control" value="<%= @user.first_name %>" readonly>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Last Name</label>
+    <input type="text" class="form-control" value="<%= @user.last_name %>" readonly>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Email</label>
+    <input type="email" class="form-control" value="<%= @user.email %>" readonly>
+  </div>
+
+  <div class="d-grid mt-3">
+    <%= link_to 'Edit Account Info', edit_user_registration_path, class: 'btn btn-secondary' %>
+  </div>
+</div>

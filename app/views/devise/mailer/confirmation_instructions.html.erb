@@ -1,0 +1,14 @@
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+  <h2 style="text-align: center; color: #333;">Welcome to Our Platform!</h2>
+
+  <p style="font-size: 16px; color: #555;">Hi <strong><%= @resource.first_name %></strong>,</p>
+
+  <p style="font-size: 16px; color: #555;">Thank you for signing up. Please confirm your account email by clicking the link below:</p>
+
+  <p style="text-align: center;">
+    <%= link_to 'Confirm my account', confirmation_url(@resource, confirmation_token: @token), style: "display: inline-block; padding: 10px 20px; color: #fff; background-color: #007bff; text-decoration: none; border-radius: 5px;" %>
+  </p>
+
+  <p style="font-size: 16px; color: #555;">Best regards,</p>
+  <p style="font-size: 16px; color: #555;"><strong>AI Assistant Team</strong></p>
+</div>
