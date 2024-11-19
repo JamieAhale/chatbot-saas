@@ -5,9 +5,9 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav">
+      <ul class="navbar-nav me-auto">
         <li class="nav-item">
-          <%= link_to 'Chat', chat_path, class: "nav-link #{'active' if current_page?(chat_path)}" %>
+          <%= link_to 'Chat', root_path, class: "nav-link #{'active' if current_page?(root_path)}" %>
         </li>
         <li class="nav-item">
           <%= link_to 'Documents', documents_path, class: "nav-link #{'active' if current_page?(documents_path)}" %>
@@ -21,6 +21,23 @@
         <li class="nav-item">
           <%= link_to 'Assistant Settings', assistant_settings_path, class: "nav-link #{'active' if current_page?(assistant_settings_path)}" %>
         </li>
+      </ul>
+      <ul class="navbar-nav ms-auto">
+        <% if user_signed_in? %>
+          <li class="nav-item">
+            <%= link_to 'Account', user_show_path, class: "nav-link #{'active' if current_page?(user_show_path)}" %>
+          </li>
+          <li class="nav-item">
+            <%= button_to 'Logout', destroy_user_session_path, method: :delete, class: 'nav-link' %>
+          </li>
+        <% else %>
+          <li class="nav-item">
+            <%= link_to 'Login', new_user_session_path, class: "nav-link #{'active' if current_page?(new_user_session_path)}" %>
+          </li>
+          <li class="nav-item">
+            <%= link_to 'Sign Up', new_user_registration_path, class: "nav-link #{'active' if current_page?(new_user_registration_path)}" %>
+          </li>
+        <% end %>
       </ul>
     </div>
   </div>
