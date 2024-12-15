@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+
+  require 'sidekiq/web'
+  mount Sidekiq::Web => '/sidekiq'
+
   devise_for :users, controllers: {
     registrations: 'users/registrations'
   }
@@ -55,6 +59,17 @@ Rails.application.routes.draw do
   # Define a named route for the dismiss_conversation action
   patch 'assistants/conversations/:id/dismiss', to: 'assistants#dismiss', as: :dismiss_conversation
 
+  # Define a named route for the delete_selected_conversations action
+  delete 'assistants/delete_selected_conversations', to: 'assistants#delete_selected_conversations', as: :delete_selected_conversations
+
+  # Define a named route for batch mark resolved action
+  patch 'assistants/mark_resolved_conversations', to: 'assistants#mark_resolved_conversations', as: :mark_resolved_conversations
+
+  # Define a named route for batch dismiss action
+  patch 'assistants/dismiss_conversations', to: 'assistants#dismiss_conversations', as: :dismiss_conversations
+
+  patch 'assistants/flag_selected_conversations', to: 'assistants#flag_selected_conversations', as: :flag_selected_conversations
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -62,4 +77,23 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   # Defines the root path route ("/")
+
+  resources :conversations do
+    member do
+      patch 'flag_for_review', to: 'assistants#flag_for_review'
+      post 'generate_summary', to: 'assistants#generate_summary'
+    end
+  end
+
+  namespace :api do
+    namespace :v1 do
+      post 'chat', to: 'chat#create'
+      get 'chat/:id/last_messages', to: 'chat#last_messages'
+    end
+  end
+
+  post 'initiate_scrape', to: 'assistants#initiate_scrape', as: 'initiate_scrape'
+
+  get 'widget_generator', to: 'assistants#widget_generator'
+  post 'generate_widget_code', to: 'assistants#generate_widget_code'
 end

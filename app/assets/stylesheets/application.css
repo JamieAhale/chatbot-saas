@@ -36,3 +36,28 @@
 .hidden {
   display: none;
 }
+
+.uniform-table th, .uniform-table td {
+  width: 20%; /* Adjust the width as needed */
+  text-align: left;
+}
+
+.uniform-table th:first-child, .uniform-table td:first-child {
+  width: 2%; /* Adjust for the checkbox column */
+}
+
+.uniform-table th:nth-child(2), .uniform-table td:nth-child(2) {
+  width: 58%; /* Adjust for the title column */
+}
+
+.uniform-table th:nth-child(3), .uniform-table td:nth-child(3) {
+  width: 5%; /* Adjust for the ID column */
+}
+
+.uniform-table th:nth-child(4), .uniform-table td:nth-child(4) {
+  width: 15%; /* Adjust for the total messages column */
+}
+
+.uniform-table th:nth-child(5), .uniform-table td:nth-child(5) {
+  width: 20%; /* Adjust for the date column */
+}

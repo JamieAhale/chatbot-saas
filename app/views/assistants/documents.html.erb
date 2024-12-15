@@ -26,6 +26,17 @@
   </div>
 <% end %>
 
+<%= form_with url: initiate_scrape_path, method: :post, local: true, class: 'mb-4' do |form| %>
+  <div class="row g-2 align-items-center mt-4">
+    <div class="col-auto col-md-11">
+      <%= form.text_field :website_url, class: 'form-control', placeholder: 'Enter website URL (include https:// prefix)' %>
+    </div>
+    <div class="col-auto col-md-1">
+      <%= form.submit "Extract", class: 'btn btn-primary' %>
+    </div>
+  </div>
+<% end %>
+
 <% if @files.any? %>
   <table class="table table-striped">
     <thead>
@@ -49,7 +60,7 @@
             end %>
             <span class="<%= status_class %>"><%= file['status'].capitalize %></span>
           </td>
-          <td><%= DateTime.parse(file['updated_on']).strftime("%I:%M%P on %-m/%-d/%y") %></td>
+          <td data-timestamp="<%= file['updated_on'] %>"></td>
           <td class="text-center align-middle">
             <div class="dropdown">
               <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton<%= file['id'] %>" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 25px; color: #333; font-weight: bold;">
@@ -72,6 +83,26 @@
 <% else %>
   <p>No documents found.</p>
 <% end %>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const timestampElements = document.querySelectorAll('[data-timestamp]');
+
+  timestampElements.forEach(element => {
+    const timestamp = element.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const formattedDate = date.toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+    element.textContent = formattedDate;
+  });
+});
+</script>
 
 <style>
   .dropdown-toggle {

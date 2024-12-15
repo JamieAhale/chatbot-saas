@@ -94,19 +94,11 @@
         chatWindow.removeChild(loadingMessage);
 
         const assistantMessage = document.createElement('div');
-        if (data.response.choices && data.response.choices[0] && data.response.choices[0].message) {
-          let messageContent = data.response.choices[0].message.content
-            .split("Potential queries you might have next:")[0]
-            .replace(/\[\d+(?:,\s*pp\.\s*\d+(?:,\s*\d+)*)?\]/g, '')
-            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '')
-            .replace(/References:\s*\d+\.\s*/g, '')
-            .replace(/References:.*$/, '')
-            .replace(/\s+$/, '')
-            .replace(/\s+\.$/, '')
+        if (data.cleaned_response && data.cleaned_response !== '') {
+          let messageContent = data.cleaned_response
             .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-            .trim();
-          let formattedMessageContent = messageContent.replace(/\n/g, '<br>');
-          assistantMessage.innerHTML = `<p class="bg-secondary text-white p-2 rounded d-inline-block text-start mb-2" style="max-width: 80%;"><strong>Assistant:</strong> ${formattedMessageContent}</p>`;
+            .replace(/\n/g, '<br>');
+          assistantMessage.innerHTML = `<p class="bg-secondary text-white p-2 rounded d-inline-block text-start mb-2" style="max-width: 80%;"><strong>Assistant:</strong> ${messageContent}</p>`;
         } else {
           assistantMessage.innerHTML = '<p class="bg-secondary text-white p-2 rounded d-inline-block text-start mb-2" style="max-width: 80%;"><strong>Assistant:</strong> No valid response received.</p>';
         }
