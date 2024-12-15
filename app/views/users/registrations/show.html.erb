@@ -16,6 +16,14 @@
     <input type="email" class="form-control" value="<%= @user.email %>" readonly>
   </div>
 
+  <div class="mb-4">
+    <div class="form-check">
+      <input type="checkbox" class="form-check-input" style="transform: scale(1.5); margin-top: 0.3em; margin-right: 1em !important;" <%= @user.email_notifications_enabled ? 'checked' : '' %> disabled>
+      <label class="form-check-label fs-5">Receive email notifications</label>
+      <div class="form-text mt-2">When enabled, you'll receive emails about flagged conversations and other important updates.</div>
+    </div>
+  </div>
+
   <div class="d-grid mt-3">
     <%= link_to 'Edit Account Info', user_edit_path, class: 'btn btn-secondary' %>
   </div>

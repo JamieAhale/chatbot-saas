@@ -51,51 +51,129 @@ class AssistantsController < ApplicationController
       if response.success?
         parsed_response = JSON.parse(response.body)
         assistant_response = parsed_response['choices'][0]['message']['content']
-        puts "assistant_response: #{assistant_response}"
-        citations = assistant_response.scan(/\[([^\]]+)\]\(([^)]+)\)/)
-        # puts "citations: #{citations.inspect}"
-        if citations.empty?
+        puts "ASSISTANT RESPONSE: #{assistant_response}"
+
+        # Separate the main response from the references
+        response_parts = assistant_response.split("References:")
+        main_response = response_parts[0].strip
+        references = response_parts[1]&.strip
+
+        CheckIfFlagForReviewJob.perform_later(conversation.id, user_input, main_response, current_user)
+
+        # Thread.new do
+        #   openai_api_key = ENV['OPENAI_API_KEY']
+        #   openai_url = "https://api.openai.com/v1/chat/completions"
+        #   evaluation_response = Faraday.post(openai_url) do |req|
+        #     req.headers['Authorization'] = "Bearer #{openai_api_key}"
+        #     req.headers['Content-Type'] = 'application/json'
+        #     req.body = {
+        #       model: 'gpt-4o-mini',
+        #       messages: [
+        #         { role: 'system', content: "You are a highly analytical evaluator. Your job is to decide if the response answers the question with useful information. If it does, answer with 'Yes'. If it doesn't, answer with 'No', especially if it only reccomends directly contacting someone." },
+        #         { role: 'user', content: "Question: #{user_input}, Response: #{main_response}" }
+        #       ]
+        #     }.to_json
+        #   end
+
+        #   parsed_evaluation_response = JSON.parse(evaluation_response.body)
+        #   evaluation = parsed_evaluation_response['choices'][0]['message']['content'].strip
+
+        #   puts "EVALUATION: #{evaluation}"
+        #   if evaluation == 'No'
+        #     conversation.flagged_for_review = true
+        #     conversation.save!
+        #     NotificationMailer.flagged_for_review(conversation, current_user).deliver_later if current_user.email_notifications_enabled
+        #   end
+        # end
+
+        # Remove inline references and spaces before punctuation
+        cleaned_response = main_response
+                     .gsub(/\s*\[\d+, pp?\.? ?\d+(-\d+)?(, \d+)*\]/, '')
+                     .gsub(/\s+([.,!?])/, '\1')
+                     .strip
+        puts "CLEANED ASSISTANT RESPONSE: #{cleaned_response}"
+
+        # Assign references to citations if they exist
+        citations = references if references.present?
+        puts "CITATIONS: #{citations.inspect}"
+
+        if citations.nil?
           conversation.flagged_for_review = true
-          conversation.save!
-        end
+          if conversation.save!
+            NotificationMailer.flagged_for_review(conversation, current_user).deliver_later if current_user.email_notifications_enabled
+          end
+        else
+          openai_api_key = ENV['OPENAI_API_KEY']
+          openai_url = "https://api.openai.com/v1/chat/completions"
 
-        # Extract potential queries
-        potential_queries = assistant_response.scan(/Potential queries you might have next:\n(\d+\..+)\n(\d+\..+)/).flatten
-
-        puts "01: potential_queries: #{potential_queries.inspect}"
-
-        # Remove potential queries from the assistant's response
-        message_content = assistant_response.split("Potential queries you might have next:").first.strip
-
-        # Save the query and response
-        conversation.query_and_responses.create(
-          user_query: user_input,
-          assistant_response: message_content
-        )
-
-        if conversation.title.blank?
-          title_response = Faraday.post(url) do |req|
-            req.headers['Api-Key'] = api_key
+          potential_queries_response = Faraday.post(openai_url) do |req|
+            req.headers['Authorization'] = "Bearer #{openai_api_key}"
             req.headers['Content-Type'] = 'application/json'
             req.body = {
-              model: 'gpt-4o',
-              streaming: false,
+              model: 'gpt-4o-mini',
               messages: [
-                { role: 'user', content: "Summarize this message to create a title for the conversation: #{user_input}" }
+                { role: 'system', content: "You are a helpful assistant that suggests potential follow-up questions. Try to keep your responses to 5 words or less." },
+                { role: 'user', content: "Based on this question and answer, suggest two potential follow-up questions. Question: #{user_input}, Answer: #{cleaned_response}" }
               ]
             }.to_json
           end
-          parsed_title_response = JSON.parse(title_response.body)
-          full_title_content = parsed_title_response['choices'][0]['message']['content'].strip.gsub(/\A"|"\Z/, '')
-          
-          # Extract the part before "Potential queries you might have next:"
-          title_content = full_title_content.split("Potential queries you might have next:").first.strip
-          
-          conversation.title = title_content
-          conversation.save!
+
+          parsed_potential_queries_response = JSON.parse(potential_queries_response.body)
+          potential_queries_content = parsed_potential_queries_response['choices'][0]['message']['content'].strip
+
+          potential_queries = potential_queries_content.split("\n").map(&:strip).reject(&:empty?)
+
+          puts "POTENTIAL QUERIES: #{potential_queries.inspect}"
         end
-  
-        render json: { response: parsed_response, potential_queries: potential_queries }
+
+        # Save the query and response
+        message = conversation.query_and_responses.create(
+          user_query: user_input,
+          assistant_response: cleaned_response
+        )
+
+        if message.persisted?
+          puts "MESSAGE PERSISTED"
+          conversation.update_last_message_time!
+          GenerateSummaryIfIdleJob.set(wait: 5.minutes).perform_later(conversation.id)
+          puts "GENERATE SUMMARY JOB SET"
+        end
+
+        if conversation.title.blank?
+          ConversationTitleJob.perform_later(conversation.id, user_input)
+          # Thread.new do
+          #   openai_api_key = ENV['OPENAI_API_KEY']
+          #   openai_url = "https://api.openai.com/v1/chat/completions"
+
+          #   title_response = Faraday.post(openai_url) do |req|
+          #     req.headers['Authorization'] = "Bearer #{openai_api_key}"
+          #     req.headers['Content-Type'] = 'application/json'
+          #     req.body = {
+          #       model: 'gpt-4o-mini',
+          #       messages: [
+          #         { role: 'system', content: "You are a helpful assistant that summarizes messages clearly and concisely." },
+          #         { role: 'user', content: "Summarize this message to create a title for the conversation: #{user_input}" }
+          #       ]
+          #     }.to_json
+          #   end
+
+          #   parsed_title_response = JSON.parse(title_response.body)
+          #   title_content = parsed_title_response['choices'][0]['message']['content'].strip
+
+          #   conversation.title = title_content
+          #   conversation.save!
+          # end
+        end
+
+        # escalation_checker = EscalationCheckerService.new(user_input, cleaned_response)
+
+        # if escalation_checker.needs_escalation?
+        #   cleaned_response = "I understand this requires more detailed assistance. Could you please provide your contact information (name, email, and phone number) so our team can reach out to you directly?"
+        #   render json: { cleaned_response: cleaned_response }
+        # else
+        #   render json: { cleaned_response: cleaned_response, potential_queries: potential_queries }
+        # end
+        render json: { cleaned_response: cleaned_response, potential_queries: potential_queries }
       else
         error_message = "Error: #{response.status} - #{response.reason_phrase}"
         Rails.logger.error(error_message)
@@ -247,6 +325,9 @@ class AssistantsController < ApplicationController
 
     if response.success?
       @assistant_info = JSON.parse(response.body)
+
+      # Define the mandatory instruction
+      # mandatory_instruction = "With every response to a query, I would like you to generate 2 potential queries from the users perspective that they may ask next. Begin your response on the next queries with 'Potential queries you might have next:' then provide the queries. If you can't find any documentation to answer a query, respond with something like 'Sorry, I have no information on that. Would you like me to connect you with a member of our team?'. If they say yes, ask for their personal details like name, email and phone. "
     else
       @assistant_info = {}
       flash[:error] = "Failed to fetch assistant settings: #{response.status} - #{response.reason_phrase}"
@@ -258,10 +339,13 @@ class AssistantsController < ApplicationController
     assistant_name = ENV['PINECONE_ASSISTANT_NAME']
     url = "https://api.pinecone.io/assistant/assistants/#{assistant_name}"
 
+    # Combine the mandatory instruction with the user's input
+    combined_instructions = "#{params[:mandatory_instruction]}#{params[:instructions]}"
+
     response = Faraday.patch(url) do |req|
       req.headers['Api-Key'] = api_key
       req.headers['Content-Type'] = 'application/json'
-      req.body = { instructions: params[:instructions] }.to_json
+      req.body = { instructions: combined_instructions }.to_json
     end
 
     if response.success?
@@ -274,7 +358,11 @@ class AssistantsController < ApplicationController
   end
 
   def conversations
-    @conversations = Conversation.order(created_at: :desc)
+    if params[:search].present?
+      @conversations = Conversation.search(params[:search]).order(created_at: :desc).page(params[:page]).per(20)
+    else
+      @conversations = Conversation.order(created_at: :desc).page(params[:page]).per(20)
+    end
   end
 
   def show_conversation
@@ -289,7 +377,11 @@ class AssistantsController < ApplicationController
   end
 
   def conversations_for_review
-    @conversations = Conversation.where(flagged_for_review: true).order(created_at: :desc)
+    if params[:search].present?
+      @conversations = Conversation.search(params[:search]).where(flagged_for_review: true).order(created_at: :desc).page(params[:page]).per(20)
+    else
+      @conversations = Conversation.where(flagged_for_review: true).order(created_at: :desc).page(params[:page]).per(20)
+    end
   end
 
   def show_conversation_for_review
@@ -309,4 +401,149 @@ class AssistantsController < ApplicationController
     redirect_to conversations_for_review_path, notice: 'Conversation dismissed.'
   end
 
+  def delete_selected_conversations
+    if params[:conversation_ids].present?
+      Conversation.where(id: params[:conversation_ids]).destroy_all
+      flash[:success] = "Selected conversations have been deleted."
+    else
+      flash[:error] = "No conversations selected for deletion."
+    end
+    redirect_to conversations_path
+  end
+
+  def mark_resolved_conversations
+    if params[:conversation_ids].present?
+      params[:conversation_ids].each do |conversation_id|
+        conversation = Conversation.find(conversation_id)
+        conversation.update!(flagged_for_review: false)
+      end
+      flash[:success] = "Selected conversations have been marked as resolved."
+    else
+      flash[:error] = "No conversations selected for marking as resolved."
+    end
+    redirect_to conversations_for_review_path
+  end
+
+  def dismiss_conversations
+    if params[:conversation_ids].present?
+      params[:conversation_ids].each do |conversation_id|
+        conversation = Conversation.find(conversation_id)
+        conversation.update!(flagged_for_review: false)
+      end
+      flash[:success] = "Selected conversations have been dismissed."
+    else
+      flash[:error] = "No conversations selected for dismissal."
+    end
+    redirect_to conversations_for_review_path
+  end
+
+  def flag_for_review
+    @conversation = Conversation.find(params[:id])
+    if @conversation.update(flagged_for_review: true)
+      flash[:success] = "Conversation has been flagged for review."
+    else
+      flash[:error] = "Failed to flag the conversation for review."
+    end
+    redirect_to conversations_for_review_path
+  end
+
+  def flag_selected_conversations
+    if params[:conversation_ids].present?
+      Conversation.where(id: params[:conversation_ids]).update_all(flagged_for_review: true)
+      flash[:success] = "Selected conversations have been flagged for review."
+    else
+      flash[:error] = "No conversations selected for flagging."
+    end
+    redirect_to conversations_path
+  end
+
+  def initiate_scrape
+    website_url = params[:website_url]
+
+    if website_url.present?
+      WebCrawlerJob.perform_later(website_url)
+      # Thread.new do
+      #   WebCrawlerService.new(website_url).perform
+      # end
+
+      flash[:success] = "Website scrape initiated, check back here to see content uploaded to assistant."
+    else
+      flash[:error] = "Please enter a valid website URL."
+    end
+
+    redirect_to documents_path
+  end
+
+  def generate_summary
+    @conversation = Conversation.find(params[:id])
+
+    if @conversation.summary_missing?
+      @conversation.generate_summary
+      flash[:notice] = "Summary successfully generated."
+    else
+      flash[:alert] = "Summary already exists."
+    end
+
+    redirect_to @conversation
+  end
+
+  def widget_generator
+    render 'widget_generator'
+  end
+
+  def generate_widget_code
+    template = File.read(Rails.root.join('public', 'chat_widget.js'))
+    
+    # Replace the values with user's choices, using current_user.email
+    modified_code = template
+      .gsub('const selected_colour = \'black\';', "const selected_colour = '#{params[:primary_color]}';")
+      .gsub('const adminAccountEmail = \'jamie.w.ahale@gmail.com\'', "const adminAccountEmail = '#{current_user.email}'")
+    
+    # Add font configuration
+    font_family = params[:font_family]
+    google_fonts = {
+      'Roboto' => 'Roboto:wght@300;400;500;700',
+      'Open Sans' => 'Open+Sans:wght@400;500;600',
+      'Lato' => 'Lato:wght@300;400;700',
+      'Poppins' => 'Poppins:wght@300;400;500;600',
+      'Montserrat' => 'Montserrat:wght@300;400;500;600',
+      'Source Sans Pro' => 'Source+Sans+Pro:wght@300;400;600',
+      'Nunito' => 'Nunito:wght@300;400;600;700',
+      'Inter' => 'Inter:wght@300;400;500;600',
+      'Ubuntu' => 'Ubuntu:wght@300;400;500;700',
+      'Playfair Display' => 'Playfair+Display:wght@400;500;600;700',
+      'Quicksand' => 'Quicksand:wght@300;400;500;600',
+      'Raleway' => 'Raleway:wght@300;400;500;600'
+    }
+
+    # Check if selected font is a Google Font
+    google_fonts.each do |font_name, font_weights|
+      if font_family.include?(font_name)
+        modified_code = modified_code.gsub(
+          '// Load FontAwesome for icons dynamically',
+          <<~JAVASCRIPT
+            // Load FontAwesome for icons dynamically
+            // Load Google Fonts if needed
+            const googleFontLink = document.createElement('link');
+            googleFontLink.rel = 'stylesheet';
+            googleFontLink.href = 'https://fonts.googleapis.com/css2?family=#{font_weights}&display=swap';
+            document.head.appendChild(googleFontLink);
+          JAVASCRIPT
+        )
+        break
+      end
+    end
+    
+    # Add font family to the chat container styles
+    modified_code = modified_code.gsub(
+      'chatContainer.classList.add(\'card\', \'shadow\', \'rounded\', \'position-fixed\');',
+      "chatContainer.classList.add('card', 'shadow', 'rounded', 'position-fixed');\n  chatContainer.style.fontFamily = '#{font_family.gsub(/['"]/, '')}';"
+    )
+    
+    # Indent the code and wrap in script tags
+    indented_code = modified_code.split("\n").map { |line| "  #{line}" }.join("\n")
+    final_code = "<script>\n#{indented_code}\n</script>"
+    
+    render json: { code: final_code }
+  end
 end

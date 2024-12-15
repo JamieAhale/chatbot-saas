@@ -21,6 +21,9 @@
         <li class="nav-item">
           <%= link_to 'Assistant Settings', assistant_settings_path, class: "nav-link #{'active' if current_page?(assistant_settings_path)}" %>
         </li>
+        <li class="nav-item">
+          <%= link_to 'Code Generator', widget_generator_path, class: "nav-link #{'active' if current_page?(widget_generator_path)}" %>
+        </li>
       </ul>
       <ul class="navbar-nav ms-auto">
         <% if user_signed_in? %>

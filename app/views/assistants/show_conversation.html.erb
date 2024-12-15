@@ -1,7 +1,6 @@
-
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div class="d-flex align-items-center">
-    <h1 class="mb-0 me-3"><%= @conversation.title %></h1>
+    <h1 class="mb-0 me-3"><%= (@conversation.title.presence || "Untitled").gsub(/\A"|"\Z/, '') %></h1>
     <p class="mb-0 me-3 bg-light border rounded p-2 d-inline-block">
       <strong>ID:</strong> <%= @conversation.id %>
     </p>
@@ -11,6 +10,12 @@
       </button>
       <ul class="dropdown-menu">
         <li>
+          <%= button_to "Flag for Review", flag_for_review_conversation_path(@conversation), 
+              method: :patch, 
+              class: "dropdown-item",
+              onclick: "return confirm('Are you sure you want to flag this conversation for review?');" %>
+        </li>
+        <li>
           <%= button_to "Delete", conversation_path(@conversation), 
               method: :delete, 
               class: "dropdown-item text-danger",
@@ -19,12 +24,34 @@
       </ul>
     </div>
   </div>
-  <%= link_to "Back to Conversations", conversations_path, class: "btn btn-outline-secondary" %>
+  <%= link_to "Back to Conversations", conversations_path(search: params[:search]), class: "btn btn-outline-secondary" %>
 </div>
+
+
+<% if @conversation.summary_missing? %>
+  <div id="no-summary-banner" class='mb-4'>
+    <%= button_to "Generate Summary", generate_summary_conversation_path(@conversation), 
+        method: :post, 
+        class: "btn btn-outline-primary", 
+        id: "generate-summary-btn" %>
+  </div>
+  <div id="loading-spinner-container" class='m-4' style="display: none;">
+    <i class="fas fa-spinner fa-spin" style="font-size: 2em;"></i>
+  </div>
+<% else %>
+  <div class="alert alert-info">
+    <p class="mb-0"><strong>Summary:</strong> <%= @conversation.summary %></p>
+  </div>
+<% end %>
 
 <!-- Chat messages container with scrollable area -->
 <div class="border rounded p-3 mb-3" style="height: 500px; overflow-y: auto;">
   <% @messages.each do |message| %>
+    <!-- Store message timestamp in a data attribute -->
+    <div class="text-muted small mb-1" data-timestamp="<%= message.created_at.iso8601 %>">
+      <!-- Placeholder for JavaScript to fill -->
+    </div>
+
     <!-- User message bubble (left-aligned) -->
     <div class="d-flex justify-content-start mb-3">
       <p class="bg-light p-2 rounded d-inline-block text-break" style="max-width: 75%;">
@@ -46,4 +73,35 @@
     </div>
   <% end %>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const timestampElements = document.querySelectorAll('[data-timestamp]');
+
+  timestampElements.forEach(element => {
+    const timestamp = element.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const formattedDate = date.toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+    element.textContent = formattedDate;
+  });
+
+  const generateSummaryBtn = document.getElementById('generate-summary-btn');
+  const noSummaryBanner = document.getElementById('no-summary-banner');
+  const loadingSpinnerContainer = document.getElementById('loading-spinner-container');
+
+  if (generateSummaryBtn) {
+    generateSummaryBtn.addEventListener('click', function() {
+      noSummaryBanner.style.display = 'none';
+      loadingSpinnerContainer.style.display = 'block';
+    });
+  }
+});
+</script>
 

@@ -10,12 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_11_18_110551) do
+ActiveRecord::Schema[7.1].define(version: 2024_12_15_043025) do
   create_table "conversations", force: :cascade do |t|
     t.string "title"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "flagged_for_review", default: false
+    t.string "unique_identifier"
+    t.text "summary"
+    t.datetime "last_message_at"
   end
 
   create_table "query_and_responses", force: :cascade do |t|
@@ -41,6 +44,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_18_110551) do
     t.string "last_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "email_notifications_enabled"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end

@@ -1,0 +1,290 @@
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@400;500;600&family=Lato:wght@300;400;700&family=Poppins:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&family=Source+Sans+Pro:wght@300;400;600&family=Nunito:wght@300;400;600;700&family=Inter:wght@300;400;500;600&family=Ubuntu:wght@300;400;500;700&family=Playfair+Display:wght@400;500;600;700&family=Quicksand:wght@300;400;500;600&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<div class="container mt-3">
+  <h1 class="mb-4">Chat Widget Generator</h1>
+  
+  <!-- Instructions Banner -->
+  <div class="alert alert-info mb-4">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="d-flex align-items-start mb-3">
+          <div class="me-3">
+            <i class="fas fa-palette fa-lg text-info"></i>
+          </div>
+          <div>
+            <h6 class="mb-1">1. Customize Your Widget</h6>
+            <p class="mb-0">Choose your preferred color scheme and font to match your website's design.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="d-flex align-items-start mb-3">
+          <div class="me-3">
+            <i class="fas fa-code fa-lg text-info"></i>
+          </div>
+          <div>
+            <h6 class="mb-1">2. Generate & Copy Code</h6>
+            <p class="mb-0">Click 'Generate Code' and copy the provided JavaScript code snippet.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="d-flex align-items-start mb-3">
+          <div class="me-3">
+            <i class="fas fa-plus-circle fa-lg text-info"></i>
+          </div>
+          <div>
+            <h6 class="mb-1">3. Add to Your Website</h6>
+            <p class="mb-0">For custom websites: Add just before the closing <code>&lt;/body&gt;</code> tag.<br>
+            For website builders: Add to your site's custom code or script section.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Customize Your Widget</h5>
+        </div>
+        <div class="card-body">
+          <form id="widget-customization-form">
+            <div class="mb-3">
+              <label class="form-label">Primary Color</label>
+              <div class="d-flex align-items-center">
+                <input type="color" class="form-control form-control-color me-2" id="primary-color" value="#000000">
+                <input type="text" class="form-control" id="color-hex" value="#000000">
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Font Family</label>
+              <div class="dropdown">
+                <button class="form-control text-start dropdown-toggle" type="button" id="fontDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                  Select Font
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="fontDropdown">
+                  <li><h6 class="dropdown-header">Google Fonts</h6></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Roboto', sans-serif" style="font-family: 'Roboto', sans-serif">Roboto</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Open Sans', sans-serif" style="font-family: 'Open Sans', sans-serif">Open Sans</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Lato', sans-serif" style="font-family: 'Lato', sans-serif">Lato</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Poppins', sans-serif" style="font-family: 'Poppins', sans-serif">Poppins</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Montserrat', sans-serif" style="font-family: 'Montserrat', sans-serif">Montserrat</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Source Sans Pro', sans-serif" style="font-family: 'Source Sans Pro', sans-serif">Source Sans Pro</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Nunito', sans-serif" style="font-family: 'Nunito', sans-serif">Nunito</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Inter', sans-serif" style="font-family: 'Inter', sans-serif">Inter</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Ubuntu', sans-serif" style="font-family: 'Ubuntu', sans-serif">Ubuntu</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Playfair Display', serif" style="font-family: 'Playfair Display', serif">Playfair Display</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Quicksand', sans-serif" style="font-family: 'Quicksand', sans-serif">Quicksand</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Raleway', sans-serif" style="font-family: 'Raleway', sans-serif">Raleway</a></li>
+                  
+                  <li><hr class="dropdown-divider"></li>
+                  <li><h6 class="dropdown-header">System Fonts</h6></li>
+                  <li><a class="dropdown-item" href="#" data-value="Arial, sans-serif" style="font-family: Arial, sans-serif">Arial</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Helvetica Neue', Helvetica, sans-serif" style="font-family: 'Helvetica Neue', Helvetica, sans-serif">Helvetica</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Segoe UI', Tahoma, Geneva, sans-serif" style="font-family: 'Segoe UI', Tahoma, Geneva, sans-serif">Segoe UI</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Times New Roman', serif" style="font-family: 'Times New Roman', serif">Times New Roman</a></li>
+                </ul>
+              </div>
+              <input type="hidden" id="font-family" value="'Roboto', sans-serif">
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Generate Code</button>
+          </form>
+        </div>
+      </div>
+
+      <div id="code-output" style="display: none;">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Your Widget Code</h5>
+            <div>
+              <button class="btn btn-sm btn-outline-secondary me-2" id="view-code">
+                <i class="fas fa-eye me-1"></i> View Code
+              </button>
+              <button class="btn btn-sm btn-primary" id="copy-code">
+                <i class="fas fa-copy me-1"></i> Copy Code
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-success">
+              <i class="fas fa-check-circle me-2"></i>
+              Your widget code is ready! Click "Copy Code" to get the code or "View Code" to see it.
+            </div>
+            <pre style="display: none;"><code class="language-javascript" id="generated-code"></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Preview (not to scale)</h5>
+        </div>
+        <div class="card-body">
+          <div id="widget-preview">
+            <!-- Preview will be rendered here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('widget-customization-form');
+  const primaryColorInput = document.getElementById('primary-color');
+  const colorHexInput = document.getElementById('color-hex');
+  const codeOutput = document.getElementById('code-output');
+  const generatedCode = document.getElementById('generated-code');
+  const copyButton = document.getElementById('copy-code');
+  const preview = document.getElementById('widget-preview');
+  
+  // Sync color inputs
+  primaryColorInput.addEventListener('input', function() {
+    colorHexInput.value = this.value;
+    updatePreview();
+  });
+  
+  colorHexInput.addEventListener('input', function() {
+    if (/^#[0-9A-F]{6}$/i.test(this.value)) {
+      primaryColorInput.value = this.value;
+      updatePreview();
+    }
+  });
+  
+  // Update preview
+  function updatePreview() {
+    preview.style.height = '500px';
+    preview.style.position = 'relative';
+    
+    preview.innerHTML = `
+      <div style="position: relative; width: 100%; height: 500px; border: 1px solid #ddd; border-radius: 8px; font-family: ${document.getElementById('font-family').value}; background: #f8f9fa;">
+        <!-- Chat Widget Preview -->
+        <div style="position: absolute; bottom: 90px; right: 20px; width: 300px; background: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+          <div style="background-color: ${primaryColorInput.value}; color: white; padding: 10px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
+            <span>AI Assistant</span>
+            <button style="background: none; border: none; color: white; font-size: 18px;">&times;</button>
+          </div>
+          <div style="height: 250px; padding: 15px; background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
+            <div style="background-color: ${primaryColorInput.value}; color: white; padding: 8px; border-radius: 8px; display: inline-block; margin-bottom: 10px;">
+              How can I help you today?
+            </div>
+          </div>
+          <div style="padding: 10px; display: flex; gap: 10px;">
+            <input type="text" placeholder="Type your message..." style="flex: 1; padding: 8px; border: 1px solid #dee2e6; border-radius: 4px;">
+            <button style="background-color: ${primaryColorInput.value}; color: white; border: none; border-radius: 4px; padding: 8px 12px;">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat Icon Preview -->
+        <div style="position: absolute; bottom: 20px; right: 20px; width: 60px; height: 60px; background-color: ${primaryColorInput.value}; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+          <i class="fas fa-comments" style="color: white; font-size: 24px;"></i>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Initial preview
+  updatePreview();
+  
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    fetch('/generate_widget_code', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+      },
+      body: JSON.stringify({
+        primary_color: primaryColorInput.value,
+        font_family: document.getElementById('font-family').value
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      generatedCode.textContent = data.code;
+      codeOutput.style.display = 'block';
+      hljs.highlightElement(generatedCode);
+    });
+  });
+  
+  copyButton.addEventListener('click', function() {
+    navigator.clipboard.writeText(generatedCode.textContent)
+      .then(() => {
+        copyButton.innerHTML = '<i class="fas fa-check me-1"></i> Copied!';
+        setTimeout(() => {
+          copyButton.innerHTML = '<i class="fas fa-copy me-1"></i> Copy Code';
+        }, 2000);
+      });
+  });
+  
+  // Function to load Google Font
+  function loadGoogleFont(fontFamily) {
+    const googleFonts = {
+      'Roboto': 'Roboto:wght@300;400;500;700',
+      'Open Sans': 'Open+Sans:wght@400;500;600',
+      'Lato': 'Lato:wght@300;400;700',
+      'Poppins': 'Poppins:wght@300;400;500;600',
+      'Montserrat': 'Montserrat:wght@300;400;500;600',
+      'Source Sans Pro': 'Source+Sans+Pro:wght@300;400;600',
+      'Nunito': 'Nunito:wght@300;400;600;700',
+      'Inter': 'Inter:wght@300;400;500;600',
+      'Ubuntu': 'Ubuntu:wght@300;400;500;700',
+      'Playfair Display': 'Playfair+Display:wght@400;500;600;700',
+      'Quicksand': 'Quicksand:wght@300;400;500;600',
+      'Raleway': 'Raleway:wght@300;400;500;600'
+    };
+
+    // Check if selected font is a Google Font
+    for (const [fontName, fontWeights] of Object.entries(googleFonts)) {
+      if (fontFamily.includes(fontName)) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = `https://fonts.googleapis.com/css2?family=${fontWeights}&display=swap`;
+        document.head.appendChild(link);
+        break;
+      }
+    }
+  }
+
+  document.querySelectorAll('.dropdown-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const selectedFont = e.target.dataset.value;
+      const selectedText = e.target.textContent;
+      document.getElementById('font-family').value = selectedFont;
+      document.getElementById('fontDropdown').textContent = selectedText;
+      document.getElementById('fontDropdown').style.fontFamily = selectedFont;
+      loadGoogleFont(selectedFont);
+      updatePreview();
+    });
+  });
+
+  // Load initial font
+  loadGoogleFont(document.getElementById('font-family').value);
+  updatePreview();
+});
+
+document.getElementById('view-code').addEventListener('click', function() {
+  const codeElement = document.querySelector('pre');
+  const viewButton = this;
+  
+  if (codeElement.style.display === 'none') {
+    codeElement.style.display = 'block';
+    viewButton.innerHTML = '<i class="fas fa-eye-slash me-1"></i> Hide Code';
+  } else {
+    codeElement.style.display = 'none';
+    viewButton.innerHTML = '<i class="fas fa-eye me-1"></i> View Code';
+  }
+});
+</script>

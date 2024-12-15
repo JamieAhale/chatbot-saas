@@ -1,10 +1,69 @@
+<style>
+  .pagination .page-item .page-link {
+    color: #6c757d; /* Grey color for text */
+  }
+
+  .pagination .page-item.active .page-link {
+    background-color: #6c757d; /* Grey color for active background */
+    border-color: #6c757d; /* Grey color for active border */
+    color: white; /* White text for active page */
+  }
+
+  .pagination .page-item .page-link:hover {
+    color: #5a6268; /* Slightly darker grey on hover */
+  }
+</style>
+
 <div>
-  <h1>Conversation History</h1>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Conversation History</h1>
+    <div class="d-flex">
+      <% if params[:search].present? %>
+        <%= link_to conversations_path, class: "btn btn-outline-secondary me-1" do %>
+          <i class="fas fa-times me-1"></i> Clear Search
+        <% end %>
+      <% end %>
+
+      <%= form_with url: conversations_path, method: :get, local: true, class: 'd-flex' do %>
+        <div class="input-group">
+          <%= text_field_tag :search, params[:search], class: 'form-control', placeholder: 'Search conversations...' %>
+          <button type="submit" class="btn btn-outline-secondary">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <% if flash[:error] %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <%= flash[:error] %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% end %>
+
+  <% if flash[:success] %>
+    <div class="alert alert-success alert-dismissible fade show align-items-right" role="alert">
+      <%= flash[:success] %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% end %>
 
   <% if @conversations.any? %>
-    <table class="table table-striped mt-4">
+    <div class="d-flex">
+      <%= form_with url: delete_selected_conversations_path, method: :delete, local: true, id: 'delete_conversations_form' do %>
+        <%= submit_tag "Delete Selected", class: "btn btn-danger mb-1 me-2", onClick: "return confirm('Are you sure you want to delete the selected conversations? This cannot be undone.')", id: 'delete_selected_button', style: 'display: none;' %>
+      <% end %>
+
+      <%= form_with url: flag_selected_conversations_path, method: :patch, local: true, id: 'flag_conversations_form' do %>
+        <%= submit_tag "Flag Selected for Review", class: "btn btn-warning mb-1", onClick: "return confirm('Are you sure you want to flag the selected conversations for review?')", id: 'flag_selected_button', style: 'display: none;' %>
+      <% end %>
+    </div>
+
+    <table class="table table-striped mt-1 uniform-table">
       <thead>
         <tr>
+          <th> </th>
           <th>Title</th>
           <th>ID</th>
           <th>Total Messages</th>
@@ -15,7 +74,10 @@
         <% @conversations.each do |conversation| %>
           <tr>
             <td>
-              <%= link_to conversation.title.presence || "Untitled", show_conversation_path(conversation), class: "fw-bold text-decoration-underline" %>
+              <%= check_box_tag "conversation_ids[]", conversation.id, false, class: 'conversation-checkbox' %>
+            </td>
+            <td>
+              <%= link_to (conversation.title.presence || "Untitled").gsub(/\A"|"\Z/, ''), show_conversation_path(conversation, search: params[:search]), class: "fw-bold text-decoration-underline" %>
             </td>
             <td>
               <%= conversation.id %>
@@ -30,7 +92,79 @@
         <% end %>
       </tbody>
     </table>
+
+    <div class="d-flex justify-content-center mb-4">
+      <nav aria-label="Page navigation">
+        <ul class="pagination">
+          <% if @conversations.current_page > 1 %>
+            <li class="page-item">
+              <%= link_to 'Previous', conversations_path(page: @conversations.current_page - 1), class: 'page-link' %>
+            </li>
+          <% end %>
+
+          <% (1..@conversations.total_pages).each do |page| %>
+            <li class="page-item <%= 'active' if page == @conversations.current_page %>">
+              <%= link_to page, conversations_path(page: page), class: 'page-link' %>
+            </li>
+          <% end %>
+
+          <% if @conversations.current_page < @conversations.total_pages %>
+            <li class="page-item">
+              <%= link_to 'Next', conversations_path(page: @conversations.current_page + 1), class: 'page-link' %>
+            </li>
+          <% end %>
+        </ul>
+      </nav>
+    </div>
   <% else %>
     <p class="mt-4">No conversations found.</p>
   <% end %>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.conversation-checkbox');
+    const forms = document.querySelectorAll('form');
+
+    function addSelectedConversationsToForm(form) {
+      // Remove any existing hidden inputs
+      form.querySelectorAll('input[name="conversation_ids[]"]').forEach(input => input.remove());
+
+      // Get selected conversation IDs
+      const selectedIds = Array.from(checkboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+
+      // Add selected IDs as hidden inputs to the form
+      selectedIds.forEach(id => {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'conversation_ids[]';
+        hiddenInput.value = id;
+        form.appendChild(hiddenInput);
+      });
+    }
+
+    // Attach submit event to each form
+    forms.forEach(form => {
+      form.addEventListener('submit', function(event) {
+        addSelectedConversationsToForm(form);
+      });
+    });
+
+    // Toggle action buttons based on checkbox selection
+    function toggleActionButtons() {
+      const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+      document.getElementById('delete_selected_button').style.display = anyChecked ? 'inline-block' : 'none';
+      document.getElementById('flag_selected_button').style.display = anyChecked ? 'inline-block' : 'none';
+    }
+
+    // Add change event listener to checkboxes
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', toggleActionButtons);
+    });
+
+    // Initial check to set button visibility
+    toggleActionButtons();
+  });
+</script>

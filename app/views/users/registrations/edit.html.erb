@@ -27,9 +27,17 @@
       <% end %>
     </div>
 
-    <div class="mb-3">
+    <div class="mb-5">
       <%= f.label :password_confirmation, class: 'form-label' %>
       <%= f.password_field :password_confirmation, autocomplete: "new-password", class: 'form-control' %>
+    </div>
+
+    <div class="mb-4">
+      <div class="form-check">
+        <%= f.check_box :email_notifications_enabled, class: 'form-check-input me-2', style: 'transform: scale(1.5); margin-top: 0.3em; margin-right: 1em !important;' %>
+        <%= f.label :email_notifications_enabled, "Receive email notifications", class: 'form-check-label fs-5' %>
+        <div class="form-text mt-2">When enabled, you'll receive emails about flagged conversations and other important updates.</div>
+      </div>
     </div>
 
     <div class="mb-3">
