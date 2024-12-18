@@ -16,6 +16,11 @@ class WebCrawlerService
     # Start crawling and collect all content
     all_content = crawl(@root_url)
 
+    if all_content.blank?
+      puts "No content was retrieved from #{@root_url}"
+      return
+    end
+
     # Generate a PDF from the collected content
     pdf = generate_pdf(all_content)
     puts "pdf generated"
@@ -101,7 +106,13 @@ class WebCrawlerService
       tempfile.write(pdf)
       tempfile.rewind
 
-      file_name = URI.parse(@root_url).host + ' content.pdf'
+      # Ensure we have a valid URL before parsing
+      begin
+        domain = URI.parse(@root_url).host || @root_url
+        file_name = "#{domain} scraped website content.pdf"
+      rescue URI::InvalidURIError
+        file_name = "#{@root_url} scraped website content.pdf"
+      end
 
       # Construct the multipart form data with the desired file name
       payload = {

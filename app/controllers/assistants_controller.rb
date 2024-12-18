@@ -546,4 +546,31 @@ class AssistantsController < ApplicationController
     
     render json: { code: final_code }
   end
+
+  def refresh_website_content
+    file_id = params[:file_id]
+    website_url = params[:website_url]
+
+    if file_id.present? && website_url.present?
+      api_key = ENV['PINECONE_API_KEY']
+      assistant_name = ENV['PINECONE_ASSISTANT_NAME']
+      delete_url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}/#{file_id}"
+
+      response = HTTParty.delete(
+        delete_url,
+        headers: { 'Api-Key' => api_key }
+      )
+
+      if response.success?
+        WebCrawlerJob.perform_later(website_url)
+        flash[:success] = "Website content refresh initiated. The old document will be deleted and a new one will be created shortly."
+      else
+        flash[:error] = "Failed to delete existing document: #{response.code} - #{response.message}"
+      end
+    else
+      flash[:error] = "Missing required parameters for refresh."
+    end
+
+    redirect_to documents_path
+  end
 end
