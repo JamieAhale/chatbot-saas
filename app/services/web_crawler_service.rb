@@ -100,21 +100,18 @@ class WebCrawlerService
     assistant_name = ENV['PINECONE_ASSISTANT_NAME']
     url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}"
 
-    # Create a temporary file for the PDF
     Tempfile.open(['pdf_upload', '.pdf']) do |tempfile|
       tempfile.binmode
       tempfile.write(pdf)
       tempfile.rewind
 
-      # Ensure we have a valid URL before parsing
       begin
         domain = URI.parse(@root_url).host || @root_url
-        file_name = "#{domain} scraped website content.pdf"
+        file_name = "#{domain} (Extracted Website Content).pdf"
       rescue URI::InvalidURIError
-        file_name = "#{@root_url} scraped website content.pdf"
+        file_name = "#{@root_url} (Extracted Website Content).pdf"
       end
 
-      # Construct the multipart form data with the desired file name
       payload = {
         file: Multipart::Post::UploadIO.new(tempfile, 'application/pdf', file_name)
       }

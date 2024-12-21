@@ -70,12 +70,12 @@
                 <li>
                   <%= link_to 'View', view_document_path(file_id: file['id']), class: 'dropdown-item', target: '_blank' %>
                 </li>
-                <% if file['name'].end_with?(' scraped website content.pdf') && file['status'] == 'Available' %>
+                <% if file['name'].end_with?(' (Extracted Website Content).pdf') && file['status'] == 'Available' %>
                   <li>
                     <%= button_to 'Refresh',
                         refresh_website_content_assistants_path(
                           file_id: file['id'],
-                          website_url: "https://#{file['name'].sub(' scraped website content.pdf', '')}"
+                          website_url: "https://#{file['name'].sub(' (Extracted Website Content).pdf', '')}"
                         ),
                         method: :post,
                         class: 'dropdown-item',
