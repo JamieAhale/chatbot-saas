@@ -96,4 +96,6 @@ Rails.application.routes.draw do
 
   get 'widget_generator', to: 'assistants#widget_generator'
   post 'generate_widget_code', to: 'assistants#generate_widget_code'
+
+  post 'assistants/refresh_website_content', to: 'assistants#refresh_website_content', as: :refresh_website_content_assistants
 end

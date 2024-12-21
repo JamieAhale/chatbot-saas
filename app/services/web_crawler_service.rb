@@ -16,6 +16,11 @@ class WebCrawlerService
     # Start crawling and collect all content
     all_content = crawl(@root_url)
 
+    if all_content.blank?
+      puts "No content was retrieved from #{@root_url}"
+      return
+    end
+
     # Generate a PDF from the collected content
     pdf = generate_pdf(all_content)
     puts "pdf generated"
@@ -95,15 +100,18 @@ class WebCrawlerService
     assistant_name = ENV['PINECONE_ASSISTANT_NAME']
     url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}"
 
-    # Create a temporary file for the PDF
     Tempfile.open(['pdf_upload', '.pdf']) do |tempfile|
       tempfile.binmode
       tempfile.write(pdf)
       tempfile.rewind
 
-      file_name = URI.parse(@root_url).host + ' content.pdf'
+      begin
+        domain = URI.parse(@root_url).host || @root_url
+        file_name = "#{domain} (Extracted Website Content).pdf"
+      rescue URI::InvalidURIError
+        file_name = "#{@root_url} (Extracted Website Content).pdf"
+      end
 
-      # Construct the multipart form data with the desired file name
       payload = {
         file: Multipart::Post::UploadIO.new(tempfile, 'application/pdf', file_name)
       }

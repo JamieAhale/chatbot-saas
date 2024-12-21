@@ -3,10 +3,17 @@ class Conversation < ApplicationRecord
   
   def self.search(term)
     term = "%#{term.downcase}%"
-    joins(:query_and_responses).where(
-      'LOWER(conversations.title) LIKE :term OR LOWER(query_and_responses.user_query) LIKE :term OR LOWER(query_and_responses.assistant_response) LIKE :term',
-      term: term
-    ).distinct
+    if ActiveRecord::Base.connection.adapter_name.downcase == 'postgresql'
+      joins(:query_and_responses).where(
+        'conversations.title ILIKE :term OR query_and_responses.user_query ILIKE :term OR query_and_responses.assistant_response ILIKE :term',
+        term: term
+      ).distinct
+    else
+      joins(:query_and_responses).where(
+        'LOWER(conversations.title) LIKE :term OR LOWER(query_and_responses.user_query) LIKE :term OR LOWER(query_and_responses.assistant_response) LIKE :term',
+        term: term
+      ).distinct
+    end
   end
 
   def summary_missing?
