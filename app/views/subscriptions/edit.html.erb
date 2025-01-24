@@ -1,0 +1,18 @@
+<h2 class="text-center mb-4 mt-5">Change Your Subscription Plan</h2>
+
+<div class="container" style="max-width: 400px;">
+  <%= form_with url: subscription_path, method: :patch, local: true, scope: :subscription do |f| %>
+    <div class="mb-3">
+      <%= f.label :price_id, "Select a New Plan", class: 'form-label' %>
+      <%= f.select :price_id, options_for_select(@plans.map { |name, id| [name, id] }, selected: @user.plan), {}, class: 'form-select' %>
+    </div>
+
+    <div class="d-grid">
+      <%= f.submit "Update Plan", class: 'btn btn-primary' %>
+    </div>
+  <% end %>
+
+  <div class="mt-3">
+    <%= link_to 'Back to Account', user_show_path, class: 'btn btn-secondary' %>
+  </div>
+</div>

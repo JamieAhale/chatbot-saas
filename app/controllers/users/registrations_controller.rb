@@ -1,6 +1,11 @@
 class Users::RegistrationsController < Devise::RegistrationsController
-  before_action :authenticate_user!
-  before_action :configure_account_update_params, only: [:update]
+  before_action :configure_sign_up_params, only: [:create]
+  before_action :authenticate_user!, only: [:show, :edit]
+  before_action :set_plans, only: [:new, :create]
+
+  def new
+    super
+  end
 
   def show
     @user = current_user
@@ -35,17 +40,49 @@ class Users::RegistrationsController < Devise::RegistrationsController
     end
   end
 
+  # Override the create action to handle Stripe customer creation
+  def create
+    ActiveRecord::Base.transaction do
+      super do |resource|
+        if resource.persisted? && params[:stripeToken].present? && params[:user][:plan].present?
+          unless resource.create_stripe_customer(params[:stripeToken], params[:user][:plan])
+            # If Stripe customer creation fails, raise a rollback
+            raise ActiveRecord::Rollback
+          end
+        end
+      end
+    end
+
+    if resource.persisted?
+      # Success logic
+    else
+      # Failure logic
+    end
+  end
+
   protected
 
-  def configure_account_update_params
-    devise_parameter_sanitizer.permit(:account_update, keys: [:first_name, :last_name, :email_notifications_enabled])
+  # Permit the `:plan` parameter during sign-up
+  def configure_sign_up_params
+    devise_parameter_sanitizer.permit(:sign_up, keys: [:plan])
   end
 
-  # Override Devise's account_update_params to ensure proper boolean handling
-  def account_update_params
-    params = devise_parameter_sanitizer.sanitize(:account_update)
-    params[:email_notifications_enabled] = 
-      ActiveModel::Type::Boolean.new.cast(params[:email_notifications_enabled]) if params[:email_notifications_enabled].present?
-    params
+  # Permit additional parameters during account update (if necessary)
+  def configure_account_update_params
+    devise_parameter_sanitizer.permit(:account_update, keys: [:plan, :email_notifications_enabled])
   end
+
+  # Define the plans in a separate method
+  def set_plans
+    @plans = {
+      'Lite - $99/month' => ENV['STRIPE_PRICE_LITE_ID'],
+      'Basic - $249/month' => ENV['STRIPE_PRICE_BASIC_ID'],
+      'Pro - $499/month' => ENV['STRIPE_PRICE_PRO_ID']
+    }
+  end
+
+  # Define the path after sign up (optional customization)
+  # def after_sign_up_path_for(resource)
+  #   user_show_path
+  # end
 end

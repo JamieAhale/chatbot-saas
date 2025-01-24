@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_12_21_073349) do
+ActiveRecord::Schema[7.1].define(version: 2024_12_22_082731) do
   create_table "conversations", force: :cascade do |t|
     t.string "title"
     t.datetime "created_at", null: false
@@ -48,8 +48,15 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_21_073349) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "email_notifications_enabled"
+    t.string "stripe_customer_id"
+    t.string "stripe_subscription_id"
+    t.string "plan"
+    t.integer "queries_remaining"
+    t.string "subscription_status"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["stripe_customer_id"], name: "index_users_on_stripe_customer_id"
+    t.index ["stripe_subscription_id"], name: "index_users_on_stripe_subscription_id"
   end
 
   add_foreign_key "query_and_responses", "conversations"

@@ -24,7 +24,16 @@
     </div>
   </div>
 
+  <div class="mb-3">
+    <h2 class="text-center mb-3 mt-5">Your Subscription</h2>
+    <div class="d-flex justify-content-center">
+      <p class='bg-success rounded-3 text-light text-center p-3 d-inline-block mx-auto d-block'><%= @user&.subscription_status&.capitalize %></p>
+    </div>
+    <p class='text-center'>Plan: <%= @user.plan %></p>
+  </div>
+
   <div class="d-grid mt-3">
-    <%= link_to 'Edit Account Info', user_edit_path, class: 'btn btn-secondary' %>
+    <%= link_to 'Edit Account Info', edit_user_registration_path, class: 'btn btn-secondary' %>
+    <%= link_to 'Manage Subscription', edit_subscription_path, class: 'btn btn-primary mt-2 mb-5' %>
   </div>
 </div>

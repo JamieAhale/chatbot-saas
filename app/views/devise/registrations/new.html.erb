@@ -1,7 +1,7 @@
 <h2 class="text-center mb-4 mt-5">Sign up</h2>
 
-<div class="container" style="max-width: 400px;">
-  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: 'form-horizontal' }) do |f| %>
+<div class="container" style="max-width: 600px;">
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { id: 'registration-form', class: 'form-horizontal' }) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>
 
     <div class="mb-3">
@@ -31,9 +31,22 @@
       <%= f.label :password_confirmation, class: 'form-label' %>
       <%= f.password_field :password_confirmation, autocomplete: "new-password", class: 'form-control' %>
     </div>
+    
+    <div class="mb-3">
+      <%= f.label :plan, "Select a Subscription Plan", class: 'form-label' %>
+      <%= f.select :plan, options_for_select(@plans.map { |name, id| [name, id] }, selected: 'Lite - $99/month'), {}, class: 'form-select' %>
+    </div>
 
+    <!-- Stripe Elements Placeholder -->
+    <div class="mb-3">
+      <label class="form-label">Credit or Debit Card</label>
+      <div id="card-element" class="form-control"></div>
+      <div id="card-errors" class="text-danger mt-2"></div>
+    </div>
+
+    <!-- Submit Button -->
     <div class="d-grid">
-      <%= f.submit "Sign up", class: 'btn btn-primary' %>
+      <%= f.submit "Sign Up", class: 'btn btn-primary' %>
     </div>
   <% end %>
 
@@ -41,3 +54,31 @@
     <%= render "devise/shared/links" %>
   </div>
 </div>
+
+<!-- Include Stripe.js -->
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const stripe = Stripe('<%= ENV["STRIPE_PUBLIC_KEY"] %>');
+    const elements = stripe.elements();
+    const card = elements.create('card');
+    card.mount('#card-element');
+
+    const form = document.getElementById('registration-form');
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const { token, error } = await stripe.createToken(card);
+      if (error) {
+        document.getElementById('card-errors').textContent = error.message;
+      } else {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.setAttribute('type', 'hidden');
+        hiddenInput.setAttribute('name', 'stripeToken');
+        hiddenInput.setAttribute('value', token.id);
+        form.appendChild(hiddenInput);
+        form.submit();
+      }
+    });
+  });
+</script>
