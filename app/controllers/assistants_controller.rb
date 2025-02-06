@@ -497,59 +497,28 @@ class AssistantsController < ApplicationController
   end
 
   def generate_widget_code
-    template = File.read(Rails.root.join('public', 'chat_widget.js'))
+    config_options = {}
     
-    # Replace the values with user's choices, using current_user.email
-    modified_code = template
-      .gsub('const selected_colour = \'black\';', "const selected_colour = '#{params[:primary_color]}';")
-      .gsub('const adminAccountEmail = \'jamie.w.ahale@gmail.com\'', "const adminAccountEmail = '#{current_user.email}'")
+    # Primary color is available for all plans
+    config_options[:primary_color] = params[:primary_color] || '#000000'
     
-    # Add font configuration
-    font_family = params[:font_family]
-    google_fonts = {
-      'Roboto' => 'Roboto:wght@300;400;500;700',
-      'Open Sans' => 'Open+Sans:wght@400;500;600',
-      'Lato' => 'Lato:wght@300;400;700',
-      'Poppins' => 'Poppins:wght@300;400;500;600',
-      'Montserrat' => 'Montserrat:wght@300;400;500;600',
-      'Source Sans Pro' => 'Source+Sans+Pro:wght@300;400;600',
-      'Nunito' => 'Nunito:wght@300;400;600;700',
-      'Inter' => 'Inter:wght@300;400;500;600',
-      'Ubuntu' => 'Ubuntu:wght@300;400;500;700',
-      'Playfair Display' => 'Playfair+Display:wght@400;500;600;700',
-      'Quicksand' => 'Quicksand:wght@300;400;500;600',
-      'Raleway' => 'Raleway:wght@300;400;500;600'
-    }
-
-    # Check if selected font is a Google Font
-    google_fonts.each do |font_name, font_weights|
-      if font_family.include?(font_name)
-        modified_code = modified_code.gsub(
-          '// Load FontAwesome for icons dynamically',
-          <<~JAVASCRIPT
-            // Load FontAwesome for icons dynamically
-            // Load Google Fonts if needed
-            const googleFontLink = document.createElement('link');
-            googleFontLink.rel = 'stylesheet';
-            googleFontLink.href = 'https://fonts.googleapis.com/css2?family=#{font_weights}&display=swap';
-            document.head.appendChild(googleFontLink);
-          JAVASCRIPT
-        )
-        break
-      end
+    # Only add font_family if user is not on Lite plan
+    unless current_user.plan_name == 'Lite'
+      config_options[:font_family] = params[:font_family] || "'Open Sans', sans-serif"
     end
     
-    # Add font family to the chat container styles
-    modified_code = modified_code.gsub(
-      'chatContainer.classList.add(\'card\', \'shadow\', \'rounded\', \'position-fixed\');',
-      "chatContainer.classList.add('card', 'shadow', 'rounded', 'position-fixed');\n  chatContainer.style.fontFamily = '#{font_family.gsub(/['"]/, '')}';"
-    )
-    
-    # Indent the code and wrap in script tags
-    indented_code = modified_code.split("\n").map { |line| "  #{line}" }.join("\n")
-    final_code = "<script>\n#{indented_code}\n</script>"
-    
-    render json: { code: final_code }
+    # Always include admin email
+    config_options[:adminAccountEmail] = current_user.email
+
+    config_script = <<~SCRIPT
+      <script>
+        window.chatWidgetConfig = #{config_options.to_json};
+      </script>
+    SCRIPT
+
+    chat_widget_script = '<script src="/chat_widget.js"></script>'
+
+    render json: { code: config_script + "\n" + chat_widget_script }
   end
 
   def refresh_website_content

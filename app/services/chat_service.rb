@@ -51,7 +51,6 @@ class ChatService
   private
 
   def find_or_create_conversation
-    raise "USER: #{@user.inspect}"
     # conversation = Conversation.find_or_create_by!(unique_identifier: @unique_identifier)
     conversation = Conversation.find_or_create_by!(unique_identifier: @unique_identifier, user: @user)
     conversation
