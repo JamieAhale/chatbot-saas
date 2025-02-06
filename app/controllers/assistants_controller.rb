@@ -497,17 +497,22 @@ class AssistantsController < ApplicationController
   end
 
   def generate_widget_code
-    primary_color = params[:primary_color] || '#000000'
-    font_family  = params[:font_family] || "'Roboto', sans-serif"
-    admin_email  = current_user.email
+    config_options = {}
+    
+    # Primary color is available for all plans
+    config_options[:primary_color] = params[:primary_color] || '#000000'
+    
+    # Only add font_family if user is not on Lite plan
+    unless current_user.plan_name == 'Lite'
+      config_options[:font_family] = params[:font_family] || "'Open Sans', sans-serif"
+    end
+    
+    # Always include admin email
+    config_options[:adminAccountEmail] = current_user.email
 
     config_script = <<~SCRIPT
       <script>
-        window.chatWidgetConfig = {
-          primary_color: "#{primary_color}",
-          font_family: "#{font_family}",
-          adminAccountEmail: "#{admin_email}"
-        };
+        window.chatWidgetConfig = #{config_options.to_json};
       </script>
     SCRIPT
 

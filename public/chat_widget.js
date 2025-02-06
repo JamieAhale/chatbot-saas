@@ -1,8 +1,16 @@
 document.addEventListener('DOMContentLoaded', function () {
-  // Use custom configuration if provided, otherwise fall back to defaults.
   const config = window.chatWidgetConfig || {};
-  const selected_colour = config.primary_color || 'black';
-  const adminAccountEmail = config.adminAccountEmail || 'jamie.w.ahale@gmail.com'; // TODO: Make this my account for backups
+  
+  // Set defaults on our side instead of in the config
+  const settings = {
+    primary_color: config.primary_color || '#000000',
+    font_family: config.font_family || "'Open Sans', sans-serif", // Default font if not provided
+    adminAccountEmail: config.adminAccountEmail
+  };
+
+  const selected_colour = settings.primary_color;
+  const font_family = settings.font_family;
+  const adminAccountEmail = settings.adminAccountEmail || 'jamie.w.ahale@gmail.com'; // TODO: Make this my account for backups
   
   // Load Bootstrap CSS dynamically
   const link = document.createElement('link');
