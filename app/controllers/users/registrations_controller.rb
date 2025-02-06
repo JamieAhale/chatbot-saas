@@ -2,6 +2,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
   before_action :configure_sign_up_params, only: [:create]
   before_action :authenticate_user!, only: [:show, :edit]
   before_action :set_plans, only: [:new, :create]
+  before_action :configure_account_update_params, only: [:update]
 
   def new
     super
@@ -9,6 +10,10 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   def show
     @user = current_user
+    @subscription = @user.subscription
+    timestamp = @subscription.current_period_end
+    @current_period_end = Time.at(timestamp).utc.strftime("%B %d, %Y")
+    @query_limit = User::PLAN_QUERY_LIMITS[@user.plan_name]
   end
 
   def edit
@@ -50,13 +55,23 @@ class Users::RegistrationsController < Devise::RegistrationsController
             raise ActiveRecord::Rollback
           end
         end
+        if resource.persisted?
+          assistant_creator = PineconeAssistantCreator.new(resource)
+          unless assistant_creator.create
+            # If the assistant creation fails, rollback the transaction.
+            raise ActiveRecord::Rollback, "Pinecone assistant creation failed"
+          end
+        end
       end
     end
 
     if resource.persisted?
-      # Success logic
+      flash[:success] = "Account created successfully. Please confirm your email to sign in."
     else
-      # Failure logic
+      # Render errors (the Devise way)
+      clean_up_passwords resource
+      set_minimum_password_length
+      respond_with resource
     end
   end
 

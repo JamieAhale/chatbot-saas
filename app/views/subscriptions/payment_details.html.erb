@@ -1,0 +1,81 @@
+<div class="container my-5">
+  <!-- Back Button and Title -->
+  <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center mb-4">
+    <%= link_to 'Back to Subscription', edit_subscription_path, class: 'btn btn-outline-secondary mb-3 mb-md-0', id: 'back-button' %>
+    <h2 class="mb-0 text-center flex-grow-1">Update Payment Method</h2>
+    <div class="d-none d-md-block" style="width: 106px"></div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-secondary text-white">
+      <h3 class="mb-0"><i class="fas fa-credit-card me-2"></i>Payment Details</h3>
+    </div>
+    <div class="card-body">
+      <% if @current_card %>
+        <div class="alert alert-info mb-4">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-info-circle me-2"></i>
+            <div>
+              Current card: <%= @current_card.card.brand.capitalize %> ending in <%= @current_card.card.last4 %>
+              <br>
+              <small class="text-muted">Expires <%= @current_card.card.exp_month %>/<%= @current_card.card.exp_year %></small>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <%= form_tag update_payment_method_path, method: :post, id: 'payment-form' do %>
+        <%= hidden_field_tag :setup_intent_id, @setup_intent.id %>
+        
+        <div class="mb-3">
+          <label class="form-label"><%= @current_card ? 'Update Card Details' : 'Add New Card' %></label>
+          <div id="card-element" class="form-control"></div>
+          <div id="card-errors" class="text-danger mt-2"></div>
+        </div>
+
+        <div class="d-grid">
+          <%= submit_tag @current_card ? "Update Card" : "Add Card", class: 'btn btn-outline-primary btn-lg', id: 'submit-button' %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const stripe = Stripe('<%= @stripe_public_key %>');
+  const elements = stripe.elements();
+  const card = elements.create('card');
+  card.mount('#card-element');
+
+  const form = document.getElementById('payment-form');
+  const submitButton = document.getElementById('submit-button');
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    submitButton.disabled = true;
+
+    const { setupIntent, error } = await stripe.confirmCardSetup(
+      '<%= @setup_intent.client_secret %>',
+      {
+        payment_method: {
+          card: card,
+          billing_details: {
+            email: '<%= @user.email %>'
+          }
+        }
+      }
+    );
+
+    if (error) {
+      const errorElement = document.getElementById('card-errors');
+      errorElement.textContent = error.message;
+      submitButton.disabled = false;
+    } else {
+      document.getElementById('setup_intent_id').value = setupIntent.id;
+      form.submit();
+    }
+  });
+});
+</script>

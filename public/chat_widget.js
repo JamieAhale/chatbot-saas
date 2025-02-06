@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function () {
     <div id="chat-window" class="card-body overflow-auto" style="height: 400px;"></div>
     <div id="potential-queries" class="p-2 d-flex justify-content-end flex-wrap"></div>
     <form id="chat-form" class="card-footer d-flex align-items-center p-2" style="width: 100%;">
-      <textarea id="user-input" class="form-control me-2" placeholder="Type your message..." rows="1" style="resize: none; overflow-y: auto; max-height: 100px;"></textarea>
+      <textarea id="user-input" class="form-control me-2 focus-ring focus-ring-sxecondary" placeholder="Type your message..." rows="1" style="resize: none; overflow-y: auto; max-height: 100px;"></textarea>
       <button type="submit" id="send-button" class="btn btn-primary" style="background-color: ${selected_colour};"><i class="fas fa-paper-plane"></i></button>
     </form>
   `;
@@ -49,6 +49,11 @@ document.addEventListener('DOMContentLoaded', function () {
   const sendButton = document.getElementById('send-button');
   sendButton.style.border = 'none';
   sendButton.style.outline = 'none';
+  console.log('selected_colour: ', selected_colour);
+
+  const textInput = document.getElementById('user-input');
+  // textInput.classList.add('focus-ring');
+  // textInput.style.setProperty('--bs-focus-ring-color', `${selected_colour}40`);
 
   // Initial styles for chat components
   chatContainer.style.width = '350px';

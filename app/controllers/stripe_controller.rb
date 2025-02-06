@@ -24,6 +24,8 @@ class StripeController < ApplicationController
       handle_customer_created(event.data.object)
     when 'subscription.created', 'subscription.updated', 'subscription.deleted'
       handle_subscription_change(event.data.object)
+    when 'invoice.payment_succeeded'
+      handle_payment_succeeded(event.data.object)
     when 'payment_intent.succeeded'
       handle_payment_success(event.data.object)
     when 'payment_intent.payment_failed'
@@ -37,13 +39,13 @@ class StripeController < ApplicationController
 
   private
 
-  # Define your handler methods below
+  # Handle customer creation
   def handle_customer_created(customer)
-    # For example, update user record to link with Stripe customer
     user = User.find_by(stripe_customer_id: customer.id)
     # Additional logic if needed
   end
 
+  # Handle subscription changes
   def handle_subscription_change(subscription)
     user = User.find_by(stripe_subscription_id: subscription.id)
     if user
@@ -54,11 +56,43 @@ class StripeController < ApplicationController
     end
   end
 
-  def handle_payment_success(payment_intent)
-    # Handle successful payments
+  # Handle successful payment
+  def handle_payment_succeeded(invoice)
+    customer_id = invoice.customer
+    user = User.find_by(stripe_customer_id: customer_id)
+    if user
+      user.reset_queries!
+      Rails.logger.info "Reset queries for user #{user.id} due to successful payment."
+    else
+      Rails.logger.warn "No user found with Stripe customer ID: #{customer_id}"
+    end
   end
 
+  # Handle successful payment intent
+  def handle_payment_success(payment_intent)
+    customer_id = payment_intent.customer
+    user = User.find_by(stripe_customer_id: customer_id)
+    if user
+      user.update(subscription_status: 'active')
+      user.reset_queries!
+      NotificationMailer.payment_successful(user).deliver_later
+      Rails.logger.info "Payment succeeded for user #{user.id}."
+    else
+      Rails.logger.warn "No user found with Stripe customer ID: #{customer_id}"
+    end
+  end
+
+  # Handle failed payment intent
   def handle_payment_failure(payment_intent)
-    # Handle failed payments
+    customer_id = payment_intent.customer
+    user = User.find_by(stripe_customer_id: customer_id)
+    if user
+      user.update(subscription_status: 'inactive')
+      user.reset_queries!
+      NotificationMailer.payment_failed(user).deliver_later
+      Rails.logger.info "Payment failed for user #{user.id}. Subscription status updated."
+    else
+      Rails.logger.warn "No user found with Stripe customer ID: #{customer_id}"
+    end
   end
 end

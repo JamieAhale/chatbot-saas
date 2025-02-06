@@ -32,9 +32,74 @@
       <%= f.password_field :password_confirmation, autocomplete: "new-password", class: 'form-control' %>
     </div>
     
-    <div class="mb-3">
-      <%= f.label :plan, "Select a Subscription Plan", class: 'form-label' %>
-      <%= f.select :plan, options_for_select(@plans.map { |name, id| [name, id] }, selected: 'Lite - $99/month'), {}, class: 'form-select' %>
+    <hr class="my-5">
+    
+    <div class="mb-4">
+      <h4 class="text-center mb-3">Choose Your Plan</h4>
+      <p class="text-center text-muted mb-4">Scale your AI assistant capabilities as your business grows</p>
+      
+      <div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
+        <!-- Lite Plan -->
+        <div class="col">
+          <div class="card h-100 plan-card" data-plan-id="<%= @plans['Lite - $99/month'] %>">
+            <div class="card-body">
+              <h5 class="card-title text-center mb-2">Lite</h5>
+              <h6 class="text-center text-primary mb-3">$99/month</h6>
+              <p class="text-center text-muted mb-4">Perfect for small businesses just getting started</p>
+              
+              <ul class="list-unstyled">
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>500 AI Queries/month</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Basic Widget Customization</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Email Support</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Basic Analytics</li>
+                <li class="mb-2 text-muted"><i class="fas fa-times text-muted me-2"></i>Review Analytics</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Basic Plan -->
+        <div class="col">
+          <div class="card h-100 plan-card" data-plan-id="<%= @plans['Basic - $249/month'] %>">
+            <div class="card-body">
+              <div class="position-absolute top-0 start-50 translate-middle">
+                <span class="badge bg-primary px-3 py-2">Most Popular</span>
+              </div>
+              <h5 class="card-title text-center mb-2">Basic</h5>
+              <h6 class="text-center text-primary mb-3">$249/month</h6>
+              <p class="text-center text-muted mb-4">Ideal for growing businesses</p>
+              
+              <ul class="list-unstyled">
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>2,000 AI Queries/month</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Advanced Widget Customization</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Priority Support</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Advanced Analytics</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Review Analytics</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pro Plan -->
+        <div class="col">
+          <div class="card h-100 plan-card" data-plan-id="<%= @plans['Pro - $499/month'] %>">
+            <div class="card-body">
+              <h5 class="card-title text-center mb-2">Pro</h5>
+              <h6 class="text-center text-primary mb-3">$499/month</h6>
+              <p class="text-center text-muted mb-4">For businesses that need maximum power</p>
+              
+              <ul class="list-unstyled">
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>10,000 AI Queries/month</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Full Widget Customization</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>24/7 Priority Support</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Enterprise Analytics</li>
+                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Advanced Review Analytics</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <%= f.hidden_field :plan, id: 'selected-plan' %>
     </div>
 
     <!-- Stripe Elements Placeholder -->
@@ -46,11 +111,11 @@
 
     <!-- Submit Button -->
     <div class="d-grid">
-      <%= f.submit "Sign Up", class: 'btn btn-primary' %>
+      <%= f.submit "Sign Up & Pay", class: 'btn btn-primary' %>
     </div>
   <% end %>
 
-  <div class="text-center mt-4">
+  <div class="text-center mt-4 mb-5">
     <%= render "devise/shared/links" %>
   </div>
 </div>
@@ -79,6 +144,31 @@
         form.appendChild(hiddenInput);
         form.submit();
       }
+    });
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const planCards = document.querySelectorAll('.plan-card');
+    const selectedPlanInput = document.getElementById('selected-plan');
+
+    // Set default selection
+    const defaultCard = planCards[0];
+    if (defaultCard) {
+      defaultCard.classList.add('selected');
+      selectedPlanInput.value = defaultCard.dataset.planId;
+    }
+
+    planCards.forEach(card => {
+      card.addEventListener('click', function() {
+        // Remove selected class from all cards
+        planCards.forEach(c => c.classList.remove('selected'));
+        
+        // Add selected class to clicked card
+        this.classList.add('selected');
+        
+        // Update hidden input value
+        selectedPlanInput.value = this.dataset.planId;
+      });
     });
   });
 </script>

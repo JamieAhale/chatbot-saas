@@ -1,60 +1,128 @@
-<h2 class="text-center mb-4 mt-5">Edit Your Account</h2>
-
-<div class="container" style="max-width: 550px;">
-  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, class: 'form-horizontal' }) do |f| %>
-    <%= render "devise/shared/error_messages", resource: resource %>
-
-    <div class="mb-3">
-      <%= f.label :first_name, class: 'form-label' %>
-      <%= f.text_field :first_name, autofocus: true, autocomplete: "first_name", class: 'form-control' %>
+<div class="container my-5">
+  
+  <!-- Back to Account Details Button -->
+  <div class="d-flex justify-content-start mb-4">
+    <%= link_to 'Back to Account Details', user_show_path, class: 'btn btn-outline-secondary', id: 'back-button' %>
+  </div>
+  
+  <!-- Edit Account Information Card -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+      <h3 class="mb-0"><i class="fas fa-edit me-2"></i>Edit Your Account</h3>
     </div>
+    <div class="card-body">
+      <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, class: 'form-horizontal' }) do |f| %>
+        <%= render "devise/shared/error_messages", resource: resource %>
 
-    <div class="mb-3">
-      <%= f.label :last_name, class: 'form-label' %>
-      <%= f.text_field :last_name, autocomplete: "last_name", class: 'form-control' %>
-    </div>
+        <div class="mb-3">
+          <%= f.label :first_name, class: 'form-label' %>
+          <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-signature"></i></span>
+            <%= f.text_field :first_name, autofocus: true, autocomplete: "first_name", class: 'form-control', placeholder: 'First Name' %>
+          </div>
+        </div>
 
-    <div class="mb-3">
-      <%= f.label :email, class: 'form-label' %>
-      <%= f.email_field :email, autocomplete: "email", class: 'form-control' %>
-    </div>
+        <div class="mb-3">
+          <%= f.label :last_name, class: 'form-label' %>
+          <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-signature"></i></span>
+            <%= f.text_field :last_name, autocomplete: "last_name", class: 'form-control', placeholder: 'Last Name' %>
+          </div>
+        </div>
 
-    <div class="mb-3">
-      <%= f.label :password, class: 'form-label' %> <i>(leave blank if you don't want to change it)</i>
-      <%= f.password_field :password, autocomplete: "new-password", class: 'form-control' %>
-      <% if @minimum_password_length %>
-        <small class="form-text text-muted"><%= @minimum_password_length %> characters minimum</small>
+        <div class="mb-3">
+          <%= f.label :email, class: 'form-label' %>
+          <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+            <%= f.email_field :email, autocomplete: "email", class: 'form-control', placeholder: 'Email Address' %>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <%= f.label :new_password, class: 'form-label' %> <i>(leave blank if you don't want to change it)</i>
+          <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+            <%= f.password_field :password, autocomplete: "new-password", class: 'form-control', placeholder: 'New Password' %>
+          </div>
+          <% if @minimum_password_length %>
+            <small class="form-text text-muted"><%= @minimum_password_length %> characters minimum</small>
+          <% end %>
+        </div>
+
+        <div class="mb-3">
+          <%= f.label :new_password_confirmation, class: 'form-label' %>
+          <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+            <%= f.password_field :password_confirmation, autocomplete: "new-password", class: 'form-control', placeholder: 'Confirm New Password' %>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <%= f.label :current_password, class: 'form-label' %> <i>(we need your current password to confirm your changes)</i>
+          <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-key"></i></span>
+            <%= f.password_field :current_password, autocomplete: "current-password", class: 'form-control', placeholder: 'Current Password' %>
+          </div>
+        </div>
+
+        <div class="form-check form-switch mb-4">
+          <%= f.check_box :email_notifications_enabled, class: 'form-check-input' %>
+          <label class="form-check-label fs-5" for="user_email_notifications_enabled">Receive Email Notifications</label>
+          <div>
+            <small class="form-text text-muted">When enabled, you'll receive emails about flagged conversations and other important updates.</small>
+          </div>
+        </div>
+
+        <div class="d-grid mb-3">
+          <%= f.submit "Update", class: 'btn btn-outline-primary btn-lg' %>
+        </div>
       <% end %>
-    </div>
-
-    <div class="mb-5">
-      <%= f.label :password_confirmation, class: 'form-label' %>
-      <%= f.password_field :password_confirmation, autocomplete: "new-password", class: 'form-control' %>
-    </div>
-
-    <div class="mb-4">
-      <div class="form-check">
-        <%= f.check_box :email_notifications_enabled, class: 'form-check-input me-2', style: 'transform: scale(1.5); margin-top: 0.3em; margin-right: 1em !important;' %>
-        <%= f.label :email_notifications_enabled, "Receive email notifications", class: 'form-check-label fs-5' %>
-        <div class="form-text mt-2">When enabled, you'll receive emails about flagged conversations and other important updates.</div>
+      
+      <!-- Cancel Account Section -->
+      <div class="mt-5">
+        <div class="d-flex align-items-center">
+          <%= button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete, class: 'btn btn-danger me-3' %>
+        </div>
       </div>
     </div>
-
-    <div class="mb-3">
-      <%= f.label :current_password, class: 'form-label' %> <i>(current password required to confirm changes)</i>
-      <%= f.password_field :current_password, autocomplete: "current-password", class: 'form-control' %>
-    </div>
-
-    <div class="d-grid mb-3">
-      <%= f.submit "Update", class: 'btn btn-primary' %>
-    </div>
-
-    <div class="d-grid">
-      <%= link_to "Back to Account Details", user_show_path, class: 'btn btn-secondary' %>
-    </div>
-  <% end %>
-
-  <div class="text-center mt-4 mb-5">
-    <%= button_to "Delete account", registration_path(resource_name), onclick: "return confirm('Are you sure? This cannot be undone.');", method: :delete, class: 'btn btn-danger' %>
   </div>
+  
 </div>
+
+<style>
+  /* Custom Styles for Back Button */
+  #back-button {
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  #back-button:hover {
+    background-color: #6c757d;
+    color: #fff;
+  }
+
+  /* Custom Styles for Input Groups */
+  .input-group-text {
+    background-color: #f8f9fa;
+    border-right: none;
+  }
+
+  .form-control {
+    border-left: none;
+  }
+
+  /* Adjust button spacing */
+  .btn-danger {
+    transition: background-color 0.3s, border-color 0.3s;
+  }
+
+  .btn-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+  }
+
+  .btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: #fff;
+    border-color: #6c757d;
+  }
+</style>

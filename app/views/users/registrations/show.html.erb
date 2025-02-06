@@ -1,39 +1,115 @@
-<h2 class="text-center mb-4 mt-5">Your Account</h2>
+<div class="container my-5">
 
-<div class="container" style="max-width: 400px;">
-  <div class="mb-3">
-    <label class="form-label">First Name</label>
-    <input type="text" class="form-control" value="<%= @user.first_name %>" readonly>
-  </div>
-
-  <div class="mb-3">
-    <label class="form-label">Last Name</label>
-    <input type="text" class="form-control" value="<%= @user.last_name %>" readonly>
-  </div>
-
-  <div class="mb-5">
-    <label class="form-label">Email</label>
-    <input type="email" class="form-control" value="<%= @user.email %>" readonly>
-  </div>
-
-  <div class="mb-4">
-    <div class="form-check">
-      <input type="checkbox" class="form-check-input" style="transform: scale(1.5); margin-top: 0.3em; margin-right: 1em !important;" <%= @user.email_notifications_enabled ? 'checked' : '' %> disabled>
-      <label class="form-check-label fs-5">Receive email notifications</label>
-      <div class="form-text mt-2">When enabled, you'll receive emails about flagged conversations and other important updates.</div>
+  <!-- Account Information Card -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h3 class="mb-0">Your Account</h3>
+    </div>
+    <div class="card-body">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label class="form-label">First Name</label>
+          <input type="text" class="form-control" value="<%= @user.first_name %>" readonly>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Last Name</label>
+          <input type="text" class="form-control" value="<%= @user.last_name %>" readonly>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" value="<%= @user.email %>" readonly>
+      </div>
+      <div class="form-check form-switch mb-4">
+        <input type="checkbox" class="form-check-input" id="emailNotifications" <%= @user.email_notifications_enabled ? 'checked' : '' %> disabled>
+        <label class="form-check-label fs-5" for="emailNotifications">Receive Email Notifications</label>
+        <div>
+          <small class="form-text text-muted">When enabled, you'll receive emails about flagged conversations and other important updates.</small>
+        </div>
+      </div>
+      <div class="text-end">
+        <%= link_to 'Edit Account Info', edit_user_registration_path, class: 'btn btn-outline-secondary' %>
+      </div>
     </div>
   </div>
 
-  <div class="mb-3">
-    <h2 class="text-center mb-3 mt-5">Your Subscription</h2>
-    <div class="d-flex justify-content-center">
-      <p class='bg-success rounded-3 text-light text-center p-3 d-inline-block mx-auto d-block'><%= @user&.subscription_status&.capitalize %></p>
+  <!-- Subscription Information Card -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h3 class="mb-0">Your Subscription</h3>
     </div>
-    <p class='text-center'>Plan: <%= @user.plan %></p>
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <div class="d-flex flex-column flex-md-row gap-2 mb-3">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-check-circle text-success me-2"></i>
+              <span class="badge bg-success rounded-pill fs-6 px-3 py-2">
+                <%= @user&.subscription_status&.capitalize %>
+              </span>
+            </div>
+            <div class="d-flex align-items-center">
+              <i class="fas fa-crown text-primary me-2"></i>
+              <span class="badge bg-primary rounded-pill fs-6 px-3 py-2">
+                Plan: <%= @user.plan_name %>
+              </span>
+            </div>
+          </div>
+          <div class="d-flex align-items-center mb-3">
+            <i class="fas fa-question-circle text-primary me-2"></i>
+            <span class="badge bg-primary rounded-pill fs-6 px-3 py-2">
+              Queries Remaining: <%= @user.queries_remaining || 0 %> / <%= @query_limit %>
+            </span>
+          </div>
+          <div class="text-muted">
+            <i class="fas fa-calendar-alt me-2"></i>
+            Renews on <%= @current_period_end %>
+          </div>
+        </div>
+        <div class="col-md-4 text-md-end">
+          <%= link_to edit_subscription_path, class: 'btn btn-outline-primary w-100 w-md-auto' do %>
+            <i class="fas fa-cog me-2"></i>Manage Subscription
+          <% end %>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="d-grid mt-3">
-    <%= link_to 'Edit Account Info', edit_user_registration_path, class: 'btn btn-secondary' %>
-    <%= link_to 'Manage Subscription', edit_subscription_path, class: 'btn btn-primary mt-2 mb-5' %>
-  </div>
-</div>
+  
+<style>
+  /* Custom Styles for Back Button */
+  #back-button {
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  #back-button:hover {
+    background-color: #6c757d;
+    color: #fff;
+  }
+
+  /* Custom Styles for Input Groups */
+  .input-group-text {
+    background-color: #f8f9fa;
+    border-right: none;
+  }
+
+  .form-control {
+    border-left: none;
+  }
+
+  /* Adjust button spacing */
+  .btn-danger {
+    transition: background-color 0.3s, border-color 0.3s;
+  }
+
+  .btn-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+  }
+
+  .btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: #fff;
+    border-color: #6c757d;
+  }
+</style>

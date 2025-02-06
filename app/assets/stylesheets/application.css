@@ -61,3 +61,32 @@
 .uniform-table th:nth-child(5), .uniform-table td:nth-child(5) {
   width: 20%; /* Adjust for the date column */
 }
+
+.plan-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  position: relative;
+}
+
+.plan-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.plan-card.selected {
+  border-color: #0d6efd;
+  background-color: #f8f9ff;
+}
+
+.plan-card .badge {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.plan-card ul li {
+  font-size: 0.95rem;
+}
+
+.plan-card .text-muted {
+  opacity: 0.7;
+}
