@@ -110,11 +110,19 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log('Fetched data:', data);
             if (data.messages && data.messages.length > 0) {
               data.messages.forEach(message => {
+                // Process formatting for each message
+                const formattedUserQuery = message.user_query
+                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                  .replace(/\n/g, '<br>');
+                const formattedAssistantResponse = message.assistant_response
+                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                  .replace(/\n/g, '<br>');
+
                 const userMessage = document.createElement('div');
                 userMessage.innerHTML = `
                   <div class="text-end mb-2">
                     <div class="text-light p-2 rounded d-inline-block" style="max-width: 80%; background-color: ${selected_colour}; opacity: 0.7;">
-                      <strong>You:</strong> ${message.user_query}
+                      <strong>You:</strong> ${formattedUserQuery}
                     </div>
                   </div>
                 `;
@@ -124,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 assistantMessage.innerHTML = `
                   <div class="text-start mb-2">
                     <div class="text-white p-2 rounded d-inline-block" style="max-width: 90%; background-color: ${selected_colour};">
-                      <strong>Assistant:</strong> ${message.assistant_response}
+                      <strong>Assistant:</strong> ${formattedAssistantResponse}
                     </div>
                   </div>
                 `;
