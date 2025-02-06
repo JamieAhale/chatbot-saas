@@ -10,7 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_12_21_073349) do
+ActiveRecord::Schema[7.1].define(version: 2025_02_05_053553) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "conversations", force: :cascade do |t|
     t.string "title"
     t.datetime "created_at", null: false
@@ -19,21 +22,23 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_21_073349) do
     t.string "unique_identifier"
     t.text "summary"
     t.datetime "last_message_at"
-    t.index ["title"], name: "index_conversations_on_title"
+    t.uuid "user_id", null: false
+    t.index "lower((title)::text)", name: "index_conversations_on_lower_title"
+    t.index ["user_id"], name: "index_conversations_on_user_id"
   end
 
   create_table "query_and_responses", force: :cascade do |t|
     t.text "user_query"
     t.text "assistant_response"
-    t.integer "conversation_id", null: false
+    t.bigint "conversation_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["assistant_response"], name: "index_query_and_responses_on_assistant_response"
+    t.index "lower(assistant_response)", name: "index_query_and_responses_on_lower_assistant_response"
+    t.index "lower(user_query)", name: "index_query_and_responses_on_lower_user_query"
     t.index ["conversation_id"], name: "index_query_and_responses_on_conversation_id"
-    t.index ["user_query"], name: "index_query_and_responses_on_user_query"
   end
 
-  create_table "users", force: :cascade do |t|
+  create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.string "reset_password_token"
@@ -48,9 +53,17 @@ ActiveRecord::Schema[7.1].define(version: 2024_12_21_073349) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "email_notifications_enabled"
+    t.string "stripe_customer_id"
+    t.string "stripe_subscription_id"
+    t.string "plan"
+    t.integer "queries_remaining"
+    t.string "subscription_status"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["stripe_customer_id"], name: "index_users_on_stripe_customer_id"
+    t.index ["stripe_subscription_id"], name: "index_users_on_stripe_subscription_id"
   end
 
+  add_foreign_key "conversations", "users"
   add_foreign_key "query_and_responses", "conversations"
 end

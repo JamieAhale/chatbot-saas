@@ -1,5 +1,6 @@
 class Conversation < ApplicationRecord
   has_many :query_and_responses, dependent: :destroy
+  belongs_to :user
   
   def self.search(term)
     term = "%#{term.downcase}%"

@@ -186,7 +186,8 @@ class AssistantsController < ApplicationController
 
   def documents
     api_key = ENV['PINECONE_API_KEY']
-    assistant_name = ENV['PINECONE_ASSISTANT_NAME']
+    # assistant_name = ENV['PINECONE_ASSISTANT_NAME']
+    assistant_name = "#{current_user.pinecone_assistant_name}"
     url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}"
 
     response = Faraday.get(url) do |req|
@@ -209,7 +210,8 @@ class AssistantsController < ApplicationController
     end
 
     api_key = ENV['PINECONE_API_KEY']
-    assistant_name = ENV['PINECONE_ASSISTANT_NAME']
+    # assistant_name = ENV['PINECONE_ASSISTANT_NAME']
+    assistant_name = "#{current_user.pinecone_assistant_name}"
     url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}"
 
     # Construct the multipart form data without setting a specific name
@@ -316,7 +318,8 @@ class AssistantsController < ApplicationController
 
   def settings
     api_key = ENV['PINECONE_API_KEY']
-    assistant_name = ENV['PINECONE_ASSISTANT_NAME']
+    # assistant_name = ENV['PINECONE_ASSISTANT_NAME']
+    assistant_name = "#{current_user.pinecone_assistant_name}"
     url = "https://api.pinecone.io/assistant/assistants/#{assistant_name}"
 
     response = Faraday.get(url) do |req|
@@ -359,9 +362,11 @@ class AssistantsController < ApplicationController
 
   def conversations
     if params[:search].present?
-      @conversations = Conversation.search(params[:search]).order(created_at: :desc).page(params[:page]).per(20)
+      # @conversations = Conversation.search(params[:search]).order(created_at: :desc).page(params[:page]).per(20)
+      @conversations = current_user.conversations.search(params[:search]).order(created_at: :desc).page(params[:page]).per(20)
     else
-      @conversations = Conversation.order(created_at: :desc).page(params[:page]).per(20)
+      # @conversations = Conversation.order(created_at: :desc).page(params[:page]).per(20)
+      @conversations = current_user.conversations.order(created_at: :desc).page(params[:page]).per(20)
     end
   end
 

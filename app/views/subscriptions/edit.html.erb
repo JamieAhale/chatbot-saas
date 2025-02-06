@@ -1,0 +1,331 @@
+<div class="container my-5">
+  <!-- Back to Account Button and Title -->
+  <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center mb-4">
+    <%= link_to 'Back to Account', user_show_path, class: 'btn btn-outline-secondary mb-3 mb-md-0', id: 'back-button' %>
+    <h2 class="mb-0 text-center flex-grow-1">Manage Your Subscription</h2>
+    <div class="d-none d-md-block" style="width: 106px"></div> <!-- Spacer to center the heading -->
+  </div>
+
+  <% if @subscription.cancel_at_period_end %>
+    <div class="alert alert-warning text-center mb-4 w-auto mx-auto" style="max-width: fit-content;">
+      <h5 class="alert-heading">Subscription Scheduled for Cancellation</h5>
+      <p class="mb-0">Your subscription will remain active until the end of your current billing period.</p>
+      <p class="mt-2">Your subscription ends <strong><%= @current_period_end %></strong>.</p>
+      <%= button_to 'Resume Subscription', 
+                    resume_subscription_path,
+                    method: :patch,
+                    class: 'btn btn-outline-success mt-3',
+                    onClick: "confirm('Would you like to resume your subscription?')" %>
+    </div>
+  <% end %>
+
+  <% unless @subscription.cancel_at_period_end %>
+    <div class="alert alert-info text-center mb-4 w-auto mx-auto" style="max-width: fit-content;">
+      <p class="mb-0">Your subscription will renew on <strong><%= @current_period_end %></strong></p>
+    </div>
+
+    <%= form_with url: subscription_path, method: :patch, local: true, scope: :subscription, html: { id: 'subscription-form', data: { redirect_url: user_show_path } } do |f| %>
+      <div class="mb-4">
+        <h4 class="text-center mb-3">Select a New Plan</h4>
+        <p class="text-center text-muted mb-4">Scale your AI assistant capabilities as your business grows</p>
+        
+        <div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
+          <!-- Lite Plan -->
+          <div class="col">
+            <div class="card h-100 plan-card <%= 'selected' if @user.plan == @plans['Lite'] %>" 
+                 data-plan-id="<%= @plans['Lite'] %>" 
+                 data-plan-name="Lite"
+                 data-plan-price="99">
+              <div class="card-body">
+                <h5 class="card-title text-center mb-2">Lite</h5>
+                <h6 class="text-center text-primary mb-3">$99/month</h6>
+                <p class="text-center text-muted mb-4">Perfect for small businesses</p>
+                
+                <ul class="list-unstyled">
+                  <li class="mb-2"><i class="fas fa-check text-success me-2"></i>500 AI Queries/month</li>
+                  <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Basic Widget Customization</li>
+                  <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Email Support</li>
+                  <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Basic Analytics</li>
+                  <li class="mb-2 text-muted"><i class="fas fa-times text-muted me-2"></i>Review Analytics</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Basic Plan -->
+          <div class="col">
+            <div class="card h-100 plan-card <%= 'selected' if @user.plan == @plans['Basic'] %>"
+                 data-plan-id="<%= @plans['Basic'] %>"
+                 data-plan-name="Basic"
+                 data-plan-price="249">
+              <div class="card-body">
+                <div class="position-absolute top-0 start-50 translate-middle">
+                  <span class="badge bg-primary px-3 py-2">Most Popular</span>
+                </div>
+                <h5 class="card-title text-center mb-2">Basic</h5>
+                <h6 class="text-center text-primary mb-3">$249/month</h6>
+                <p class="text-center text-muted mb-4">Ideal for growing businesses</p>
+                
+                <ul class="list-unstyled">
+                  <li class="mb-2"><i class="fas fa-check text-success me-2"></i>2,000 AI Queries/month</li>
+                  <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Advanced Widget Customization</li>
+                  <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Priority Support</li>
+                  <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Advanced Analytics</li>
+                  <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Review Analytics</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pro Plan -->
+          <div class="col">
+            <div class="card h-100 plan-card <%= 'selected' if @user.plan == @plans['Pro'] %>"
+                 data-plan-id="<%= @plans['Pro'] %>"
+                 data-plan-name="Pro"
+                 data-plan-price="499">
+              <div class="card-body">
+                <h5 class="card-title text-center mb-2">Pro</h5>
+                <h6 class="text-center text-primary mb-3">$499/month</h6>
+                <p class="text-center text-muted mb-4">For maximum power</p>
+                
+                <ul class="list-unstyled">
+                  <li class="mb-2"><i class="fas fa-check text-success me-2"></i>10,000 AI Queries/month</li>
+                  <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Full Widget Customization</li>
+                  <li class="mb-2"><i class="fas fa-check text-success me-2"></i>24/7 Priority Support</li>
+                  <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Enterprise Analytics</li>
+                  <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Advanced Review Analytics</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <%= f.hidden_field :price_id, id: 'selected-plan' %>
+      </div>
+
+      <div class="text-center">
+        <%= f.submit "Update Plan", class: 'btn btn-outline-primary', disabled: true, id: 'update-plan-btn', data: { "bs-toggle": "modal", "bs-target": "#confirmationModal" } %>
+      </div>
+    <% end %>
+
+    <hr class="my-4">
+
+    <div class="text-center mt-5">
+      <div class="mb-4">
+        <%= link_to payment_details_path, class: 'btn btn-outline-secondary' do %>
+          <i class="fas fa-credit-card me-2"></i>Update Payment Details
+        <% end %>
+      </div>
+
+      <%= button_to 'Cancel Subscription', 
+                    subscription_path, 
+                    method: :delete,
+                    class: 'btn btn-outline-danger',
+                    onClick: "confirm('Are you sure you want to cancel your subscription? Your service will continue until the end of your current billing period.')" %>
+      <p class="text-muted mt-3">
+        Your subscription will remain active until <br> the end of your current billing period.
+      </p>
+    </div>
+  <% end %>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmationModalLabel">Confirm Plan Change</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="confirmation-message">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirm-change">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const planCards = document.querySelectorAll('.plan-card');
+  const selectedPlanInput = document.getElementById('selected-plan');
+  const updateButton = document.getElementById('update-plan-btn');
+  const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+  const confirmButton = document.getElementById('confirm-change');
+  const form = document.getElementById('subscription-form');
+  let selectedCard = null;
+
+  // Get current plan details
+  const currentPlan = document.querySelector('.plan-card.selected');
+  const currentPlanPrice = parseInt(currentPlan.dataset.planPrice);
+  const currentPlanName = currentPlan.dataset.planName;
+
+  planCards.forEach(card => {
+    card.addEventListener('click', function() {
+      if (this === currentPlan) {
+        return;
+      }
+
+      selectedCard = this;
+      const newPlanPrice = parseInt(this.dataset.planPrice);
+      const newPlanName = this.dataset.planName;
+      
+      selectedPlanInput.value = this.dataset.planId;
+      planCards.forEach(c => c.classList.remove('selected'));
+      this.classList.add('selected');
+      updateButton.disabled = (this === currentPlan);
+    });
+  });
+
+  updateButton.disabled = true;
+
+  // Handle the update button click
+  updateButton.addEventListener('click', function(e) {
+    e.preventDefault();
+    if (!selectedCard) return;
+    
+    const newPlanPrice = parseInt(selectedCard.dataset.planPrice);
+    const newPlanName = selectedCard.dataset.planName;
+    const priceDiff = newPlanPrice - currentPlanPrice;
+    
+    let message = '';
+    if (priceDiff > 0) {
+      message = `You will be charged an additional $${priceDiff} for upgrading from ${currentPlanName} to ${newPlanName}. Are you sure you want to continue?`;
+    } else {
+      message = `Your plan will be downgraded from ${currentPlanName} to ${newPlanName} at the end of your current billing period. Are you sure you want to continue?`;
+    }
+    
+    document.getElementById('confirmation-message').textContent = message;
+  });
+
+  // Handle the confirm button click
+  confirmButton.addEventListener('click', function(e) {
+    e.preventDefault();
+    modal.hide();
+    setTimeout(() => {
+      const formData = new FormData(form);
+      
+      fetch('/subscription', {
+        method: 'PATCH',
+        body: formData,
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+          'Accept': 'application/json'
+        },
+        credentials: 'same-origin',
+        redirect: 'follow'
+      }).then(response => {
+        if (response.redirected) {
+          window.location.href = response.url;
+        } else {
+          window.location.href = '/account';
+        }
+      }).catch(error => {
+        console.error('Error:', error);
+        window.location.href = '/account';
+      });
+    }, 150);
+  });
+});
+</script>
+
+<style>
+  /* Plan Card Styles */
+  .plan-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+  }
+
+  .plan-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  }
+
+  .plan-card.selected {
+    border-color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.05);
+    position: relative;
+  }
+
+  .plan-card.selected::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #0d6efd;
+    color: white;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+  }
+
+  /* Center bullet points */
+  .plan-card .list-unstyled {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: left;
+    width: fit-content;
+    margin: 0 auto;
+  }
+
+  .plan-card .list-unstyled li {
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .plan-card .list-unstyled li i {
+    width: 20px;
+    text-align: center;
+    margin-right: 8px;
+  }
+
+  /* Keep existing button styles */
+  #back-button {
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  #back-button:hover {
+    background-color: #6c757d;
+    color: #fff;
+  }
+
+  .btn-outline-primary,
+  .btn-outline-danger,
+  .btn-outline-success {
+    transition: all 0.3s ease;
+  }
+
+  .btn-outline-primary:hover {
+    background-color: #0d6efd;
+    color: #fff;
+    border-color: #0d6efd;
+  }
+
+  .btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: #fff;
+    border-color: #dc3545;
+  }
+
+  .btn-outline-success:hover {
+    background-color: #198754;
+    color: #fff;
+    border-color: #198754;
+  }
+
+  .btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: #fff;
+    border-color: #6c757d;
+  }
+</style>

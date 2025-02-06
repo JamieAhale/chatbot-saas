@@ -98,4 +98,14 @@ Rails.application.routes.draw do
   post 'generate_widget_code', to: 'assistants#generate_widget_code'
 
   post 'assistants/refresh_website_content', to: 'assistants#refresh_website_content', as: :refresh_website_content_assistants
+
+  post '/stripe/webhook', to: 'stripe#webhook'
+
+  resource :subscription, only: [:edit, :update, :destroy] do
+    patch :resume, on: :collection
+  end
+
+  get 'payment_details', to: 'subscriptions#payment_details', as: :payment_details
+  post 'update_payment_method', to: 'subscriptions#update_payment_method', as: :update_payment_method
+
 end

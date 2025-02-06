@@ -1,10 +1,10 @@
 class ChatService
   def initialize(user_input, unique_identifier, assistant_name, user)
     @user_input = user_input
+    @user = user
     @unique_identifier = unique_identifier
     @pinecone_api_key = ENV['PINECONE_API_KEY']
-    @assistant_name = assistant_name
-    @user = user
+    @assistant_name = user.pinecone_assistant_name
     # @assistant_name = ENV['PINECONE_ASSISTANT_NAME']
     @openai_api_key = ENV['OPENAI_API_KEY']
     @openai_url = "https://api.openai.com/v1/chat/completions"
@@ -13,37 +13,47 @@ class ChatService
 
   def process_chat
     return { error: 'No user input provided' } if @user_input.blank?
+    if @user.can_make_query?
+      @user.decrement_queries!
+      conversation = find_or_create_conversation
+      messages = build_messages(conversation)
 
-    conversation = find_or_create_conversation
-    messages = build_messages(conversation)
+      response = send_request_to_pinecone(messages)
+      puts "RESPONSE: #{response.inspect}"
+      return { error: "Error: #{response.status} - #{response.reason_phrase}" } unless response.success?
 
-    response = send_request_to_pinecone(messages)
-    return { error: "Error: #{response.status} - #{response.reason_phrase}" } unless response.success?
+      parsed_response = JSON.parse(response.body)
+      assistant_response = parsed_response['choices'][0]['message']['content']
+      cleaned_response, citations = clean_response(assistant_response)
 
-    parsed_response = JSON.parse(response.body)
-    assistant_response = parsed_response['choices'][0]['message']['content']
-    cleaned_response, citations = clean_response(assistant_response)
+      check_if_flag_for_review(conversation, @user_input, cleaned_response, @user)
 
-    check_if_flag_for_review(conversation, @user_input, cleaned_response, @user)
+      puts "CITATIONS: #{citations}"
 
-    puts "CITATIONS: #{citations}"
+      if citations.nil?
+        flag_conversation_for_review(conversation)
+      else
+        potential_queries = generate_potential_queries(messages)
+        puts "POTENTIAL QUERIES: #{potential_queries}"
+      end
 
-    if citations.nil?
-      flag_conversation_for_review(conversation)
+      puts "CLEANED RESPONSE: #{cleaned_response}"
+
+      save_conversation(conversation, cleaned_response)
+
+      { cleaned_response: cleaned_response, potential_queries: potential_queries }
     else
-      potential_queries = generate_potential_queries(messages)
-      puts "POTENTIAL QUERIES: #{potential_queries}"
+      NotificationMailer.query_limit_reached(@user).deliver_later
+      { cleaned_response: "We are unable to process your request at this time. Please try again later." }
     end
-
-    save_conversation(conversation, cleaned_response)
-
-    { cleaned_response: cleaned_response, potential_queries: potential_queries }
   end
 
   private
 
   def find_or_create_conversation
-    conversation = Conversation.find_or_create_by!(unique_identifier: @unique_identifier)
+    raise "USER: #{@user.inspect}"
+    # conversation = Conversation.find_or_create_by!(unique_identifier: @unique_identifier)
+    conversation = Conversation.find_or_create_by!(unique_identifier: @unique_identifier, user: @user)
     conversation
   end
 
@@ -103,8 +113,8 @@ class ChatService
       req.body = {
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: "You are a helpful assistant that suggests potential follow-up questions. Try to keep your responses to 5 words or less. Give responses as 2 plain sentences" },
-          { role: 'user', content: "Based on this conversation, suggest 2 potential follow-up questions from the user's perspective. Conversation: #{messages}" }
+          { role: 'system', content: "You are a helpful assistant that suggests potential follow-up questions from the USER'S PERSPECTIVE. Try to keep your responses to 5 words or less. Give responses as 2 plain sentences" },
+          { role: 'user', content: "Based on this conversation, suggest 2 potential follow-up questions the user may want to ask. Conversation: #{messages}" }
         ]
       }.to_json
     end
