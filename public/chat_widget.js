@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', function () {
+  // Use custom configuration if provided, otherwise fall back to defaults.
+  const config = window.chatWidgetConfig || {};
+  const selected_colour = config.primary_color || 'black';
+  const adminAccountEmail = config.adminAccountEmail || 'jamie.w.ahale@gmail.com'; // TODO: Make this my account for backups
+  
   // Load Bootstrap CSS dynamically
   const link = document.createElement('link');
   link.rel = 'stylesheet';
@@ -16,8 +21,6 @@ document.addEventListener('DOMContentLoaded', function () {
   document.head.appendChild(fontAwesomeLink);
 
   const assistantName = 'example-assistant';
-  const adminAccountEmail = 'jamie.w.ahale@gmail.com'
-  const selected_colour = 'black';
   let hasLoadedMessages = false;
   console.log('uniqueIdentifierData: ', localStorage.getItem('uniqueIdentifierData'));
 
@@ -40,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
     <div id="chat-window" class="card-body overflow-auto" style="height: 400px;"></div>
     <div id="potential-queries" class="p-2 d-flex justify-content-end flex-wrap"></div>
     <form id="chat-form" class="card-footer d-flex align-items-center p-2" style="width: 100%;">
-      <textarea id="user-input" class="form-control me-2 focus-ring focus-ring-sxecondary" placeholder="Type your message..." rows="1" style="resize: none; overflow-y: auto; max-height: 100px;"></textarea>
+      <textarea id="user-input" class="form-control me-2 focus-ring focus-ring-secondary" placeholder="Type your message..." rows="1" style="resize: none; overflow-y: auto; max-height: 100px;"></textarea>
       <button type="submit" id="send-button" class="btn btn-primary" style="background-color: ${selected_colour};"><i class="fas fa-paper-plane"></i></button>
     </form>
   `;
@@ -49,6 +52,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const sendButton = document.getElementById('send-button');
   sendButton.style.border = 'none';
   sendButton.style.outline = 'none';
+  sendButton.style.padding = '12px 12px';
+  sendButton.style.fontSize = '1.2em';
   console.log('selected_colour: ', selected_colour);
 
   const textInput = document.getElementById('user-input');
@@ -234,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const loadingMessage = document.createElement('div');
     loadingMessage.innerHTML = `
       <div class="text-start mb-2">
-        <div class="text-white p-2 rounded d-inline-block" style="background-color: ${selected_colour};">
+        <div class="text-white p-2 rounded d-inline-block" style="width: auto; max-width: 80%; background-color: ${selected_colour};">
           <i class="fas fa-circle fa-bounce" style="font-size: 0.5em; animation-delay: 0s;"></i>
           <i class="fas fa-circle fa-bounce" style="font-size: 0.5em; animation-delay: 0.2s;"></i>
           <i class="fas fa-circle fa-bounce" style="font-size: 0.5em; animation-delay: 0.4s;"></i>
@@ -265,8 +270,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const assistantMessage = document.createElement('div');
         assistantMessage.innerHTML = `
           <div class="text-start mb-2">
-            <div class="text-white p-2 rounded d-inline-block" style="max-width: 90%; background-color: ${selected_colour};">
-              <strong>Assistant:</strong> ${data.cleaned_response.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>') || 'No valid response received.'}
+            <div class="text-white p-2 rounded d-inline-block" style="width: auto; max-width: 80%; background-color: ${selected_colour};">
+              <strong>Assistant:</strong> ${
+                data.cleaned_response
+                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                  .replace(/\n/g, '<br>') || 'No valid response received.'
+              }
             </div>
           </div>
         `;
@@ -312,11 +321,10 @@ document.addEventListener('DOMContentLoaded', function () {
       })
       .catch((error) => {
         chatWindow.removeChild(loadingMessage);
-
         const errorMessage = document.createElement('div');
         errorMessage.innerHTML = `
           <div class="text-start mb-2">
-            <div class="bg-danger text-white p-2 rounded d-inline-block">
+            <div class="bg-danger text-white p-2 rounded d-inline-block" style="width: auto; max-width: 80%;">
               <strong>Error:</strong> Unable to get a response from the assistant.
             </div>
           </div>
@@ -325,6 +333,7 @@ document.addEventListener('DOMContentLoaded', function () {
         chatWindow.scrollTop = chatWindow.scrollHeight;
       });
 
+    // Clear the input after sending
     userInput.value = '';
     userInput.style.height = 'auto'; // Reset height after sending
   });
