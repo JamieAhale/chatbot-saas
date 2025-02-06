@@ -10,7 +10,7 @@ class AssistantsController < ApplicationController
   def chat
     if params[:user_input].present?
       api_key = ENV['PINECONE_API_KEY']
-      assistant_name = ENV['PINECONE_ASSISTANT_NAME']
+      assistant_name = "#{current_user.pinecone_assistant_name}"
       url = "https://prod-1-data.ke.pinecone.io/assistant/chat/#{assistant_name}/chat/completions"
 
       # Retrieve or create the current conversation
@@ -186,7 +186,6 @@ class AssistantsController < ApplicationController
 
   def documents
     api_key = ENV['PINECONE_API_KEY']
-    # assistant_name = ENV['PINECONE_ASSISTANT_NAME']
     assistant_name = "#{current_user.pinecone_assistant_name}"
     url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}"
 
@@ -210,7 +209,6 @@ class AssistantsController < ApplicationController
     end
 
     api_key = ENV['PINECONE_API_KEY']
-    # assistant_name = ENV['PINECONE_ASSISTANT_NAME']
     assistant_name = "#{current_user.pinecone_assistant_name}"
     url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}"
 
@@ -244,7 +242,7 @@ class AssistantsController < ApplicationController
     end
 
     api_key = ENV['PINECONE_API_KEY']
-    assistant_name = ENV['PINECONE_ASSISTANT_NAME']
+    assistant_name = "#{current_user.pinecone_assistant_name}"
     url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}/#{file_id}"
 
     response = HTTParty.delete(
@@ -270,7 +268,7 @@ class AssistantsController < ApplicationController
     end
 
     api_key = ENV['PINECONE_API_KEY']
-    assistant_name = ENV['PINECONE_ASSISTANT_NAME']
+    assistant_name = "#{current_user.pinecone_assistant_name}"
     url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}/#{file_id}?include_url=true"
 
     response = HTTParty.get(
@@ -288,37 +286,8 @@ class AssistantsController < ApplicationController
     end
   end
 
-  # def check_status
-  #   file_id = params[:file_id]
-
-  #   if file_id.blank?
-  #     flash[:error] = "File ID is required to check status."
-  #     redirect_to documents_path and return
-  #   end
-
-  #   api_key = ENV['PINECONE_API_KEY']
-  #   assistant_name = ENV['PINECONE_ASSISTANT_NAME']
-  #   url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}/#{file_id}"
-
-  #   response = HTTParty.get(
-  #     url,
-  #     headers: { 'Api-Key' => api_key }
-  #   )
-
-  #   puts "Check Status Response: #{response.body}"
-
-  #   if response.success?
-  #     flash[:success] = "Status checked successfully. Check the terminal for details."
-  #   else
-  #     flash[:error] = "Failed to check status: #{response.code} - #{response.message}"
-  #   end
-
-  #   redirect_to documents_path
-  # end
-
   def settings
     api_key = ENV['PINECONE_API_KEY']
-    # assistant_name = ENV['PINECONE_ASSISTANT_NAME']
     assistant_name = "#{current_user.pinecone_assistant_name}"
     url = "https://api.pinecone.io/assistant/assistants/#{assistant_name}"
 
@@ -339,7 +308,7 @@ class AssistantsController < ApplicationController
 
   def update_instructions
     api_key = ENV['PINECONE_API_KEY']
-    assistant_name = ENV['PINECONE_ASSISTANT_NAME']
+    assistant_name = "#{current_user.pinecone_assistant_name}"
     url = "https://api.pinecone.io/assistant/assistants/#{assistant_name}"
 
     # Combine the mandatory instruction with the user's input
@@ -527,7 +496,7 @@ class AssistantsController < ApplicationController
 
     if file_id.present? && website_url.present?
       api_key = ENV['PINECONE_API_KEY']
-      assistant_name = ENV['PINECONE_ASSISTANT_NAME']
+      assistant_name = "#{current_user.pinecone_assistant_name}"
       delete_url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}/#{file_id}"
 
       response = HTTParty.delete(

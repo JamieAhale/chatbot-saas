@@ -1,11 +1,10 @@
 class ChatService
-  def initialize(user_input, unique_identifier, assistant_name, user)
+  def initialize(user_input, unique_identifier, user)
     @user_input = user_input
     @user = user
     @unique_identifier = unique_identifier
     @pinecone_api_key = ENV['PINECONE_API_KEY']
     @assistant_name = user.pinecone_assistant_name
-    # @assistant_name = ENV['PINECONE_ASSISTANT_NAME']
     @openai_api_key = ENV['OPENAI_API_KEY']
     @openai_url = "https://api.openai.com/v1/chat/completions"
     @pinecone_assistant_url = "https://prod-1-data.ke.pinecone.io/assistant/chat/#{@assistant_name}/chat/completions"
