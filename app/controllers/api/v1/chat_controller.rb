@@ -2,17 +2,16 @@ class Api::V1::ChatController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   def create
-    chat_params = params.require(:chat).permit(:user_input, :unique_identifier, :assistant_name, :admin_account_email)
+    chat_params = params.require(:chat).permit(:user_input, :unique_identifier, :admin_account_email)
 
     puts "chat_params: #{chat_params}"
 
     user_input = params[:user_input]
     unique_identifier = params[:unique_identifier]
-    assistant_name = params[:assistant_name]
     admin_account_email = params[:admin_account_email]
     user = User.find_by(email: admin_account_email)
     puts "user: #{user}"
-    chat_service = ChatService.new(user_input, unique_identifier, assistant_name, user)
+    chat_service = ChatService.new(user_input, unique_identifier, user)
     result = chat_service.process_chat
     puts "result: #{result}"
     render json: result

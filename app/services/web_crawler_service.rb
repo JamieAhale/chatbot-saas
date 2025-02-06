@@ -97,7 +97,7 @@ class WebCrawlerService
 
   def upload_to_assistant(pdf)
     api_key = ENV['PINECONE_API_KEY']
-    assistant_name = ENV['PINECONE_ASSISTANT_NAME']
+    assistant_name = "#{current_user.pinecone_assistant_name}"
     url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}"
 
     Tempfile.open(['pdf_upload', '.pdf']) do |tempfile|
