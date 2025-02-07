@@ -39,6 +39,12 @@
       <h3 class="mb-0">Your Subscription</h3>
     </div>
     <div class="card-body">
+      <% if @scheduled_downgrade_price_id.present? %>
+        <div class="alert alert-info text-center mb-3">
+          You are scheduled to downgrade to <strong><%= get_plan_name(@scheduled_downgrade_price_id) %></strong>
+          at the end of your current billing period on <strong><%= @scheduled_downgrade_date %></strong>.
+        </div>
+      <% end %>
       <div class="row align-items-center">
         <div class="col-md-8">
           <div class="d-flex flex-column flex-md-row gap-2 mb-3">

@@ -30,6 +30,8 @@ class StripeController < ApplicationController
       handle_payment_success(event.data.object)
     when 'payment_intent.payment_failed'
       handle_payment_failure(event.data.object)
+    when 'subscription_schedule.completed'
+      handle_subscription_schedule_completed(event.data.object)
     else
       Rails.logger.info "Unhandled event type: #{event.type}"
     end
@@ -93,6 +95,16 @@ class StripeController < ApplicationController
       Rails.logger.info "Payment failed for user #{user.id}. Subscription status updated."
     else
       Rails.logger.warn "No user found with Stripe customer ID: #{customer_id}"
+    end
+  end
+
+  def handle_subscription_schedule_completed(schedule)
+    user = User.find_by(stripe_subscription_schedule_id: schedule.id)
+    if user
+      user.update(stripe_subscription_schedule_id: nil)
+      Rails.logger.info "Subscription schedule completed for user #{user.id}. Resetting stripe_subscription_schedule_id."
+    else
+      Rails.logger.warn "No user found with Stripe subscription schedule ID: #{schedule.id}"
     end
   end
 end
