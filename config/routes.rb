@@ -12,7 +12,7 @@ Rails.application.routes.draw do
     get 'account/edit', to: 'users/registrations#edit', as: :user_edit
   end
 
-  root 'assistants#chat'
+  root 'assistants#documents'
 
   # Define a named route for the chat action
   # get 'assistants/chat', to: 'assistants#chat', as: :chat
