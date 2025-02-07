@@ -5,11 +5,13 @@ document.addEventListener('DOMContentLoaded', function () {
   const settings = {
     primary_color: config.primary_color || '#000000',
     font_family: config.font_family || "'Open Sans', sans-serif", // Default font if not provided
+    widget_heading: config.widget_heading || 'AI Assistant', 
     adminAccountEmail: config.adminAccountEmail
   };
 
   const selected_colour = settings.primary_color;
   const font_family = settings.font_family;
+  const widget_heading = settings.widget_heading;
   const adminAccountEmail = settings.adminAccountEmail || 'jamie.w.ahale@gmail.com'; // TODO: Make this my account for backups
   
   // Dynamically inject a CSS rule to apply the desired font-family for the widget.
@@ -82,13 +84,13 @@ document.addEventListener('DOMContentLoaded', function () {
   chatIcon.style.backgroundColor = selected_colour;
   document.body.appendChild(chatIcon);
 
-  // Create the chat container
+  // Create the chat container with customizable heading
   const chatContainer = document.createElement('div');
   chatContainer.id = 'chat-container';
   chatContainer.classList.add('card', 'shadow', 'rounded', 'position-fixed');
   chatContainer.innerHTML = `
     <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: ${selected_colour};">
-      <span>AI Assistant</span>
+      <span><strong>${widget_heading}</strong></span>
       <button type="button" id="close-chat" class="btn-close btn-close-white"></button>
     </div>
     <div id="chat-window" class="card-body overflow-auto" style="height: 400px;"></div>
