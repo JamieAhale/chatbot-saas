@@ -12,11 +12,54 @@ document.addEventListener('DOMContentLoaded', function () {
   const font_family = settings.font_family;
   const adminAccountEmail = settings.adminAccountEmail || 'jamie.w.ahale@gmail.com'; // TODO: Make this my account for backups
   
+  // Dynamically inject a CSS rule to apply the desired font-family for the widget.
+  const widgetStyle = document.createElement('style');
+  widgetStyle.innerHTML = `
+    #chat-icon, #chat-container, #chat-container * {
+      font-family: ${font_family} !important;
+    }
+  `;
+  document.head.appendChild(widgetStyle);
+
+  // Override the font for Font Awesome icons specifically so they display correctly
+  const iconOverrideStyle = document.createElement('style');
+  iconOverrideStyle.innerHTML = `
+    #chat-container i.fas {
+      font-family: "Font Awesome 6 Free" !important;
+      font-weight: 900; /* Adjust if necessary depending on your FA version */
+    }
+  `;
+  document.head.appendChild(iconOverrideStyle);
+
+  // Helper function to extract the primary font name from the font-family string.
+  // E.g., given "'Roboto', sans-serif" it returns "Roboto".
+  function extractFontName(fontFamilyStr) {
+    const match = fontFamilyStr.match(/^['"]?([^,'"]+)['"]?/);
+    return match ? match[1] : fontFamilyStr;
+  }
+
+  const fontName = extractFontName(font_family);
+  console.log("Extracted font name:", fontName);
+
+  // Known Google Fonts options based on your widget generator dropdown:
+  const googleFonts = ["Roboto", "Open Sans", "Lato", "Poppins", "Montserrat", "Source Sans Pro", "Nunito", "Inter", "Ubuntu", "Playfair Display", "Quicksand", "Raleway"];
+
+  // If the extracted font name is a Google Font, load it dynamically.
+  if (googleFonts.includes(fontName)) {
+    const googleFontLink = document.createElement('link');
+    googleFontLink.rel = 'stylesheet';
+    // Replace spaces with '+' for the URL
+    const fontNameUrl = fontName.split(' ').join('+');
+    // Here we load weights 400, 600, and 700; adjust as needed.
+    googleFontLink.href = `https://fonts.googleapis.com/css2?family=${fontNameUrl}:wght@400;600;700&display=swap`;
+    document.head.appendChild(googleFontLink);
+  }
+
   // Load Bootstrap CSS dynamically
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css'; // Load Bootstrap
-  document.head.appendChild(link);
+  const bootstrapLink = document.createElement('link');
+  bootstrapLink.rel = 'stylesheet';
+  bootstrapLink.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css'; // Load Bootstrap
+  document.head.appendChild(bootstrapLink);
 
   // Load FontAwesome for icons dynamically
   const faLink = document.createElement('link');
@@ -24,9 +67,9 @@ document.addEventListener('DOMContentLoaded', function () {
   faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css'; // Load FontAwesome
   document.head.appendChild(faLink);
 
-  const fontAwesomeLink = document.createElement('script');
-  fontAwesomeLink.src = 'https://kit.fontawesome.com/aee17d2e29.js'; // Load FontAwesome
-  document.head.appendChild(fontAwesomeLink);
+  const fontAwesomeScript = document.createElement('script');
+  fontAwesomeScript.src = 'https://kit.fontawesome.com/aee17d2e29.js'; // Load FontAwesome
+  document.head.appendChild(fontAwesomeScript);
 
   const assistantName = 'example-assistant';
   let hasLoadedMessages = false;
