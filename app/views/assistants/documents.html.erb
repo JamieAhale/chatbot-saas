@@ -1,20 +1,6 @@
 <!-- app/views/assistants/documents.html.erb -->
 <h1>Documents</h1>
 
-<% if flash[:error] %>
-  <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <%= flash[:error] %>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-<% end %>
-
-<% if flash[:success] %>
-  <div class="alert alert-success alert-dismissible fade show" role="alert">
-    <%= flash[:success] %>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-<% end %>
-
 <%= form_with url: upload_document_path, local: true, html: { multipart: true }, class: 'mb-4' do |form| %>
   <div class="row g-2 align-items-center mt-4">
     <div class="col-auto col-md-11">
