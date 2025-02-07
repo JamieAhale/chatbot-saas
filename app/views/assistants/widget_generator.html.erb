@@ -94,6 +94,10 @@
                 </div>
                 <input type="hidden" id="font-family" value="'Roboto', sans-serif">
               </div>
+              <div class="mb-3">
+                <label class="form-label">Widget Heading</label>
+                <input type="text" class="form-control" id="widget-heading" placeholder="Enter widget heading" value="AI Assistant" maxlength="25">
+              </div>
             <% end %>
 
             <button type="submit" class="btn btn-primary">Generate Code</button>
@@ -163,11 +167,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // Update preview
+  // Add event listener for the widget heading (if available) to update preview dynamically.
+  const widgetHeadingInput = document.getElementById('widget-heading');
+  if (widgetHeadingInput) {
+    widgetHeadingInput.addEventListener('input', updatePreview);
+  }
+  
+  // Update preview function with dynamic widget heading
   function updatePreview() {
     const fontFamilyElem = document.getElementById('font-family');
-    // Use Open Sans as the default font if not provided
     const fontFamily = fontFamilyElem ? fontFamilyElem.value : "'Open Sans', sans-serif";
+    // Fetch the current widget heading value, defaulting to "AI Assistant" if not provided.
+    const widgetHeadingElem = document.getElementById('widget-heading');
+    const widgetHeading = widgetHeadingElem ? widgetHeadingElem.value : 'AI Assistant';
+    
     preview.style.height = '500px';
     preview.style.position = 'relative';
     
@@ -176,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <!-- Chat Widget Preview -->
         <div style="position: absolute; bottom: 90px; right: 20px; width: 300px; background: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
           <div style="background-color: ${primaryColorInput.value}; color: white; padding: 10px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
-            <span>AI Assistant</span>
+            <span><strong>${widgetHeading}</strong></span>
             <button style="background: none; border: none; color: white; font-size: 18px;">&times;</button>
           </div>
           <div style="height: 250px; padding: 15px; background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
@@ -191,7 +204,6 @@ document.addEventListener('DOMContentLoaded', function() {
             </button>
           </div>
         </div>
-
         <!-- Chat Icon Preview -->
         <div style="position: absolute; bottom: 20px; right: 20px; width: 60px; height: 60px; background-color: ${primaryColorInput.value}; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
           <i class="fas fa-comments" style="color: white; font-size: 24px;"></i>
@@ -207,8 +219,10 @@ document.addEventListener('DOMContentLoaded', function() {
     e.preventDefault();
 
     const fontFamilyElem = document.getElementById('font-family');
-    // Use Open Sans as the default font if not provided (instead of Roboto)
+    const widgetHeadingElem = document.getElementById('widget-heading');
     const fontFamilyValue = fontFamilyElem ? fontFamilyElem.value : "'Open Sans', sans-serif";
+    // Use the current widget heading from the form if available; default to "AI Assistant" otherwise.
+    const widgetHeading = widgetHeadingElem ? widgetHeadingElem.value : 'AI Assistant';
 
     fetch('/generate_widget_code', {
       method: 'POST',
@@ -218,7 +232,8 @@ document.addEventListener('DOMContentLoaded', function() {
       },
       body: JSON.stringify({
         primary_color: primaryColorInput.value,
-        font_family: fontFamilyValue
+        font_family: fontFamilyValue,
+        widget_heading: widgetHeading
       })
     })
     .then(response => response.json())
@@ -256,7 +271,6 @@ document.addEventListener('DOMContentLoaded', function() {
       'Raleway': 'Raleway:wght@300;400;500;600'
     };
 
-    // Check if selected font is a Google Font
     for (const [fontName, fontWeights] of Object.entries(googleFonts)) {
       if (fontFamily.includes(fontName)) {
         const link = document.createElement('link');
@@ -281,21 +295,20 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Load initial font
+  // Load initial font and preview
   loadGoogleFont(document.getElementById('font-family').value);
   updatePreview();
-});
 
-document.getElementById('view-code').addEventListener('click', function() {
-  const codeElement = document.querySelector('pre');
-  const viewButton = this;
-  
-  if (codeElement.style.display === 'none') {
-    codeElement.style.display = 'block';
-    viewButton.innerHTML = '<i class="fas fa-eye-slash me-1"></i> Hide Code';
-  } else {
-    codeElement.style.display = 'none';
-    viewButton.innerHTML = '<i class="fas fa-eye me-1"></i> View Code';
-  }
+  document.getElementById('view-code').addEventListener('click', function() {
+    const codeElement = document.querySelector('pre');
+    const viewButton = this;
+    if (codeElement.style.display === 'none') {
+      codeElement.style.display = 'block';
+      viewButton.innerHTML = '<i class="fas fa-eye-slash me-1"></i> Hide Code';
+    } else {
+      codeElement.style.display = 'none';
+      viewButton.innerHTML = '<i class="fas fa-eye me-1"></i> View Code';
+    }
+  });
 });
 </script>

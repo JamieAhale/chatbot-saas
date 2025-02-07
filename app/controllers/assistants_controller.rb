@@ -468,25 +468,23 @@ class AssistantsController < ApplicationController
   def generate_widget_code
     config_options = {}
     
-    # Primary color is available for all plans
     config_options[:primary_color] = params[:primary_color] || '#000000'
     
-    # Only add font_family if user is not on Lite plan
     unless current_user.plan_name == 'Lite'
       config_options[:font_family] = params[:font_family] || "'Open Sans', sans-serif"
+      config_options[:widget_heading] = params[:widget_heading] || 'AI Assistant'
     end
     
-    # Always include admin email
     config_options[:adminAccountEmail] = current_user.email
-
+    
     config_script = <<~SCRIPT
       <script>
         window.chatWidgetConfig = #{config_options.to_json};
       </script>
     SCRIPT
-
+    
     chat_widget_script = '<script src="/chat_widget.js"></script>'
-
+    
     render json: { code: config_script + "\n" + chat_widget_script }
   end
 
