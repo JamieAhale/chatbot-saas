@@ -14,6 +14,25 @@ class Users::RegistrationsController < Devise::RegistrationsController
     timestamp = @subscription.current_period_end
     @current_period_end = Time.at(timestamp).utc.strftime("%B %d, %Y")
     @query_limit = User::PLAN_QUERY_LIMITS[@user.plan_name]
+  
+    # Retrieve the subscription schedule, if one exists
+    begin
+      schedule = Stripe::SubscriptionSchedule.retrieve(@user.stripe_subscription_schedule_id)
+      
+      if schedule
+        # If the schedule has more than one phase, assume the second phase is the scheduled downgrade
+        if schedule.phases.count > 1
+          downgrade_phase = schedule.phases[1]
+          # Check if the downgrade phase start date is in the future
+          if downgrade_phase.start_date > Time.current.to_i
+            @scheduled_downgrade_price_id = downgrade_phase.items.first.price
+            @scheduled_downgrade_date = Time.at(downgrade_phase.start_date).utc.strftime("%B %d, %Y")
+          end
+        end
+      end
+    rescue Stripe::StripeError => e
+      Rails.logger.error "Error retrieving subscription schedule for user #{@user.id}: #{e.message}"
+    end
   end
 
   def edit

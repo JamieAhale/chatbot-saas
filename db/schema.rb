@@ -58,10 +58,12 @@ ActiveRecord::Schema[7.1].define(version: 2025_02_05_053553) do
     t.string "plan"
     t.integer "queries_remaining"
     t.string "subscription_status"
+    t.string "stripe_subscription_schedule_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["stripe_customer_id"], name: "index_users_on_stripe_customer_id"
     t.index ["stripe_subscription_id"], name: "index_users_on_stripe_subscription_id"
+    t.index ["stripe_subscription_schedule_id"], name: "index_users_on_stripe_subscription_schedule_id"
   end
 
   add_foreign_key "conversations", "users"

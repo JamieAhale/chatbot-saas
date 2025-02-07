@@ -5,8 +5,10 @@ class AddStripeFieldsToUsers < ActiveRecord::Migration[7.1]
     add_column :users, :plan, :string
     add_column :users, :queries_remaining, :integer
     add_column :users, :subscription_status, :string
+    add_column :users, :stripe_subscription_schedule_id, :string
 
     add_index :users, :stripe_customer_id
     add_index :users, :stripe_subscription_id
+    add_index :users, :stripe_subscription_schedule_id
   end
 end
