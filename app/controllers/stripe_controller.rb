@@ -47,7 +47,7 @@ class StripeController < ApplicationController
 
   # Handle customer creation
   def handle_customer_created(customer)
-    user = User.find_or_create_by(stripe_customer_id: customer.id)
+    user = User.find_by(stripe_customer_id: customer.id)
     user.update!(email: customer.email)
     # Additional logic if needed
   end
