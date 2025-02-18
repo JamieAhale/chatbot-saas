@@ -155,6 +155,26 @@ class SubscriptionsController < ApplicationController
     redirect_to payment_details_path
   end
 
+  def billing_portal
+    customer_id = current_user.stripe_customer_id
+    if customer_id.blank?
+      flash[:error] = "Billing portal unavailable - no Stripe customer found."
+      redirect_to user_show_path and return
+    end
+    
+    portal_session = Stripe::BillingPortal::Session.create({
+      customer: customer_id,
+      return_url: 'http://localhost:3000/account'
+    })
+    
+    # allow_other_host: true is needed if the redirect URL is on a different domain.
+    redirect_to portal_session.url, allow_other_host: true
+  rescue Stripe::StripeError => e
+    Rails.logger.error("Stripe billing portal error: #{e.message}")
+    flash[:error] = "An error occurred while accessing the billing portal. Please try again."
+    redirect_to user_show_path
+  end
+
   private
 
   def set_user
@@ -185,6 +205,19 @@ class SubscriptionsController < ApplicationController
       'Pro'
     else
       'Unknown Plan'
+    end
+  end
+
+  def get_price_id_from_plan_name(plan_name)
+    case plan_name
+    when 'Lite'
+      ENV['STRIPE_PRICE_LITE_ID']
+    when 'Basic'
+      ENV['STRIPE_PRICE_BASIC_ID']
+    when 'Pro'
+      ENV['STRIPE_PRICE_PRO_ID']
+    else
+      nil
     end
   end
 end
