@@ -49,16 +49,17 @@
         <div class="col-md-8">
           <div class="d-flex flex-column flex-md-row gap-2 mb-3">
             <div class="d-flex align-items-center">
-              <i class="fas fa-check-circle text-success me-2"></i>
-              <span class="badge bg-success rounded-pill fs-6 px-3 py-2">
-                <%= @user&.subscription_status&.capitalize %>
-              </span>
-            </div>
-            <div class="d-flex align-items-center">
-              <i class="fas fa-crown text-primary me-2"></i>
-              <span class="badge bg-primary rounded-pill fs-6 px-3 py-2">
-                Plan: <%= @user.plan_name %>
-              </span>
+              <% if @user&.subscription_status&.capitalize == 'Active' %>
+                <i class="fas fa-check-circle text-success me-2"></i>
+                <span class="badge bg-success rounded-pill fs-6 px-3 py-2">
+                  <%= @user&.subscription_status&.capitalize %>
+                </span>
+              <% else %>
+                <i class="fas fa-times-circle text-danger me-2"></i>
+                <span class="badge bg-danger rounded-pill fs-6 px-3 py-2">
+                  <%= @user&.subscription_status&.capitalize %>
+                </span>
+              <% end %>
             </div>
           </div>
           <div class="d-flex align-items-center mb-3">
@@ -67,13 +68,9 @@
               Queries Remaining: <%= @user.queries_remaining || 0 %> / <%= @query_limit %>
             </span>
           </div>
-          <div class="text-muted">
-            <i class="fas fa-calendar-alt me-2"></i>
-            Renews on <%= @current_period_end %>
-          </div>
         </div>
         <div class="col-md-4 text-md-end">
-          <%= link_to edit_subscription_path, class: 'btn btn-outline-primary w-100 w-md-auto' do %>
+          <%= link_to billing_portal_path, class: 'btn btn-outline-primary w-100 w-md-auto' do %>
             <i class="fas fa-cog me-2"></i>Manage Subscription
           <% end %>
         </div>

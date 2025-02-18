@@ -99,7 +99,7 @@ Rails.application.routes.draw do
 
   post 'assistants/refresh_website_content', to: 'assistants#refresh_website_content', as: :refresh_website_content_assistants
 
-  post '/stripe/webhook', to: 'stripe#webhook'
+  post '/stripe/webhook', to: 'stripe#webhook', defaults: { format: :json }
 
   resource :subscription, only: [:edit, :update, :destroy] do
     patch :resume, on: :collection
@@ -107,5 +107,7 @@ Rails.application.routes.draw do
 
   get 'payment_details', to: 'subscriptions#payment_details', as: :payment_details
   post 'update_payment_method', to: 'subscriptions#update_payment_method', as: :update_payment_method
+
+  get 'billing_portal', to: 'subscriptions#billing_portal', as: :billing_portal
 
 end

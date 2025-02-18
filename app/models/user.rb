@@ -63,9 +63,10 @@ class User < ApplicationRecord
     update(
       stripe_subscription_id: subscription.id,
       plan: price_id,
-      subscription_status: subscription.status
+      subscription_status: 'active'
     )
     reset_queries!
+    true
   rescue Stripe::StripeError => e
     Rails.logger.error "Stripe Error in subscribe_to_plan: #{e.message}"
     errors.add(:base, "There was an issue subscribing to the plan: #{e.message}")
