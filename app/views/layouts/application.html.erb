@@ -20,13 +20,20 @@
     <%= render 'layouts/navbar' %>
 
     <div class="container mt-3">
-      <% flash.each do |name, msg| %>
-        <% if msg.is_a?(String) %>
-          <div class="alert alert-<%= name == 'success' ? 'success' : name == 'error' ? 'danger' : name %> alert-dismissible fade show" role="alert">
-            <%= msg %>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        <% end %>
+      <% flash.each do |key, message| %>
+        <% next unless message.is_a?(String) %>
+        <% bootstrap_class =
+             case key.to_sym
+             when :notice then "info"
+             when :alert then "danger"
+             when :error then "danger"
+             when :success then "success"
+             else "secondary"
+             end %>
+        <div class="alert alert-<%= bootstrap_class %> alert-dismissible fade show" role="alert">
+          <%= message %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
       <% end %>
     </div>
 
