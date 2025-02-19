@@ -1,4 +1,5 @@
 class StripeController < ApplicationController
+  include ApplicationHelper
   # Skip CSRF protection for webhooks
   skip_before_action :verify_authenticity_token
 
@@ -94,10 +95,11 @@ class StripeController < ApplicationController
     customer_id = invoice.customer
     user = User.find_by(stripe_customer_id: customer_id)
     if user
-      new_plan_id = invoice.lines.data.first&.price&.id
+      subscription_line = invoice.lines.data.find { |line| line.type == 'subscription' }
+      new_plan_id = subscription_line&.price&.id if subscription_line
       if new_plan_id && new_plan_id != user.plan
         user.update!(plan: new_plan_id, subscription_status: 'active')
-        Rails.logger.info "User #{user.id} upgraded/downgraded to new plan: #{new_plan_id}."
+        Rails.logger.info "User #{user.id} upgraded/downgraded to new plan: #{get_plan_name(new_plan_id)}."
       else
         Rails.logger.info "Invoice payment succeeded for user #{user.id}, but no plan change detected."
       end
