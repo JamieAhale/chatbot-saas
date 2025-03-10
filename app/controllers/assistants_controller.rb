@@ -435,7 +435,7 @@ class AssistantsController < ApplicationController
     website_url = params[:website_url]
 
     if website_url.present?
-      WebCrawlerJob.perform_later(website_url)
+      WebCrawlerJob.perform_later(website_url, current_user.id)
       # Thread.new do
       #   WebCrawlerService.new(website_url).perform
       # end
@@ -503,7 +503,7 @@ class AssistantsController < ApplicationController
       )
 
       if response.success?
-        WebCrawlerJob.perform_later(website_url)
+        WebCrawlerJob.perform_later(website_url, current_user.id)
         flash[:success] = "Website content refresh initiated. The old document will be deleted and a new one will be created shortly."
       else
         flash[:error] = "Failed to delete existing document: #{response.code} - #{response.message}"
