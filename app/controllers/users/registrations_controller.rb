@@ -10,29 +10,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   def show
     @user = current_user
-    @subscription = @user.subscription
-    timestamp = @subscription.current_period_end
-    @current_period_end = Time.at(timestamp).utc.strftime("%B %d, %Y")
     @query_limit = User::PLAN_QUERY_LIMITS[@user.plan_name]
-  
-    # Retrieve the subscription schedule, if one exists
-    begin
-      schedule = Stripe::SubscriptionSchedule.retrieve(@user.stripe_subscription_schedule_id)
-      
-      if schedule
-        # If the schedule has more than one phase, assume the second phase is the scheduled downgrade
-        if schedule.phases.count > 1
-          downgrade_phase = schedule.phases[1]
-          # Check if the downgrade phase start date is in the future
-          if downgrade_phase.start_date > Time.current.to_i
-            @scheduled_downgrade_price_id = downgrade_phase.items.first.price
-            @scheduled_downgrade_date = Time.at(downgrade_phase.start_date).utc.strftime("%B %d, %Y")
-          end
-        end
-      end
-    rescue Stripe::StripeError => e
-      Rails.logger.error "Error retrieving subscription schedule for user #{@user.id}: #{e.message}"
-    end
   end
 
   def edit
@@ -64,30 +42,23 @@ class Users::RegistrationsController < Devise::RegistrationsController
     end
   end
 
-  # Override the create action to handle Stripe customer creation
   def create
     ActiveRecord::Base.transaction do
+      puts "entering create transaction"
+      puts "params: #{params}"
       super do |resource|
-        if resource.persisted? && params[:stripeToken].present? && params[:user][:plan].present?
-          unless resource.create_stripe_customer(params[:stripeToken], params[:user][:plan])
-            # If Stripe customer creation fails, raise a rollback
-            raise ActiveRecord::Rollback
-          end
-        end
         if resource.persisted?
-          assistant_creator = PineconeAssistantCreator.new(resource)
-          unless assistant_creator.create
-            # If the assistant creation fails, rollback the transaction.
-            raise ActiveRecord::Rollback, "Pinecone assistant creation failed"
+          unless resource.create_stripe_customer_only
+            raise ActiveRecord::Rollback, "Stripe customer creation failed"
           end
+          puts "stripe customer id: #{resource.stripe_customer_id}"
         end
       end
     end
 
     if resource.persisted?
-      flash[:success] = "Account created successfully. Please confirm your email to sign in."
+      flash[:success] = "Account created successfully. Please confirm your email then purchase a subscription to access the full app."
     else
-      # Render errors (the Devise way)
       clean_up_passwords resource
       set_minimum_password_length
       respond_with resource
@@ -114,9 +85,4 @@ class Users::RegistrationsController < Devise::RegistrationsController
       'Pro - $499/month' => ENV['STRIPE_PRICE_PRO_ID']
     }
   end
-
-  # Define the path after sign up (optional customization)
-  # def after_sign_up_path_for(resource)
-  #   user_show_path
-  # end
 end

@@ -1,0 +1,20 @@
+<h2 class="text-center mt-5">Processing Payment</h2>
+<p class="text-center">Please wait while we confirm your payment. This may take a moment. Please do not refresh the page.</p>
+
+<script>
+  // Function to poll the payment status endpoint
+  function checkPaymentStatus() {
+    fetch('<%= payment_status_path %>')
+      .then(response => response.json())
+      .then(data => {
+        if (data.active) {
+          // Redirect once the subscription is activated
+          window.location.href = '<%= user_show_path %>';
+        }
+      })
+      .catch(error => console.error('Error fetching payment status:', error));
+  }
+
+  // Poll every 3 seconds
+  setInterval(checkPaymentStatus, 3000);
+</script> 

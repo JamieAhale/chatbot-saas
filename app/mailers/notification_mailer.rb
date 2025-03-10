@@ -12,13 +12,19 @@ class NotificationMailer < ApplicationMailer
     mail(to: @user.email, subject: 'Query Limit Reached')
   end
 
-  def payment_failed(user)
+  def invoice_payment_succeeded(user)
+    @user = user
+    mail(to: @user.email, subject: 'Payment Successful')
+  end
+
+  def invoice_payment_failed(user)
     @user = user
     mail(to: @user.email, subject: 'Payment Failed')
   end
 
-  def payment_successful(user)
+  def refund(user)
     @user = user
-    mail(to: @user.email, subject: 'Payment Successful')
+    mail(to: @user.email, subject: 'Refund Processed')
   end
+  
 end
