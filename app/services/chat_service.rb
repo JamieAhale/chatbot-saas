@@ -56,7 +56,10 @@ class ChatService
   end
 
   def build_messages(conversation)
-    messages = conversation.query_and_responses.map do |qr|
+    max_messages = 15
+    allowed_pairs = (max_messages - 1) / 2
+    
+    messages = conversation.query_and_responses.last(allowed_pairs).map do |qr|
       [
         { role: 'user', content: qr.user_query },
         { role: 'assistant', content: qr.assistant_response }
