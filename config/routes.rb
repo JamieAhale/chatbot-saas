@@ -110,4 +110,9 @@ Rails.application.routes.draw do
 
   get 'billing_portal', to: 'subscriptions#billing_portal', as: :billing_portal
 
+  # New routes for subscription checkout and payment processing
+  post '/create_checkout_session', to: 'checkouts#create'
+  get '/payment_processing', to: 'payment_processing#show', as: :payment_processing
+  get '/payment_status', to: 'payment_processing#status'
+
 end

@@ -7,9 +7,10 @@ require 'tempfile'
 require 'multipart/post'
 
 class WebCrawlerService
-  def initialize(root_url)
+  def initialize(root_url, user = nil)
     @root_url = root_url
     @visited_urls = Set.new
+    @user = user
   end
 
   def perform
@@ -97,7 +98,7 @@ class WebCrawlerService
 
   def upload_to_assistant(pdf)
     api_key = ENV['PINECONE_API_KEY']
-    assistant_name = "#{current_user.pinecone_assistant_name}"
+    assistant_name = "#{@user.pinecone_assistant_name}"
     url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}"
 
     Tempfile.open(['pdf_upload', '.pdf']) do |tempfile|
