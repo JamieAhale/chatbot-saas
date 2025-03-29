@@ -52,16 +52,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
             raise ActiveRecord::Rollback, "Stripe customer creation failed"
           end
           puts "stripe customer id: #{resource.stripe_customer_id}"
+          flash[:success] = "Account created successfully. Please confirm your email then purchase a subscription to access the full app."
         end
       end
-    end
-
-    if resource.persisted?
-      flash[:success] = "Account created successfully. Please confirm your email then purchase a subscription to access the full app."
-    else
-      clean_up_passwords resource
-      set_minimum_password_length
-      respond_with resource
     end
   end
 
