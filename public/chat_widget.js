@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function () {
       console.log('Loading messages...');
       if (localStorage.getItem('initialMessageShown') === 'true' && uniqueIdentifier) {
         // Fetch the last 10 messages for the conversation
-        fetch(`http://localhost:3000/api/v1/chat/${uniqueIdentifier.id}/last_messages`)
+        fetch(`https://chatbot-saas-e0691e8fb948.herokuapp.com/api/v1/chat/${uniqueIdentifier.id}/last_messages`)
           .then(response => response.json())
           .then(data => {
             console.log('Fetched data:', data);
@@ -311,7 +311,7 @@ document.addEventListener('DOMContentLoaded', function () {
     chatWindow.scrollTop = chatWindow.scrollHeight;
 
     // Send message to API
-    fetch('http://localhost:3000/api/v1/chat', {
+    fetch('https://chatbot-saas-e0691e8fb948.herokuapp.com/api/v1/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
