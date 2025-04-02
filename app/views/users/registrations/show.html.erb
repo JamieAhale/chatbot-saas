@@ -43,15 +43,16 @@
       <div class="card-body">
         <div id="plan-options" class="d-flex flex-wrap gap-3 justify-content-center">
           <% plans = { 
-               ENV['STRIPE_PRICE_LITE_ID'] => { name: "Lite", price: "$99/month", benefits: ["100 queries", "Basic support"] },
-               ENV['STRIPE_PRICE_BASIC_ID'] => { name: "Basic", price: "$249/month", benefits: ["500 queries", "Priority support"] },
-               ENV['STRIPE_PRICE_PRO_ID'] => { name: "Pro", price: "$499/month", benefits: ["Unlimited queries", "24/7 support", "Advanced features"] }
+               ENV['STRIPE_PRICE_TEST_ID'] => { name: "Test", price: "$0.1/month", benefits: ["Full access to all features", "Perfect for testing and evaluation", "No commitment required"] },
+               ENV['STRIPE_PRICE_BASIC_ID'] => { name: "Basic", price: "$129/month", benefits: ["1,000 monthly queries", "Basic widget customisation", "Email support", "Basic analytics dashboard"] },
+               ENV['STRIPE_PRICE_STANDARD_ID'] => { name: "Standard", price: "$299/month", benefits: ["5,000 monthly queries", "Advanced widget customization", "Priority support", "Advanced analytics and reporting"] },
+               ENV['STRIPE_PRICE_PRO_ID'] => { name: "Pro", price: "$499/month", benefits: ["10,000 monthly queries", "Advanced widget customization", "Priority support", "Advanced analytics and reporting"] }
              } %>
           <% plans.each do |price_id, details| %>
             <div class="plan-card card" data-plan-id="<%= price_id %>" style="cursor: pointer; width: 18rem; transition: border 0.3s ease;">
               <div class="card-body">
-                <h5 class="card-title text-center"><%= details[:name] %></h5>
-                <h6 class="card-subtitle mb-2 text-muted text-center"><%= details[:price] %></h6>
+                <h4 class="card-title text-center mb-3"><%= details[:name] %></h5>
+                <h6 class="card-subtitle mb-3 text-center"><%= details[:price] %></h6>
                 <ul class="list-unstyled">
                   <% details[:benefits].each do |benefit| %>
                     <li><i class="fas fa-check text-success me-1"></i> <%= benefit %></li>

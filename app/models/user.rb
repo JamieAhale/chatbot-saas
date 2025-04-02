@@ -11,8 +11,9 @@ class User < ApplicationRecord
 
   # Define the maximum number of queries for each plan
   PLAN_QUERY_LIMITS = {
-    'Lite' => 500,
-    'Basic' => 2000,
+    'Test' => 100,
+    'Basic' => 1000,
+    'Standard' => 5000,
     'Pro' => 10000
   }.freeze
 
@@ -48,12 +49,14 @@ class User < ApplicationRecord
 
   def plan_name
     case plan
-    when ENV['STRIPE_PRICE_LITE_ID']
-      'Lite'
     when ENV['STRIPE_PRICE_BASIC_ID']
       'Basic'
+    when ENV['STRIPE_PRICE_STANDARD_ID']
+      'Standard'
     when ENV['STRIPE_PRICE_PRO_ID']
       'Pro'
+    when ENV['STRIPE_PRICE_TEST_ID']
+      'Test'
     else
       'No Plan'
     end

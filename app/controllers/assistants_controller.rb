@@ -470,7 +470,7 @@ class AssistantsController < ApplicationController
     
     config_options[:primary_color] = params[:primary_color] || '#000000'
     
-    unless current_user.plan_name == 'Lite'
+    unless current_user.plan_name == 'Basic'
       config_options[:font_family] = params[:font_family] || "'Open Sans', sans-serif"
       config_options[:widget_heading] = params[:widget_heading] || 'AI Assistant'
     end
