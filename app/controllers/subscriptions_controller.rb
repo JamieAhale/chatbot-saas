@@ -7,10 +7,12 @@ class SubscriptionsController < ApplicationController
       flash[:error] = "Billing portal unavailable - no Stripe customer found."
       redirect_to user_show_path and return
     end
+
+    return_url = Rails.env.production? ? 'https://chatbot-saas-e0691e8fb948.herokuapp.com/account' : 'http://localhost:3000/account'
     
     portal_session = Stripe::BillingPortal::Session.create({
       customer: customer_id,
-      return_url: 'http://localhost:3000/account'
+      return_url: return_url
     })
     
     # allow_other_host: true is needed if the redirect URL is on a different domain.
