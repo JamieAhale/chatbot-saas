@@ -10,7 +10,9 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   // Determine if we're in production or development based on the current URL
-  const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
+  const isProduction = window.location.hostname !== 'localhost' && 
+                      !window.location.hostname.includes('127.0.0.1') && 
+                      window.location.protocol !== 'file:';
   const apiBaseUrl = isProduction 
     ? 'https://chatbot-saas-e0691e8fb948.herokuapp.com' 
     : 'http://localhost:3000';
