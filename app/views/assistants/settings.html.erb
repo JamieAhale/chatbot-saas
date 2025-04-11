@@ -50,7 +50,6 @@
               <%= form.label :instructions, "Instructions", class: 'form-label' %>
               <%= form.text_area :instructions, value: @assistant_info['instructions'], class: 'form-control', rows: 4 %>
             </div>
-            <!-- <%= form.hidden_field :mandatory_instruction, value: "With every response to a query, I would like you to generate 2 potential queries from the users perspective that they may ask next. Begin your response on the next queries with 'Potential queries you might have next:' then provide the queries. If you can't find any documentation to answer a query, respond with something like 'Sorry, I have no information on that. Would you like me to connect you with a member of our team?'. If they say yes, ask for their personal details like name, email and phone. " %> -->
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
               <%= form.submit "Save Changes", class: 'btn btn-primary' %>
