@@ -9,6 +9,21 @@ document.addEventListener('DOMContentLoaded', function () {
     adminAccountEmail: config.adminAccountEmail
   };
 
+  // Add sanitization function to prevent XSS attacks
+  function sanitizeHTML(text) {
+    const element = document.createElement('div');
+    element.textContent = text;
+    return element.innerHTML;
+  }
+
+  // Function to safely format messages with markdown-like formatting
+  function formatMessage(message) {
+    if (!message) return '';
+    return sanitizeHTML(message)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>');
+  }
+  
   const selected_colour = settings.primary_color;
   const font_family = settings.font_family;
   const widget_heading = settings.widget_heading;
@@ -155,13 +170,9 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log('Fetched data:', data);
             if (data.messages && data.messages.length > 0) {
               data.messages.forEach(message => {
-                // Process formatting for each message
-                const formattedUserQuery = message.user_query
-                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                  .replace(/\n/g, '<br>');
-                const formattedAssistantResponse = message.assistant_response
-                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                  .replace(/\n/g, '<br>');
+                // Process formatting for each message using our safe formatter
+                const formattedUserQuery = formatMessage(message.user_query);
+                const formattedAssistantResponse = formatMessage(message.assistant_response);
 
                 const userMessage = document.createElement('div');
                 userMessage.innerHTML = `
@@ -285,12 +296,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // Clear potential queries when a message is sent
     potentialQueriesContainer.innerHTML = '';
 
-    // Display user's message
+    // Display user's message with sanitization
     const userMessage = document.createElement('div');
     userMessage.innerHTML = `
       <div class="text-end mb-2">
         <div class="text-light p-2 rounded d-inline-block" style="max-width: 80%; background-color: ${selected_colour}; opacity: 0.7;">
-          <strong>You:</strong> ${userInput.value}
+          <strong>You:</strong> ${sanitizeHTML(userInput.value)}
         </div>
       </div>
     `;
@@ -333,9 +344,7 @@ document.addEventListener('DOMContentLoaded', function () {
           <div class="text-start mb-2">
             <div class="text-white p-2 rounded d-inline-block" style="width: auto; max-width: 80%; background-color: ${selected_colour};">
               <strong>Assistant:</strong> ${
-                data.cleaned_response
-                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                  .replace(/\n/g, '<br>') || 'No valid response received.'
+                formatMessage(data.cleaned_response) || 'No valid response received.'
               }
             </div>
           </div>
@@ -347,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (data.potential_queries) {
           data.potential_queries.forEach(query => {
             const queryButton = document.createElement('button');
-            queryButton.textContent = query;
+            queryButton.textContent = query; // textContent is safe from XSS
             
             // Apply the styles directly when creating the button
             queryButton.style.border = `1px solid ${selected_colour}`;
