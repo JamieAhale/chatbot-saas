@@ -9,6 +9,15 @@ document.addEventListener('DOMContentLoaded', function () {
     adminAccountEmail: config.adminAccountEmail
   };
 
+  // Determine if we're in production or development based on the current URL
+  const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
+  const apiBaseUrl = isProduction 
+    ? 'https://chatbot-saas-e0691e8fb948.herokuapp.com' 
+    : 'http://localhost:3000';
+  
+  console.log('Environment:', isProduction ? 'Production' : 'Development');
+  console.log('API Base URL:', apiBaseUrl);
+
   // Add sanitization function to prevent XSS attacks
   function sanitizeHTML(text) {
     const element = document.createElement('div');
@@ -164,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function () {
       console.log('Loading messages...');
       if (localStorage.getItem('initialMessageShown') === 'true' && uniqueIdentifier) {
         // Fetch the last 10 messages for the conversation
-        fetch(`https://chatbot-saas-e0691e8fb948.herokuapp.com/api/v1/chat/${uniqueIdentifier.id}/last_messages`)
+        fetch(`${apiBaseUrl}/api/v1/chat/${uniqueIdentifier.id}/last_messages`)
           .then(response => response.json())
           .then(data => {
             console.log('Fetched data:', data);
@@ -322,7 +331,7 @@ document.addEventListener('DOMContentLoaded', function () {
     chatWindow.scrollTop = chatWindow.scrollHeight;
 
     // Send message to API
-    fetch('https://chatbot-saas-e0691e8fb948.herokuapp.com/api/v1/chat', {
+    fetch(`${apiBaseUrl}/api/v1/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
