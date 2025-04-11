@@ -63,12 +63,11 @@
     <div class="d-flex justify-content-end mb-3">
       <p class="bg-secondary text-white p-2 rounded d-inline-block text-break" style="max-width: 75%;">
         <strong>Assistant:</strong> 
-        <%= message.assistant_response
+        <%= sanitize(message.assistant_response
               .gsub(/\[\d+,\s*pp\.\s*\d+\]/, '')
               .gsub(/\[cite:[^\]]+\]/, '')
               .gsub("\n", '<br>')
-              .gsub(/\*\*(.+?)\*\*/, '<strong>\1</strong>')
-              .html_safe %>
+              .gsub(/\*\*(.+?)\*\*/, '<strong>\1</strong>')) %>
       </p>
     </div>
   <% end %>
