@@ -1,4 +1,12 @@
 class Rack::Attack
+  # Replace safelist with throttle for document uploads
+  # This allows document uploads but with a higher limit than regular requests
+  throttle('document uploads', limit: 20, period: 5.minutes) do |req|
+    if req.path == '/assistants/upload_document' && req.post?
+      req.ip
+    end
+  end
+
   # Throttle all requests by IP (300rpm) - high enough for legitimate users, but will catch aggressive bots
   throttle('req/ip', limit: 300, period: 5.minutes) do |req|
     req.ip
@@ -84,6 +92,9 @@ class Rack::Attack
   class BadRequestMatcher
     def self.match?(request)
       path = request.path.downcase
+      
+      # Skip validation for document uploads (handled in controller)
+      return false if path.start_with?('/assistants/upload_document')
       
       # Block requests with suspicious SQL fragments
       request.params.values.any? { |v| v.to_s =~ /(\%27)|(\')|(\-\-)|(\%23)|(#)/i } ||
