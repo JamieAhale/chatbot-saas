@@ -498,8 +498,12 @@ class AssistantsController < ApplicationController
         window.chatWidgetConfig = #{config_options.to_json};
       </script>
     SCRIPT
-    
-    chat_widget_script = '<script src="/chat_widget.js"></script>'
+
+    if Rails.env.development?
+      chat_widget_script = '<script src="http://localhost:3000/chat_widget.js"></script>'
+    else
+      chat_widget_script = '<script src="https://chatbot-saas-e0691e8fb948.herokuapp.com/chat_widget.js"></script>'
+    end
     
     render json: { code: config_script + "\n" + chat_widget_script }
   end
