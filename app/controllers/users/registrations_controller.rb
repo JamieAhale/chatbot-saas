@@ -73,8 +73,8 @@ class Users::RegistrationsController < Devise::RegistrationsController
   # Define the plans in a separate method
   def set_plans
     @plans = {
-      'Lite - $99/month' => ENV['STRIPE_PRICE_LITE_ID'],
-      'Basic - $249/month' => ENV['STRIPE_PRICE_BASIC_ID'],
+      'Basic - $129/month' => ENV['STRIPE_PRICE_BASIC_ID'],
+      'Standard - $299/month' => ENV['STRIPE_PRICE_STANDARD_ID'],
       'Pro - $499/month' => ENV['STRIPE_PRICE_PRO_ID']
     }
   end

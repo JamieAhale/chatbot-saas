@@ -61,8 +61,8 @@
               </div>
             </div>
 
-            <!-- Additional customization fields visible only if the plan is not Lite -->
-            <% unless current_user.plan_name == 'Lite' %>
+            <!-- Additional customization fields visible only if the plan is not Basic -->
+            <% unless current_user.plan_name == 'Basic' %>
               <div class="mb-3">
                 <label class="form-label">Font Family</label>
                 <div class="dropdown">
@@ -181,31 +181,58 @@ document.addEventListener('DOMContentLoaded', function() {
     const widgetHeadingElem = document.getElementById('widget-heading');
     const widgetHeading = widgetHeadingElem ? widgetHeadingElem.value : 'AI Assistant';
     
+    // Sanitize inputs to prevent XSS
+    const sanitizedHeading = document.createElement('div');
+    sanitizedHeading.textContent = widgetHeading; // This escapes HTML
+    const safeHeading = sanitizedHeading.textContent;
+    
+    // Validate color to ensure it's a valid hex color
+    let safeColor = "#000000";
+    if (/^#[0-9A-F]{6}$/i.test(primaryColorInput.value)) {
+      safeColor = primaryColorInput.value;
+    }
+    
+    // Validate font family to prevent injection
+    let safeFontFamily = "'Open Sans', sans-serif";
+    // Only allow valid font families from our predefined list
+    const allowedFonts = [
+      "'Roboto', sans-serif", "'Open Sans', sans-serif", "'Lato', sans-serif", 
+      "'Poppins', sans-serif", "'Montserrat', sans-serif", "'Source Sans Pro', sans-serif",
+      "'Nunito', sans-serif", "'Inter', sans-serif", "'Ubuntu', sans-serif",
+      "'Playfair Display', serif", "'Quicksand', sans-serif", "'Raleway', sans-serif",
+      "Arial, sans-serif", "'Helvetica Neue', Helvetica, sans-serif", 
+      "'Segoe UI', Tahoma, Geneva, sans-serif", "'Times New Roman', serif"
+    ];
+    
+    if (allowedFonts.includes(fontFamily)) {
+      safeFontFamily = fontFamily;
+    }
+    
     preview.style.height = '500px';
     preview.style.position = 'relative';
     
     preview.innerHTML = `
-      <div style="position: relative; width: 100%; height: 500px; border: 1px solid #ddd; border-radius: 8px; font-family: ${fontFamily}; background: #f8f9fa;">
+      <div style="position: relative; width: 100%; height: 500px; border: 1px solid #ddd; border-radius: 8px; font-family: ${safeFontFamily}; background: #f8f9fa;">
         <!-- Chat Widget Preview -->
         <div style="position: absolute; bottom: 90px; right: 20px; width: 300px; background: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-          <div style="background-color: ${primaryColorInput.value}; color: white; padding: 10px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
-            <span><strong>${widgetHeading}</strong></span>
+          <div style="background-color: ${safeColor}; color: white; padding: 10px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
+            <span><strong>${safeHeading}</strong></span>
             <button style="background: none; border: none; color: white; font-size: 18px;">&times;</button>
           </div>
           <div style="height: 250px; padding: 15px; background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
-            <div style="background-color: ${primaryColorInput.value}; color: white; padding: 8px; border-radius: 8px; display: inline-block; margin-bottom: 10px;">
+            <div style="background-color: ${safeColor}; color: white; padding: 8px; border-radius: 8px; display: inline-block; margin-bottom: 10px;">
               How can I help you today?
             </div>
           </div>
           <div style="padding: 10px; display: flex; gap: 10px;">
-            <input type="text" placeholder="Type your message..." style="flex: 1; padding: 8px; border: 1px solid #dee2e6; border-radius: 4px; outline-color: ${primaryColorInput.value};">
-            <button style="background-color: ${primaryColorInput.value}; color: white; border: none; border-radius: 4px; padding: 8px 12px;">
+            <input type="text" placeholder="Type your message..." style="flex: 1; padding: 8px; border: 1px solid #dee2e6; border-radius: 4px; outline-color: ${safeColor};">
+            <button style="background-color: ${safeColor}; color: white; border: none; border-radius: 4px; padding: 8px 12px;">
               <i class="fas fa-paper-plane"></i>
             </button>
           </div>
         </div>
         <!-- Chat Icon Preview -->
-        <div style="position: absolute; bottom: 20px; right: 20px; width: 60px; height: 60px; background-color: ${primaryColorInput.value}; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <div style="position: absolute; bottom: 20px; right: 20px; width: 60px; height: 60px; background-color: ${safeColor}; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
           <i class="fas fa-comments" style="color: white; font-size: 24px;"></i>
         </div>
       </div>
@@ -223,6 +250,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const fontFamilyValue = fontFamilyElem ? fontFamilyElem.value : "'Open Sans', sans-serif";
     // Use the current widget heading from the form if available; default to "AI Assistant" otherwise.
     const widgetHeading = widgetHeadingElem ? widgetHeadingElem.value : 'AI Assistant';
+    
+    // Sanitize and validate inputs before sending to server
+    let safeColor = "#000000";
+    if (/^#[0-9A-F]{6}$/i.test(primaryColorInput.value)) {
+      safeColor = primaryColorInput.value;
+    }
+    
+    // Validate font family
+    let safeFontFamily = "'Open Sans', sans-serif";
+    const allowedFonts = [
+      "'Roboto', sans-serif", "'Open Sans', sans-serif", "'Lato', sans-serif", 
+      "'Poppins', sans-serif", "'Montserrat', sans-serif", "'Source Sans Pro', sans-serif",
+      "'Nunito', sans-serif", "'Inter', sans-serif", "'Ubuntu', sans-serif",
+      "'Playfair Display', serif", "'Quicksand', sans-serif", "'Raleway', sans-serif",
+      "Arial, sans-serif", "'Helvetica Neue', Helvetica, sans-serif", 
+      "'Segoe UI', Tahoma, Geneva, sans-serif", "'Times New Roman', serif"
+    ];
+    
+    if (allowedFonts.includes(fontFamilyValue)) {
+      safeFontFamily = fontFamilyValue;
+    }
+    
+    // Sanitize widget heading
+    const sanitizedHeading = document.createElement('div');
+    sanitizedHeading.textContent = widgetHeading;
+    const safeHeading = sanitizedHeading.textContent;
 
     fetch('/generate_widget_code', {
       method: 'POST',
@@ -231,9 +284,9 @@ document.addEventListener('DOMContentLoaded', function() {
         'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
       },
       body: JSON.stringify({
-        primary_color: primaryColorInput.value,
-        font_family: fontFamilyValue,
-        widget_heading: widgetHeading
+        primary_color: safeColor,
+        font_family: safeFontFamily,
+        widget_heading: safeHeading
       })
     })
     .then(response => response.json())

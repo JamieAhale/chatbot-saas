@@ -3,16 +3,72 @@ document.addEventListener('DOMContentLoaded', function () {
   
   // Set defaults on our side instead of in the config
   const settings = {
-    primary_color: config.primary_color || '#000000',
-    font_family: config.font_family || "'Open Sans', sans-serif", // Default font if not provided
-    widget_heading: config.widget_heading || 'AI Assistant', 
-    adminAccountEmail: config.adminAccountEmail
+    primary_color: validateColor(config.primary_color) || '#000000',
+    font_family: validateFontFamily(config.font_family) || "'Open Sans', sans-serif", // Default font if not provided
+    widget_heading: sanitizeHTML(config.widget_heading) || 'AI Assistant', 
+    adminAccountEmail: sanitizeEmail(config.adminAccountEmail)
   };
 
+  // Determine if we're in production or development based on the current URL
+  const isProduction = window.location.hostname !== 'localhost' && 
+                      !window.location.hostname.includes('127.0.0.1') && 
+                      window.location.protocol !== 'file:';
+  const apiBaseUrl = isProduction 
+    ? 'https://chatbot-saas-e0691e8fb948.herokuapp.com' 
+    : 'http://localhost:3000';
+  
+  console.log('Environment:', isProduction ? 'Production' : 'Development');
+  console.log('API Base URL:', apiBaseUrl);
+
+  // Improved sanitization function to prevent XSS attacks
+  function sanitizeHTML(text) {
+    if (!text) return '';
+    const element = document.createElement('div');
+    element.textContent = text;
+    return element.innerHTML;
+  }
+
+  // Function to validate color to ensure it's a valid hex color code
+  function validateColor(color) {
+    return /^#[0-9A-F]{6}$/i.test(color) ? color : '#000000';
+  }
+
+  // Function to validate font family against allowed list
+  function validateFontFamily(fontFamily) {
+    const allowedFonts = [
+      "'Roboto', sans-serif", "'Open Sans', sans-serif", "'Lato', sans-serif", 
+      "'Poppins', sans-serif", "'Montserrat', sans-serif", "'Source Sans Pro', sans-serif",
+      "'Nunito', sans-serif", "'Inter', sans-serif", "'Ubuntu', sans-serif",
+      "'Playfair Display', serif", "'Quicksand', sans-serif", "'Raleway', sans-serif",
+      "Arial, sans-serif", "'Helvetica Neue', Helvetica, sans-serif", 
+      "'Segoe UI', Tahoma, Geneva, sans-serif", "'Times New Roman', serif"
+    ];
+    
+    return allowedFonts.includes(fontFamily) ? fontFamily : "'Open Sans', sans-serif";
+  }
+
+  // Function to sanitize email
+  function sanitizeEmail(email) {
+    if (!email) return '';
+    // Basic email validation
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return email;
+    }
+    return '';
+  }
+
+  // Function to safely format messages with markdown-like formatting
+  function formatMessage(message) {
+    if (!message) return '';
+    return sanitizeHTML(message)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>');
+  }
+  
   const selected_colour = settings.primary_color;
   const font_family = settings.font_family;
   const widget_heading = settings.widget_heading;
-  const adminAccountEmail = settings.adminAccountEmail || 'jamie.w.ahale@gmail.com'; // TODO: Make this my account for backups
+  const adminAccountEmail = settings.adminAccountEmail || '';
   
   // Dynamically inject a CSS rule to apply the desired font-family for the widget.
   const widgetStyle = document.createElement('style');
@@ -149,19 +205,15 @@ document.addEventListener('DOMContentLoaded', function () {
       console.log('Loading messages...');
       if (localStorage.getItem('initialMessageShown') === 'true' && uniqueIdentifier) {
         // Fetch the last 10 messages for the conversation
-        fetch(`http://localhost:3000/api/v1/chat/${uniqueIdentifier.id}/last_messages`)
+        fetch(`${apiBaseUrl}/api/v1/chat/${uniqueIdentifier.id}/last_messages`)
           .then(response => response.json())
           .then(data => {
             console.log('Fetched data:', data);
             if (data.messages && data.messages.length > 0) {
               data.messages.forEach(message => {
-                // Process formatting for each message
-                const formattedUserQuery = message.user_query
-                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                  .replace(/\n/g, '<br>');
-                const formattedAssistantResponse = message.assistant_response
-                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                  .replace(/\n/g, '<br>');
+                // Process formatting for each message using our safe formatter
+                const formattedUserQuery = formatMessage(message.user_query);
+                const formattedAssistantResponse = formatMessage(message.assistant_response);
 
                 const userMessage = document.createElement('div');
                 userMessage.innerHTML = `
@@ -285,12 +337,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // Clear potential queries when a message is sent
     potentialQueriesContainer.innerHTML = '';
 
-    // Display user's message
+    // Display user's message with sanitization
     const userMessage = document.createElement('div');
     userMessage.innerHTML = `
       <div class="text-end mb-2">
         <div class="text-light p-2 rounded d-inline-block" style="max-width: 80%; background-color: ${selected_colour}; opacity: 0.7;">
-          <strong>You:</strong> ${userInput.value}
+          <strong>You:</strong> ${sanitizeHTML(userInput.value)}
         </div>
       </div>
     `;
@@ -311,7 +363,7 @@ document.addEventListener('DOMContentLoaded', function () {
     chatWindow.scrollTop = chatWindow.scrollHeight;
 
     // Send message to API
-    fetch('http://localhost:3000/api/v1/chat', {
+    fetch(`${apiBaseUrl}/api/v1/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -333,9 +385,7 @@ document.addEventListener('DOMContentLoaded', function () {
           <div class="text-start mb-2">
             <div class="text-white p-2 rounded d-inline-block" style="width: auto; max-width: 80%; background-color: ${selected_colour};">
               <strong>Assistant:</strong> ${
-                data.cleaned_response
-                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                  .replace(/\n/g, '<br>') || 'No valid response received.'
+                formatMessage(data.cleaned_response) || 'No valid response received.'
               }
             </div>
           </div>
@@ -347,7 +397,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (data.potential_queries) {
           data.potential_queries.forEach(query => {
             const queryButton = document.createElement('button');
-            queryButton.textContent = query;
+            queryButton.textContent = query; // textContent is safe from XSS
             
             // Apply the styles directly when creating the button
             queryButton.style.border = `1px solid ${selected_colour}`;

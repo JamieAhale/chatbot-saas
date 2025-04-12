@@ -41,15 +41,15 @@
           <p class="text-center text-muted mb-4">Scale your AI assistant capabilities as your business grows</p>
           
           <div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
-            <!-- Lite Plan -->
+            <!-- Basic Plan -->
             <div class="col">
-              <div class="card h-100 plan-card <%= 'selected' if @user.plan == @plans['Lite'] %>" 
-                   data-plan-id="<%= @plans['Lite'] %>" 
-                   data-plan-name="Lite"
+              <div class="card h-100 plan-card <%= 'selected' if @user.plan == @plans['Basic'] %>" 
+                   data-plan-id="<%= @plans['Basic'] %>" 
+                   data-plan-name="Basic"
                    data-plan-price="99">
                 <div class="card-body">
-                  <h5 class="card-title text-center mb-2">Lite</h5>
-                  <h6 class="text-center text-primary mb-3">$99/month</h6>
+                  <h5 class="card-title text-center mb-2">Basic</h5>
+                  <h6 class="text-center text-primary mb-3">$129/month</h6>
                   <p class="text-center text-muted mb-4">Perfect for small businesses</p>
                   
                   <ul class="list-unstyled">

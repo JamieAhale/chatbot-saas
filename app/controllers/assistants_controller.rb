@@ -207,6 +207,20 @@ class AssistantsController < ApplicationController
       flash[:error] = "Please select a file to upload."
       redirect_to documents_path and return
     end
+    
+    # Validate filename for security
+    filename = file.original_filename
+    if filename =~ /\.(php|exe|jsp|asp|cgi|pl|sh|bat|cmd)$/i
+      flash[:error] = "For security reasons, this file type is not allowed."
+      redirect_to documents_path and return
+    end
+    
+    # Check for actual SQL injection patterns and sanitize if necessary
+    if filename =~ /(\%27)|(\')|(\%23)|(#)|(--|drop|select|;|insert|update|delete|union)/i
+      # Sanitize the filename
+      sanitized_filename = filename.gsub(/[^a-zA-Z0-9\s\.\-\_]/, '').gsub(/\s+/, ' ')
+      file.instance_variable_set(:@original_filename, sanitized_filename)
+    end
 
     api_key = ENV['PINECONE_API_KEY']
     assistant_name = "#{current_user.pinecone_assistant_name}"
@@ -216,19 +230,21 @@ class AssistantsController < ApplicationController
     payload = {
       file: Multipart::Post::UploadIO.new(file.tempfile, file.content_type, file.original_filename)
     }
+    
+    begin
+      response = HTTParty.post(
+        url,
+        headers: { 'Api-Key' => api_key },
+        body: payload
+      )
 
-    response = HTTParty.post(
-      url,
-      headers: { 'Api-Key' => api_key },
-      body: payload
-    )
-
-    puts "Response: #{response.body}"
-
-    if response.success?
-      flash[:success] = "File uploaded successfully."
-    else
-      flash[:error] = "Failed to upload file: #{response.code} - #{response.message}"
+      if response.success?
+        flash[:success] = "File uploaded successfully."
+      else
+        flash[:error] = "Failed to upload file: #{response.code} - #{response.message}"
+      end
+    rescue => e
+      flash[:error] = "An error occurred during upload: #{e.message}"
     end
 
     redirect_to documents_path
@@ -470,7 +486,7 @@ class AssistantsController < ApplicationController
     
     config_options[:primary_color] = params[:primary_color] || '#000000'
     
-    unless current_user.plan_name == 'Lite'
+    unless current_user.plan_name == 'Basic'
       config_options[:font_family] = params[:font_family] || "'Open Sans', sans-serif"
       config_options[:widget_heading] = params[:widget_heading] || 'AI Assistant'
     end
@@ -482,8 +498,12 @@ class AssistantsController < ApplicationController
         window.chatWidgetConfig = #{config_options.to_json};
       </script>
     SCRIPT
-    
-    chat_widget_script = '<script src="/chat_widget.js"></script>'
+
+    if Rails.env.development?
+      chat_widget_script = '<script src="http://localhost:3000/chat_widget.js"></script>'
+    else
+      chat_widget_script = '<script src="https://chatbot-saas-e0691e8fb948.herokuapp.com/chat_widget.js"></script>'
+    end
     
     render json: { code: config_script + "\n" + chat_widget_script }
   end
