@@ -3,10 +3,10 @@ document.addEventListener('DOMContentLoaded', function () {
   
   // Set defaults on our side instead of in the config
   const settings = {
-    primary_color: config.primary_color || '#000000',
-    font_family: config.font_family || "'Open Sans', sans-serif", // Default font if not provided
-    widget_heading: config.widget_heading || 'AI Assistant', 
-    adminAccountEmail: config.adminAccountEmail
+    primary_color: validateColor(config.primary_color) || '#000000',
+    font_family: validateFontFamily(config.font_family) || "'Open Sans', sans-serif", // Default font if not provided
+    widget_heading: sanitizeHTML(config.widget_heading) || 'AI Assistant', 
+    adminAccountEmail: sanitizeEmail(config.adminAccountEmail)
   };
 
   // Determine if we're in production or development based on the current URL
@@ -20,11 +20,41 @@ document.addEventListener('DOMContentLoaded', function () {
   console.log('Environment:', isProduction ? 'Production' : 'Development');
   console.log('API Base URL:', apiBaseUrl);
 
-  // Add sanitization function to prevent XSS attacks
+  // Improved sanitization function to prevent XSS attacks
   function sanitizeHTML(text) {
+    if (!text) return '';
     const element = document.createElement('div');
     element.textContent = text;
     return element.innerHTML;
+  }
+
+  // Function to validate color to ensure it's a valid hex color code
+  function validateColor(color) {
+    return /^#[0-9A-F]{6}$/i.test(color) ? color : '#000000';
+  }
+
+  // Function to validate font family against allowed list
+  function validateFontFamily(fontFamily) {
+    const allowedFonts = [
+      "'Roboto', sans-serif", "'Open Sans', sans-serif", "'Lato', sans-serif", 
+      "'Poppins', sans-serif", "'Montserrat', sans-serif", "'Source Sans Pro', sans-serif",
+      "'Nunito', sans-serif", "'Inter', sans-serif", "'Ubuntu', sans-serif",
+      "'Playfair Display', serif", "'Quicksand', sans-serif", "'Raleway', sans-serif",
+      "Arial, sans-serif", "'Helvetica Neue', Helvetica, sans-serif", 
+      "'Segoe UI', Tahoma, Geneva, sans-serif", "'Times New Roman', serif"
+    ];
+    
+    return allowedFonts.includes(fontFamily) ? fontFamily : "'Open Sans', sans-serif";
+  }
+
+  // Function to sanitize email
+  function sanitizeEmail(email) {
+    if (!email) return '';
+    // Basic email validation
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return email;
+    }
+    return '';
   }
 
   // Function to safely format messages with markdown-like formatting
@@ -38,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const selected_colour = settings.primary_color;
   const font_family = settings.font_family;
   const widget_heading = settings.widget_heading;
-  const adminAccountEmail = settings.adminAccountEmail || 'jamie.w.ahale@gmail.com'; // TODO: Make this my account for backups
+  const adminAccountEmail = settings.adminAccountEmail || '';
   
   // Dynamically inject a CSS rule to apply the desired font-family for the widget.
   const widgetStyle = document.createElement('style');
