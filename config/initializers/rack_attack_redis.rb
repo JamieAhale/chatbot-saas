@@ -7,5 +7,5 @@ if defined?(Redis) && Rails.env.production?
   }
 
   # Set cache store for Rack::Attack using ActiveSupport::Cache::RedisCacheStore
-  Rack::Attack.cache.store = ActiveSupport::Cache::RedisCacheStore.new(redis_config)
+  Rack::Attack.cache.store = ActiveSupport::Cache::RedisCacheStore.new(**redis_config)
 end 
