@@ -1,5 +1,5 @@
 class NotificationMailer < ApplicationMailer
-  default from: 'Vitro AI <notifications@vitroai.com>'
+  default from: 'Bravik <jamie@bravik.com.au>'
 
   def flagged_for_review(conversation, user)
     @conversation = conversation
