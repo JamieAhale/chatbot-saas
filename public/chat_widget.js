@@ -99,6 +99,27 @@ document.addEventListener('DOMContentLoaded', function () {
     #chat-icon, #chat-container, #chat-container * {
       font-family: ${font_family} !important;
     }
+    
+    #chat-container .card-footer {
+      padding: 0 !important;
+      margin: 0 !important;
+      border-top: none !important;
+      background-color: white !important;
+    }
+    
+    #chat-container form {
+      margin-bottom: 0 !important;
+    }
+    
+    #chat-container #user-input {
+      border: 1px solid ${selected_colour}40 !important;
+      outline: none !important;
+    }
+    
+    #chat-container #user-input:focus {
+      border-color: ${selected_colour} !important;
+      box-shadow: 0 0 0 0.2rem ${selected_colour}30 !important;
+    }
   `;
   document.head.appendChild(widgetStyle);
 
@@ -174,10 +195,12 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
     <div id="chat-window" class="card-body overflow-auto" style="height: 400px;"></div>
     <div id="potential-queries" class="p-2 d-flex justify-content-end flex-wrap"></div>
-    <form id="chat-form" class="card-footer d-flex align-items-center p-2" style="width: 100%;">
-      <textarea id="user-input" class="form-control me-2 focus-ring focus-ring-secondary" placeholder="Type your message..." rows="1" style="resize: none; overflow-y: auto; max-height: 100px;"></textarea>
-      <button type="submit" id="send-button" class="btn btn-primary" style="background-color: ${selected_colour};"><i class="fas fa-paper-plane"></i></button>
-    </form>
+    <div class="card-footer p-0" style="background-color: #fff; border-top: none; padding: 0; margin: 0;">
+      <form id="chat-form" class="d-flex align-items-center p-2" style="width: 100%;">
+        <textarea id="user-input" class="form-control me-2 focus-ring focus-ring-secondary" placeholder="Type your message..." rows="1" style="resize: none; overflow-y: auto; max-height: 100px;"></textarea>
+        <button type="submit" id="send-button" class="btn btn-primary" style="background-color: ${selected_colour};"><i class="fas fa-paper-plane"></i></button>
+      </form>
+    </div>
   `;
   document.body.appendChild(chatContainer);
 
@@ -198,6 +221,7 @@ document.addEventListener('DOMContentLoaded', function () {
   chatContainer.style.right = '20px';
   chatContainer.style.display = 'none';
   chatContainer.style.height = 'auto'; // Ensure it opens to full size
+  chatContainer.style.overflow = 'hidden'; // Hide any overflow
 
   chatIcon.style.position = 'fixed';
   chatIcon.style.bottom = '20px';
@@ -318,20 +342,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Adjust the chat form to be anchored at the bottom
   form.style.display = 'flex';
-  form.style.alignItems = 'flex-end';
-  form.style.bottom = '0';
+  form.style.alignItems = 'center';
   form.style.width = '100%';
-  form.style.backgroundColor = '#f8f9fa';
+  form.style.margin = '0';
+  form.style.padding = '8px';
 
   // Adjust the user input to expand upwards
   userInput.style.flex = '1';
-  userInput.style.border = 'none';
+  userInput.style.border = `1px solid ${selected_colour}40`; // Faint outline using the selected color with 25% opacity
   userInput.style.borderRadius = '5px';
   userInput.style.padding = '10px';
   userInput.style.resize = 'none';
   userInput.style.overflowY = 'auto';
   userInput.style.maxHeight = '100px'; // Set a maximum height
-
+  userInput.style.marginBottom = '0'; // Ensure no bottom margin
+  
+  // Add custom focus style
+  userInput.addEventListener('focus', function() {
+    this.style.boxShadow = `0 0 0 0.2rem ${selected_colour}30`;
+    this.style.borderColor = selected_colour;
+  });
+  
+  userInput.addEventListener('blur', function() {
+    this.style.boxShadow = 'none';
+    this.style.borderColor = `${selected_colour}40`; // Return to faint outline
+  });
 
   // Dynamically adjust the height of the textarea and the chat form
   userInput.addEventListener('input', function () {
