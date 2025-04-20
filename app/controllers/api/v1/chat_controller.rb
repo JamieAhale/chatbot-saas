@@ -6,9 +6,9 @@ class Api::V1::ChatController < ApplicationController
 
     puts "chat_params: #{chat_params}"
 
-    user_input = params[:user_input]
-    unique_identifier = params[:unique_identifier]
-    admin_account_email = params[:admin_account_email]
+    user_input = chat_params[:user_input]
+    unique_identifier = chat_params[:unique_identifier]
+    admin_account_email = chat_params[:admin_account_email]
     user = User.find_by(email: admin_account_email)
     puts "user: #{user}"
     chat_service = ChatService.new(user_input, unique_identifier, user)

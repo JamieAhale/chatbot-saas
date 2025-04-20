@@ -1,22 +1,30 @@
 class PineconeAssistantCreator
   def initialize(user)
     @user = user
-    @api_key = ENV['PINECONE_API_KEY']
+    @pinecone_api_key = ENV['PINECONE_API_KEY']
+    @assistant_name = @user.pinecone_assistant_name
   end
 
-  def create
-    assistant_name = @user.pinecone_assistant_name
-    url = "https://api.pinecone.io/assistant/assistants"
+  def create_assistant
+    url = "https://prod-1-data.ke.pinecone.io/assistant"
 
-    response = Faraday.post(url) do |req|
-      req.headers['Api-Key'] = @api_key
-      req.headers['Content-Type'] = 'application/json'
-      req.body = {
-        name: assistant_name,
+    response = Faraday.post(
+      url,
+      {
+        name: @assistant_name,
         instructions: "You are a helpful assistant.",
-      }.to_json
-    end
+      }.to_json,
+      {
+        'Api-Key' => @pinecone_api_key,
+        'Content-Type' => 'application/json'
+      }
+    )
 
     response.success?
+  end
+  
+  # Keep the original method for backward compatibility
+  def create
+    create_assistant
   end
 end
