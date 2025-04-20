@@ -20,6 +20,29 @@ document.addEventListener('DOMContentLoaded', function () {
   console.log('Environment:', isProduction ? 'Production' : 'Development');
   console.log('API Base URL:', apiBaseUrl);
 
+  // Initialize FingerprintJS
+  let visitorId = null;
+  // Initialize the FingerprintJS agent
+  const fpPromise = import('https://openfpcdn.io/fingerprintjs/v4')
+    .then(FingerprintJS => FingerprintJS.load())
+    .catch(error => {
+      console.error('Error loading FingerprintJS:', error);
+      return null;
+    });
+
+  // Get visitor identifier when available
+  fpPromise
+    .then(fp => fp ? fp.get() : null)
+    .then(result => {
+      if (result) {
+        visitorId = result.visitorId;
+        console.log('FingerprintJS Visitor ID:', visitorId);
+      }
+    })
+    .catch(error => {
+      console.error('Error getting visitor ID:', error);
+    });
+
   // Improved sanitization function to prevent XSS attacks
   function sanitizeHTML(text) {
     if (!text) return '';
@@ -374,6 +397,7 @@ document.addEventListener('DOMContentLoaded', function () {
         unique_identifier: uniqueIdentifier.id,
         assistant_name: assistantName,
         admin_account_email: adminAccountEmail,
+        visitor_id: visitorId // Include the FingerprintJS visitor ID
       }),
     })
       .then((response) => response.json())

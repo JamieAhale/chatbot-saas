@@ -1,16 +1,12 @@
 class Rack::Attack
+  # Comment out IP-based rate limiting
   # Replace safelist with throttle for document uploads
   # This allows document uploads but with a higher limit than regular requests
-  throttle('document uploads', limit: 20, period: 5.minutes) do |req|
-    if req.path == '/assistants/upload_document' && req.post?
-      req.ip
-    end
-  end
-
-  # Throttle all requests by IP (300rpm) - high enough for legitimate users, but will catch aggressive bots
-  throttle('req/ip', limit: 300, period: 5.minutes) do |req|
-    req.ip
-  end
+  # throttle('document uploads', limit: 20, period: 5.minutes) do |req|
+  #   if req.path == '/assistants/upload_document' && req.post?
+  #     req.ip
+  #   end
+  # end
 
   # Throttle login attempts for a given email parameter to 6 RPM
   throttle('logins/email', limit: 6, period: 60.seconds) do |req|
@@ -28,59 +24,85 @@ class Rack::Attack
     end
   end
 
-  # Throttle chat endpoint requests by IP to 30 requests per minute
-  throttle('api/v1/chat', limit: 10, period: 60.seconds) do |req|
+  # Helper method to extract visitor ID from request body
+  def self.extract_visitor_id_from_body(req)
+    visitor_id = nil
+    begin
+      if req.body.respond_to?(:rewind)
+        req.body.rewind
+        body = req.body.read
+        req.body.rewind
+        
+        if body.present?
+          json_body = JSON.parse(body)
+          visitor_id = json_body['visitor_id'] if json_body.is_a?(Hash)
+        end
+      end
+    rescue => e
+      Rails.logger.error("Error extracting visitor_id: #{e.message}")
+    end
+    visitor_id
+  end
+
+  # Block all API requests without a valid fingerprint
+  # This just immediately blocks the request, but does not add them to a blocklist
+  blocklist('require fingerprint') do |req|
     if req.path.start_with?('/api/v1/chat') && req.post?
-      req.ip
+      visitor_id = extract_visitor_id_from_body(req)
+      visitor_id.blank?
     end
   end
 
-  # Throttle last_messages endpoint requests by IP to 60 requests per minute
-  throttle('api/v1/chat/last_messages', limit: 10, period: 60.seconds) do |req|
-    if req.path.match?(%r{/api/v1/chat/.+/last_messages}) && req.get?
-      req.ip
+  # FingerprintJS throttling for chat endpoint - throttle by visitor ID
+  throttle('api/v1/chat/fingerprint', limit: 20, period: 60.seconds) do |req|
+    if req.path.start_with?('/api/v1/chat') && req.post?
+      # Extract the visitor_id from the request body
+      visitor_id = extract_visitor_id_from_body(req)
+
+      "visitor:#{visitor_id}" if visitor_id.present?
     end
   end
 
-  throttle('api/excessive-requests', limit: 15, period: 1.minute) do |req|
+  # Block visitors by FingerprintJS visitor ID
+  blocklist('block suspicious visitors') do |req|
     if req.path.start_with?('/api/v1/chat')
-      req.ip
+      visitor_id = extract_visitor_id_from_body(req)
+
+      if visitor_id.present?
+        key = "api/block-candidates/visitor:#{visitor_id}_block"
+        Rack::Attack.cache.store.read(key)
+      end
     end
   end
 
-  throttle('api/excessive-requests', limit: 25, period: 2.minutes) do |req|
+  # Track excessive requests by FingerprintJS visitor ID
+  throttle('api/excessive-requests/fingerprint', limit: 30, period: 5.minutes) do |req|
     if req.path.start_with?('/api/v1/chat')
-      req.ip
+      visitor_id = extract_visitor_id_from_body(req)
+      "visitor:#{visitor_id}" if visitor_id.present?
     end
   end
 
-  throttle('api/excessive-requests', limit: 50, period: 5.minutes) do |req|
-    if req.path.start_with?('/api/v1/chat')
-      req.ip
-    end
-  end
-
-  # Block IPs that have been flagged as abusive
-  blocklist('block suspicious API requests') do |req|
-    # Check if this IP has been blocked
-    if req.path.start_with?('/api/v1/chat')
-      key = "api/block-candidates/ip:#{req.ip}_block"
-      Rack::Attack.cache.store.read(key)
-    end
-  end
-
-  # Helper method to block an IP
-  def self.block_ip(ip, duration = 24.hours)
-    key = "api/block-candidates/ip:#{ip}_block"
+  # Helper method to block a visitor ID
+  def self.block_visitor(visitor_id, duration = 24.hours)
+    key = "api/block-candidates/visitor:#{visitor_id}_block"
     Rack::Attack.cache.store.write(key, true, expires_in: duration)
   end
-
-  # Set up a subscriber to block IPs that trigger the excessive-requests throttle
+    
+  # Block visitor IDs that trigger excessive requests
   ActiveSupport::Notifications.subscribe("throttle.rack_attack") do |name, start, finish, request_id, payload|
-    if payload[:request].env["rack.attack.matched"] == "api/excessive-requests" && payload[:request].env["rack.attack.match_type"] == :throttle
-      # Block the IP for 1 hour after hitting the rate limit
-      ip = payload[:request].ip
-      Rack::Attack.block_ip(ip, 24.hours)
+    # Block visitor IDs that trigger excessive requests
+    if payload[:request].env["rack.attack.matched"] == "api/excessive-requests/fingerprint" && payload[:request].env["rack.attack.match_type"] == :throttle
+      begin
+        # Extract the throttle discriminator which contains the visitor ID
+        discriminator = payload[:request].env["rack.attack.match_discriminator"]
+        if discriminator && discriminator.start_with?("visitor:")
+          visitor_id = discriminator.sub("visitor:", "")
+          Rack::Attack.block_visitor(visitor_id, 24.hours) if visitor_id.present?
+        end
+      rescue => e
+        Rails.logger.error("Error blocking visitor ID: #{e.message}")
+      end
     end
   end
 
@@ -119,6 +141,16 @@ class Rack::Attack
   # Custom response for blocked requests
   self.blocklisted_responder = lambda do |request|
     headers = { 'Content-Type' => 'application/json' }
-    [403, headers, [{ error: "Access denied. Your IP has been blocked due to suspicious activity. Please contact support if you believe this is an error." }.to_json]]
+    
+    # Check if this is a fingerprint-related block
+    if request.env['rack.attack.matched'] == 'require fingerprint'
+      [403, headers, [{ 
+        error: "JavaScript must be enabled to use this service. FingerprintJS is required for security purposes." 
+      }.to_json]]
+    else
+      [403, headers, [{ 
+        error: "Access denied. Your access has been blocked due to suspicious activity." 
+      }.to_json]]
+    end
   end
 end 
