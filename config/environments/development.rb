@@ -80,9 +80,9 @@ Rails.application.configure do
   config.action_mailer.smtp_settings = {
     address: 'smtp.gmail.com',
     port: 587,
-    domain: 'example.com',
-    user_name: ENV['GMAIL_USERNAME'],
-    password: ENV['MAIL_APP_PASSWORD'],
+    domain: ENV['APP_DOMAIN'] || 'example.com',
+    user_name: ENV['WORKSPACE_EMAIL'],
+    password: ENV['WORKSPACE_PASSWORD'],
     authentication: 'plain',
     enable_starttls_auto: true
   }

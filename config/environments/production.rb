@@ -97,14 +97,14 @@ Rails.application.configure do
 
   # Configure mailer for production
   config.action_mailer.perform_deliveries = true
-  config.action_mailer.default_url_options = { host: 'chatbot-saas-e0691e8fb948.herokuapp.com', protocol: 'https' }
+  config.action_mailer.default_url_options = { host: ENV['APP_DOMAIN'] || 'chatbot-saas-e0691e8fb948.herokuapp.com', protocol: 'https' }
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
     address: 'smtp.gmail.com',
     port: 587,
-    domain: 'chatbot-saas-e0691e8fb948.herokuapp.com',
-    user_name: ENV['GMAIL_USERNAME'],
-    password: ENV['MAIL_APP_PASSWORD'],
+    domain: ENV['APP_DOMAIN'],
+    user_name: ENV['WORKSPACE_EMAIL'],
+    password: ENV['WORKSPACE_PASSWORD'],
     authentication: 'plain',
     enable_starttls_auto: true
   }
