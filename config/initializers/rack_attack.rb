@@ -153,4 +153,39 @@ class Rack::Attack
       }.to_json]]
     end
   end
+
+  # For debugging - log all blocklist matches in development
+  if Rails.env.development?
+    ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, request_id, payload|
+      req = payload[:request]
+      if req && payload[:match_type] == :blocklist
+        matched_rule = payload[:matched]
+        path = req.path rescue "unknown"
+        ip = req.ip rescue "unknown"
+        Rails.logger.warn "RACK ATTACK: Request blocked by rule #{matched_rule} - Path: #{path}, IP: #{ip}"
+      elsif req && payload[:match_type] == :throttle
+        matched_rule = payload[:matched]
+        path = req.path rescue "unknown"
+        ip = req.ip rescue "unknown"
+        Rails.logger.warn "RACK ATTACK: Request throttled by rule #{matched_rule} - Path: #{path}, IP: #{ip}"
+      end
+    end
+  end
+
+  # Skip throttling in development environment
+  if Rails.env.development?
+    throttle('logins/email', limit: 6, period: 60.seconds) do |req|
+      if req.path == '/users/sign_in' && req.post?
+        # Normalize email address by downcasing it
+        req.params['user'] && req.params['user']['email'].to_s.downcase
+      end
+    end
+
+    throttle('signups/email', limit: 6, period: 60.seconds) do |req|
+      if req.path == '/users' && req.post?
+        # Normalize email address by downcasing it
+        req.params['user'] && req.params['user']['email'].to_s.downcase
+      end
+    end
+  end
 end 
