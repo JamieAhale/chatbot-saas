@@ -103,11 +103,20 @@ RSpec.describe User, type: :model do
       expect(user.id).to match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
     end
 
-    # Skip this test as the factory_bot will always assign IDs
-    xit 'does not change the ID if it is already set' do
-      user = User.new(id: 'custom-id')
-      user.send(:assign_uuid)
-      expect(user.id).to eq('custom-id')
+    it 'correctly implements the conditional logic for ID assignment' do
+      # Test the method logic directly - it should only assign if id.blank? is true
+      # Case 1: id is blank - should assign a UUID
+      user1 = User.new
+      user1.id = nil
+      user1.send(:assign_uuid)
+      expect(user1.id).not_to be_nil
+      
+      # Case 2: id is not blank - should not change the id
+      user2 = User.new
+      original_id = SecureRandom.uuid # Use a UUID to prevent factory_bot issues
+      user2.id = original_id
+      user2.send(:assign_uuid)
+      expect(user2.id).to eq(original_id)
     end
   end
 
