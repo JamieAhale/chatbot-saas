@@ -1,0 +1,11 @@
+This is a test document for upload testing.
+
+It contains some sample text that can be used to test the document upload functionality.
+
+The chatbot should be able to process this document and index its contents in Pinecone.
+
+Some facts that could be retrieved:
+- Paris is the capital of France
+- The Great Wall of China is more than 13,000 miles long
+- The first computer programmer was Ada Lovelace
+- Water boils at 100 degrees Celsius at sea level 
