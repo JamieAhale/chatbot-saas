@@ -6,21 +6,25 @@ class PineconeAssistantCreator
   end
 
   def create_assistant
-    url = "https://prod-1-data.ke.pinecone.io/assistant"
+    assistant_name = @user.pinecone_assistant_name
+    url = "https://api.pinecone.io/assistant/assistants"
 
-    response = Faraday.post(
-      url,
-      {
-        name: @assistant_name,
-        instructions: "You are a helpful assistant.",
-      }.to_json,
-      {
-        'Api-Key' => @pinecone_api_key,
-        'Content-Type' => 'application/json'
-      }
-    )
-
-    response.success?
+    response = Faraday.post(url) do |req|
+      req.headers['Api-Key'] = @pinecone_api_key
+      req.headers['Content-Type'] = 'application/json'
+      req.body = {
+        name: assistant_name,
+        instructions: "You are a helpful assistant."
+      }.to_json
+    end
+    
+    if response.success?
+      Rails.logger.info "Successfully created Pinecone assistant for user #{@user.id}"
+      return true
+    else
+      Rails.logger.error "Failed to create Pinecone assistant for user #{@user.id}. Status: #{response.status} - #{response.reason_phrase}"
+      return false
+    end
   end
   
   # Keep the original method for backward compatibility
