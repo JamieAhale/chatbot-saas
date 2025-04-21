@@ -14,22 +14,36 @@ RSpec.describe PineconeAssistantCreator do
   
   describe '#create_assistant' do
     let(:faraday_response) { instance_double(Faraday::Response, success?: true, status: 200) }
+    let(:faraday_request) { double('Faraday::Request') }
+    let(:request_headers) { {} }
+    let(:expected_body) { {
+      name: user.pinecone_assistant_name,
+      instructions: "You are a helpful assistant."
+    }.to_json }
     
     before do
-      allow(Faraday).to receive(:post).and_return(faraday_response)
+      # Setup mock request with hash-like headers access
+      allow(faraday_request).to receive(:headers).and_return(request_headers)
+      allow(faraday_request).to receive(:body=)
+      allow(Faraday).to receive(:post).and_yield(faraday_request).and_return(faraday_response)
     end
     
-    it 'makes a request to Pinecone and returns true on success' do
-      expect(Faraday).to receive(:post).with(
-        'https://api.pinecone.io/assistant/assistants',
-        kind_of(String),
-        {
-          'Api-Key' => ENV['PINECONE_API_KEY'],
-          'Content-Type' => 'application/json'
-        }
-      )
+    it 'makes a request to Pinecone with correct parameters' do
+      # Verify the URL is correct
+      expect(Faraday).to receive(:post).with('https://api.pinecone.io/assistant/assistants')
       
-      expect(service.create_assistant).to be true
+      # Execute the method
+      result = service.create_assistant
+      
+      # Verify that headers were set correctly
+      expect(request_headers['Api-Key']).to eq(ENV['PINECONE_API_KEY'])
+      expect(request_headers['Content-Type']).to eq('application/json')
+      
+      # Verify body was set correctly
+      expect(faraday_request).to have_received(:body=).with(expected_body)
+      
+      # Verify the result is true on success
+      expect(result).to be true
     end
     
     context 'when the request fails' do
@@ -37,6 +51,11 @@ RSpec.describe PineconeAssistantCreator do
       
       it 'returns false' do
         expect(service.create_assistant).to be false
+      end
+      
+      it 'logs an error message' do
+        expect(Rails.logger).to receive(:error).with(/Failed to create Pinecone assistant/)
+        service.create_assistant
       end
     end
   end
