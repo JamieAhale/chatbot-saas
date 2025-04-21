@@ -21,7 +21,7 @@ RSpec.describe PineconeAssistantCreator do
     
     it 'makes a request to Pinecone and returns true on success' do
       expect(Faraday).to receive(:post).with(
-        'https://prod-1-data.ke.pinecone.io/assistant',
+        'https://api.pinecone.io/assistant/assistants',
         kind_of(String),
         {
           'Api-Key' => ENV['PINECONE_API_KEY'],
