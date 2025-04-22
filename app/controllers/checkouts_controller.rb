@@ -11,6 +11,9 @@ class CheckoutsController < ApplicationController
         quantity: 1
       }],
       mode: 'subscription',
+      subscription_data: {
+        trial_period_days: 14
+      },
       success_url: payment_processing_url,
       cancel_url: user_show_url
     )
