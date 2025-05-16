@@ -18,7 +18,7 @@ class ApplicationController < ActionController::Base
     allowed_controllers = %w[users/registrations subscriptions checkouts payment_processing stripe]
     unless allowed_controllers.any? { |ctrl| controller_path.start_with?(ctrl) }
       if session[:free_trial]
-        flash[:notice] = "Welcome to Bravik! Please select a plan and click 'Proceed to Payment' to start your free trial! You will not be charged today and you can cancel any time."
+        flash[:notice] = "Welcome to Bravik! Please select a plan and click 'Proceed to Payment' to start your free trial! You will not be charged for 14 days and you can cancel any time."
         session[:free_trial] = nil
         redirect_to user_show_path
       else
