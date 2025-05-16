@@ -27,14 +27,9 @@ class ChatService
 
       check_if_flag_for_review(conversation, @user_input, cleaned_response, @user)
 
-      puts "CITATIONS: #{citations}"
-
-      if citations.nil?
-        flag_conversation_for_review(conversation)
-      else
-        potential_queries = generate_potential_queries(messages)
-        puts "POTENTIAL QUERIES: #{potential_queries}"
-      end
+      # Generate potential queries for all responses
+      potential_queries = generate_potential_queries(messages)
+      puts "POTENTIAL QUERIES: #{potential_queries}"
 
       puts "CLEANED RESPONSE: #{cleaned_response}"
 

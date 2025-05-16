@@ -14,7 +14,7 @@
       <%= button_to 'Resume Subscription', 
                     resume_subscription_path,
                     method: :patch,
-                    class: 'btn btn-outline-success mt-3',
+                    class: 'btn btn-outline-secondary mt-3',
                     onClick: "confirm('Would you like to resume your subscription?')" %>
     </div>
   <% else %>
@@ -114,7 +114,7 @@
         </div>
 
         <div class="text-center">
-          <%= f.submit "Update Plan", class: 'btn btn-outline-primary', disabled: true, id: 'update-plan-btn', data: { "bs-toggle": "modal", "bs-target": "#confirmationModal" } %>
+          <%= f.submit "Update Plan", class: 'btn btn-outline-secondary', disabled: true, id: 'update-plan-btn', data: { "bs-toggle": "modal", "bs-target": "#confirmationModal" } %>
         </div>
       <% end %>
     <% end %>
@@ -133,7 +133,7 @@
     <%= button_to 'Cancel Subscription', 
                   subscription_path, 
                   method: :delete,
-                  class: 'btn btn-outline-danger',
+                  class: 'btn btn-outline-secondary',
                   onClick: "confirm('Are you sure you want to cancel your subscription? Your service will continue until the end of your current billing period.')" %>
     <p class="text-muted mt-3">
       Your subscription will remain active until <br> the end of your current billing period.

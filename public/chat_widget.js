@@ -189,123 +189,199 @@ document.addEventListener('DOMContentLoaded', function () {
   chatContainer.id = 'chat-container';
   chatContainer.classList.add('card', 'shadow', 'rounded', 'position-fixed');
   chatContainer.innerHTML = `
-    <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: ${selected_colour};">
-      <span><strong>${widget_heading}</strong></span>
-      <button type="button" id="close-chat" class="btn-close btn-close-white"></button>
+    <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: ${selected_colour}; border-bottom: none; padding: 15px;">
+      <span class="fs-5"><strong>${widget_heading}</strong></span>
+      <button type="button" id="close-chat" class="btn-close btn-close-white" style="opacity: 0.8;"></button>
     </div>
     <div id="chat-window" class="card-body overflow-auto" style="height: 400px;"></div>
     <div id="potential-queries" class="p-2 d-flex justify-content-end flex-wrap"></div>
-    <div class="card-footer p-0" style="background-color: #fff; border-top: none; padding: 0; margin: 0;">
-      <form id="chat-form" class="d-flex align-items-center p-2" style="width: 100%;">
-        <textarea id="user-input" class="form-control me-2 focus-ring focus-ring-secondary" placeholder="Type your message..." rows="1" style="resize: none; overflow-y: auto; max-height: 100px;"></textarea>
-        <button type="submit" id="send-button" class="btn btn-primary" style="background-color: ${selected_colour};"><i class="fas fa-paper-plane"></i></button>
+    <div class="card-footer p-0" style="background-color: #fff; border-top: 1px solid rgba(0,0,0,0.1); padding: 8px !important;">
+      <form id="chat-form" class="d-flex align-items-end gap-2 p-1" style="width: 100%;">
+        <textarea id="user-input" class="form-control" placeholder="Type your message..." rows="1" style="resize: none; overflow-y: auto; max-height: 100px; padding: 10px; border-radius: 20px; box-shadow: none;"></textarea>
+        <button type="submit" id="send-button" class="btn d-flex align-items-center justify-content-center" style="width: 42px; height: 42px; padding: 0; border-radius: 50%;"><i class="fas fa-paper-plane" style="color: white;"></i></button>
       </form>
     </div>
   `;
   document.body.appendChild(chatContainer);
 
   const sendButton = document.getElementById('send-button');
+  sendButton.style.backgroundColor = selected_colour;
   sendButton.style.border = 'none';
-  sendButton.style.outline = 'none';
-  sendButton.style.padding = '12px 12px';
-  sendButton.style.fontSize = '1.2em';
-  console.log('selected_colour: ', selected_colour);
+  sendButton.style.transition = 'all 0.2s ease';
+  sendButton.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+
+  // Add hover effect to send button
+  sendButton.addEventListener('mouseenter', () => {
+    sendButton.style.transform = 'scale(1.05)';
+    sendButton.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+  });
+
+  sendButton.addEventListener('mouseleave', () => {
+    sendButton.style.transform = 'scale(1)';
+    sendButton.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+  });
 
   const textInput = document.getElementById('user-input');
-  // textInput.classList.add('focus-ring');
-  // textInput.style.setProperty('--bs-focus-ring-color', `${selected_colour}40`);
+  textInput.style.transition = 'all 0.3s ease';
+  textInput.style.border = `1px solid ${selected_colour}20`;
+  
+  // Add focus effect to input
+  textInput.addEventListener('focus', function() {
+    this.style.border = `2px solid ${selected_colour}40`;
+    this.style.boxShadow = `0 0 0 4px ${selected_colour}15`;
+  });
+  
+  textInput.addEventListener('blur', function() {
+    this.style.border = `1px solid ${selected_colour}20`;
+    this.style.boxShadow = 'none';
+  });
 
   // Initial styles for chat components
-  chatContainer.style.width = '350px';
+  chatContainer.style.width = 'min(400px, 95vw)';
   chatContainer.style.bottom = '90px';
   chatContainer.style.right = '20px';
   chatContainer.style.display = 'none';
-  chatContainer.style.height = 'auto'; // Ensure it opens to full size
-  chatContainer.style.overflow = 'hidden'; // Hide any overflow
+  chatContainer.style.height = 'auto';
+  chatContainer.style.overflow = 'hidden';
+  chatContainer.style.transition = 'all 0.3s ease-in-out';
+  chatContainer.style.zIndex = '10000';
+  chatContainer.style.borderRadius = '15px';
+  chatContainer.style.boxShadow = '0 5px 25px rgba(0,0,0,0.15)';
+  chatContainer.style.transform = 'translateY(20px)';
+  chatContainer.style.opacity = '0';
 
   chatIcon.style.position = 'fixed';
   chatIcon.style.bottom = '20px';
   chatIcon.style.right = '20px';
   chatIcon.style.width = '60px';
   chatIcon.style.height = '60px';
-  chatIcon.style.backgroundColor = '#007bff';
+  chatIcon.style.backgroundColor = selected_colour;
   chatIcon.style.color = 'white';
   chatIcon.style.borderRadius = '50%';
   chatIcon.style.display = 'flex';
   chatIcon.style.justifyContent = 'center';
   chatIcon.style.alignItems = 'center';
   chatIcon.style.cursor = 'pointer';
-  chatIcon.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+  chatIcon.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
   chatIcon.style.fontSize = '1.7em';
-  chatIcon.style.backgroundColor = selected_colour;
+  chatIcon.style.transition = 'all 0.3s ease-in-out';
+  chatIcon.style.zIndex = '10000';
+
+  // Add hover effect to chat icon
+  chatIcon.addEventListener('mouseenter', () => {
+    chatIcon.style.transform = 'scale(1.2)';
+    chatIcon.style.borderRadius = '35%';
+    chatIcon.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.3)';
+  });
+
+  chatIcon.addEventListener('mouseleave', () => {
+    chatIcon.style.transform = 'scale(1)';
+    chatIcon.style.borderRadius = '50%';
+    chatIcon.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
+  });
 
   // Retrieve or generate a unique identifier
   let uniqueIdentifier = JSON.parse(localStorage.getItem('uniqueIdentifierData'));
   const now = new Date().getTime();
 
-  // Toggle chat visibility
+  // Toggle chat visibility with animation
   chatIcon.addEventListener('click', () => {
-    chatContainer.style.display = 'block';
-    console.log('hasLoadedMessages:', hasLoadedMessages);
+    if (chatContainer.style.display === 'none') {
+      chatContainer.style.display = 'block';
+      // Trigger reflow
+      chatContainer.offsetHeight;
+      chatContainer.style.transform = 'translateY(0)';
+      chatContainer.style.opacity = '1';
+      
+      if (!hasLoadedMessages) {
+        console.log('Loading messages...');
+        if (localStorage.getItem('initialMessageShown') === 'true' && uniqueIdentifier) {
+          // Fetch the last 10 messages for the conversation
+          fetch(`${apiBaseUrl}/api/v1/chat/${uniqueIdentifier.id}/last_messages`)
+            .then(response => response.json())
+            .then(data => {
+              console.log('Fetched data:', data);
+              if (data.messages && data.messages.length > 0) {
+                data.messages.forEach(message => {
+                  // Process formatting for each message using our safe formatter
+                  const formattedUserQuery = formatMessage(message.user_query);
+                  const formattedAssistantResponse = formatMessage(message.assistant_response);
 
-    if (!hasLoadedMessages) {
-      console.log('Loading messages...');
-      if (localStorage.getItem('initialMessageShown') === 'true' && uniqueIdentifier) {
-        // Fetch the last 10 messages for the conversation
-        fetch(`${apiBaseUrl}/api/v1/chat/${uniqueIdentifier.id}/last_messages`)
-          .then(response => response.json())
-          .then(data => {
-            console.log('Fetched data:', data);
-            if (data.messages && data.messages.length > 0) {
-              data.messages.forEach(message => {
-                // Process formatting for each message using our safe formatter
-                const formattedUserQuery = formatMessage(message.user_query);
-                const formattedAssistantResponse = formatMessage(message.assistant_response);
-
-                const userMessage = document.createElement('div');
-                userMessage.innerHTML = `
-                  <div class="text-end mb-2">
-                    <div class="text-light p-2 rounded d-inline-block" style="max-width: 80%; background-color: ${selected_colour}; opacity: 0.7;">
-                      <strong>You:</strong> ${formattedUserQuery}
+                  const userMessage = document.createElement('div');
+                  userMessage.innerHTML = `
+                    <div class="text-end mb-2">
+                      <div class="text-light p-2 rounded d-inline-block" style="max-width: 80%; background-color: ${selected_colour}; opacity: 0.7;">
+                        <strong>You:</strong> ${formattedUserQuery}
+                      </div>
                     </div>
-                  </div>
-                `;
-                chatWindow.appendChild(userMessage);
+                  `;
+                  chatWindow.appendChild(userMessage);
 
-                const assistantMessage = document.createElement('div');
-                assistantMessage.innerHTML = `
-                  <div class="text-start mb-2">
-                    <div class="text-white p-2 rounded d-inline-block" style="max-width: 90%; background-color: ${selected_colour};">
-                      <strong>Assistant:</strong> ${formattedAssistantResponse}
+                  const assistantMessage = document.createElement('div');
+                  assistantMessage.innerHTML = `
+                    <div class="text-start mb-2">
+                      <div class="text-white p-2 rounded d-inline-block" style="max-width: 90%; background-color: ${selected_colour};">
+                        <strong>Assistant:</strong> ${formattedAssistantResponse}
+                      </div>
                     </div>
-                  </div>
-                `;
-                chatWindow.appendChild(assistantMessage);
-              });
-              chatWindow.scrollTop = chatWindow.scrollHeight;
-            } else {
+                  `;
+                  chatWindow.appendChild(assistantMessage);
+                });
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+              } else {
+                displayInitialMessage();
+              }
+              hasLoadedMessages = true;
+              console.log('Messages loaded, flag set to true');
+            })
+            .catch(error => {
+              console.error('Error fetching messages:', error);
               displayInitialMessage();
-            }
-            hasLoadedMessages = true;
-            console.log('Messages loaded, flag set to true');
-          })
-          .catch(error => {
-            console.error('Error fetching messages:', error);
-            displayInitialMessage();
-            hasLoadedMessages = true;
-          });
-      } else {
-        displayInitialMessage();
-        hasLoadedMessages = true;
+              hasLoadedMessages = true;
+            });
+        } else {
+          displayInitialMessage();
+          hasLoadedMessages = true;
+        }
       }
     }
   });
 
+  // Add a function to get standardized message bubble styling
+  function getMessageStyle(isUser = false) {
+    const baseStyle = `
+      min-height: 18px;
+      display: flex;
+      align-items: center;
+      border-radius: 20px;
+      padding: 8px 16px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      max-width: 85%;
+    `;
+    return isUser ? 
+      `${baseStyle} background-color: ${selected_colour}; opacity: 0.85;` :
+      `${baseStyle} background-color: ${selected_colour};`;
+  }
+
+  // Update error message display
+  function displayErrorMessage(message) {
+    const errorMessage = document.createElement('div');
+    errorMessage.innerHTML = `
+      <div class="text-start mb-3" style="animation: slideFromLeft 0.3s ease-out;">
+        <div class="text-white d-inline-block" style="${getMessageStyle()}">
+          <strong>Error:</strong> ${message}
+        </div>
+      </div>
+    `;
+    chatWindow.appendChild(errorMessage);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  }
+
   function displayInitialMessage() {
     const initialMessage = document.createElement('div');
     initialMessage.innerHTML = `
-      <div class="text-start mb-2">
-        <div class="text-white p-2 rounded d-inline-block" style="max-width: 80%; background-color: ${selected_colour};">
+      <div class="text-start mb-3" style="animation: slideFromLeft 0.3s ease-out;">
+        <div class="text-white d-inline-block" style="${getMessageStyle()}">
           <strong>Assistant:</strong> How can I help you today?
         </div>
       </div>
@@ -327,8 +403,28 @@ document.addEventListener('DOMContentLoaded', function () {
   console.log('uniqueIdentifier: ', uniqueIdentifier);
 
   const closeChat = document.getElementById('close-chat');
+  closeChat.style.transition = 'all 0.3s ease';
+  closeChat.style.opacity = '0.7';
+  closeChat.style.transform = 'scale(1)';
+  
+  closeChat.addEventListener('mouseenter', () => {
+    closeChat.style.opacity = '1';
+    closeChat.style.transform = 'scale(1.2) rotate(90deg)';
+  });
+  
+  closeChat.addEventListener('mouseleave', () => {
+    closeChat.style.opacity = '0.7';
+    closeChat.style.transform = 'scale(1) rotate(0deg)';
+  });
+
   closeChat.addEventListener('click', () => {
-    chatContainer.style.display = 'none';
+    chatContainer.style.transform = 'translateY(20px)';
+    chatContainer.style.opacity = '0';
+    
+    // Wait for animation to complete before hiding
+    setTimeout(() => {
+      chatContainer.style.display = 'none';
+    }, 300);
   });
 
   // Handle sending messages
@@ -398,8 +494,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Display user's message with sanitization
     const userMessage = document.createElement('div');
     userMessage.innerHTML = `
-      <div class="text-end mb-2">
-        <div class="text-light p-2 rounded d-inline-block" style="max-width: 80%; background-color: ${selected_colour}; opacity: 0.7;">
+      <div class="text-end mb-3" style="animation: slideFromRight 0.3s ease-out;">
+        <div class="text-light d-inline-block" style="${getMessageStyle(true)}">
           <strong>You:</strong> ${sanitizeHTML(userInput.value)}
         </div>
       </div>
@@ -409,16 +505,64 @@ document.addEventListener('DOMContentLoaded', function () {
     // Display loading message
     const loadingMessage = document.createElement('div');
     loadingMessage.innerHTML = `
-      <div class="text-start mb-2">
-        <div class="text-white p-2 rounded d-inline-block" style="width: auto; max-width: 80%; background-color: ${selected_colour};">
-          <i class="fas fa-circle fa-bounce" style="font-size: 0.5em; animation-delay: 0s;"></i>
-          <i class="fas fa-circle fa-bounce" style="font-size: 0.5em; animation-delay: 0.2s;"></i>
-          <i class="fas fa-circle fa-bounce" style="font-size: 0.5em; animation-delay: 0.4s;"></i>
+      <div class="text-start mb-3" style="animation: fadeIn 0.3s ease-out;">
+        <div class="text-white d-inline-block" style="${getMessageStyle()}">
+          <div style="display: flex; gap: 4px; align-items: center;">
+            <i class="fas fa-circle fa-bounce" style="font-size: 0.5em; animation-delay: 0s;"></i>
+            <i class="fas fa-circle fa-bounce" style="font-size: 0.5em; animation-delay: 0.2s;"></i>
+            <i class="fas fa-circle fa-bounce" style="font-size: 0.5em; animation-delay: 0.4s;"></i>
+          </div>
         </div>
       </div>
     `;
+
+    // Add animation styles to the document
+    if (!document.getElementById('message-animations')) {
+      const styleSheet = document.createElement('style');
+      styleSheet.id = 'message-animations';
+      styleSheet.textContent = `
+        @keyframes slideFromRight {
+          from {
+            opacity: 0;
+            transform: translateX(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        @keyframes slideFromLeft {
+          from {
+            opacity: 0;
+            transform: translateX(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+      `;
+      document.head.appendChild(styleSheet);
+    }
+
     chatWindow.appendChild(loadingMessage);
     chatWindow.scrollTop = chatWindow.scrollHeight;
+
+    // Update the chat window styling
+    const chatWindowElement = document.getElementById('chat-window');
+    chatWindowElement.style.padding = '20px';
+    chatWindowElement.style.backgroundColor = '#f8f9fa';
+    chatWindowElement.style.height = '400px';
+    chatWindowElement.style.overflowY = 'auto';
+    chatWindowElement.style.scrollBehavior = 'smooth';
 
     // Send message to API
     fetch(`${apiBaseUrl}/api/v1/chat`, {
@@ -441,8 +585,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const assistantMessage = document.createElement('div');
         assistantMessage.innerHTML = `
-          <div class="text-start mb-2">
-            <div class="text-white p-2 rounded d-inline-block" style="width: auto; max-width: 80%; background-color: ${selected_colour};">
+          <div class="text-start mb-3" style="animation: slideFromLeft 0.3s ease-out;">
+            <div class="text-white d-inline-block" style="${getMessageStyle()}">
               <strong>Assistant:</strong> ${
                 formatMessage(data.cleaned_response) || 'No valid response received.'
               }
@@ -453,30 +597,43 @@ document.addEventListener('DOMContentLoaded', function () {
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
         // Display potential queries as buttons
-        if (data.potential_queries) {
+        if (data.potential_queries && data.potential_queries.length > 0) {
+          potentialQueriesContainer.innerHTML = ''; // Clear existing queries
           data.potential_queries.forEach(query => {
             const queryButton = document.createElement('button');
-            queryButton.textContent = query; // textContent is safe from XSS
+            queryButton.textContent = query;
             
-            // Apply the styles directly when creating the button
-            queryButton.style.border = `1px solid ${selected_colour}`;
-            queryButton.style.backgroundColor = 'transparent';
+            // Apply modern styling to query buttons
+            queryButton.style.border = `1px solid ${selected_colour}40`;
+            queryButton.style.backgroundColor = '#fff';
             queryButton.style.color = selected_colour;
-            queryButton.style.padding = '5px 10px';
-            queryButton.style.borderRadius = '15px';
+            queryButton.style.padding = '8px 16px';
+            queryButton.style.borderRadius = '20px';
             queryButton.style.cursor = 'pointer';
-            queryButton.style.transition = 'all 0.3s';
-            queryButton.style.margin = '2px';
+            queryButton.style.transition = 'all 0.2s ease';
+            queryButton.style.margin = '4px';
+            queryButton.style.fontSize = '0.9em';
+            queryButton.style.fontWeight = '500';
+            queryButton.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+            queryButton.style.maxWidth = '100%';
+            queryButton.style.overflow = 'hidden';
+            queryButton.style.textOverflow = 'ellipsis';
+            queryButton.style.whiteSpace = 'nowrap';
+            queryButton.style.border = 'none';
             
-            // Add hover event listeners
+            // Add hover effects
             queryButton.addEventListener('mouseover', () => {
               queryButton.style.backgroundColor = selected_colour;
               queryButton.style.color = 'white';
+              queryButton.style.transform = 'translateY(-1px)';
+              queryButton.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
             });
             
             queryButton.addEventListener('mouseout', () => {
-              queryButton.style.backgroundColor = 'transparent';
+              queryButton.style.backgroundColor = '#fff';
               queryButton.style.color = selected_colour;
+              queryButton.style.transform = 'translateY(0)';
+              queryButton.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
             });
 
             queryButton.addEventListener('click', () => {
@@ -486,21 +643,23 @@ document.addEventListener('DOMContentLoaded', function () {
             
             potentialQueriesContainer.appendChild(queryButton);
           });
-          chatWindow.scrollTop = chatWindow.scrollHeight;
+
+          // Style the container for potential queries
+          potentialQueriesContainer.style.padding = '10px 15px';
+          potentialQueriesContainer.style.borderTop = '1px solid rgba(0,0,0,0.1)';
+          potentialQueriesContainer.style.backgroundColor = '#f8f9fa';
+          potentialQueriesContainer.style.display = 'flex';
+          potentialQueriesContainer.style.flexWrap = 'wrap';
+          potentialQueriesContainer.style.gap = '4px';
+          potentialQueriesContainer.style.justifyContent = 'flex-end';
+          potentialQueriesContainer.style.alignItems = 'center';
+          potentialQueriesContainer.style.maxHeight = 'none';
+          potentialQueriesContainer.style.overflowY = 'visible';
         }
       })
       .catch((error) => {
         chatWindow.removeChild(loadingMessage);
-        const errorMessage = document.createElement('div');
-        errorMessage.innerHTML = `
-          <div class="text-start mb-2">
-            <div class="bg-danger text-white p-2 rounded d-inline-block" style="width: auto; max-width: 80%;">
-              <strong>Error:</strong> Unable to get a response from the assistant.
-            </div>
-          </div>
-        `;
-        chatWindow.appendChild(errorMessage);
-        chatWindow.scrollTop = chatWindow.scrollHeight;
+        displayErrorMessage('Unable to get a response from the assistant.');
       });
 
     // Clear the input after sending

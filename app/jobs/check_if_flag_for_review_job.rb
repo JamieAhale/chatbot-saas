@@ -11,7 +11,7 @@ class CheckIfFlagForReviewJob < ApplicationJob
       req.body = {
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: "You are a highly analytical evaluator. Your job is to decide if the response answers the question with useful information. If it does, answer with 'Yes'. If it doesn't, answer with 'No', especially if it only reccomends directly contacting someone." },
+          { role: 'system', content: "You are a highly analytical evaluator. Your job is to decide if the response answers the question with useful information. If it does, respond with 'Yes'. If it doesn't, respond with 'No'" },
           { role: 'user', content: "Question: #{user_input}, Response: #{main_response}" }
         ]
       }.to_json
@@ -20,7 +20,6 @@ class CheckIfFlagForReviewJob < ApplicationJob
     parsed_evaluation_response = JSON.parse(evaluation_response.body)
     evaluation = parsed_evaluation_response['choices'][0]['message']['content'].strip
 
-    puts "EVALUATION: #{evaluation}"
     if evaluation == 'No'
       conversation.flagged_for_review = true
       conversation.save!
