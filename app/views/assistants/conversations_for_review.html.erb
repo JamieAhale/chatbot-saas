@@ -13,6 +13,84 @@
     color: #5a6268; /* Slightly darker grey on hover */
   }
 
+  /* Custom checkbox styles */
+  .custom-checkbox-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    position: relative;
+  }
+
+  .checkbox-cell {
+    padding: 0.75rem 0.5rem !important;
+    width: 40px;
+    text-align: center;
+  }
+
+  .custom-checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+
+  .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: #fff;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .custom-checkbox-container:hover input ~ .checkmark {
+    border-color: #666;
+  }
+
+  .custom-checkbox-container input:checked ~ .checkmark {
+    background-color: #28a745;
+    border-color: #28a745;
+  }
+
+  .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 6px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    transition: all 0.2s ease-in-out;
+  }
+
+  .custom-checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+    animation: checkmark 0.2s ease-in-out forwards;
+  }
+
+  @keyframes checkmark {
+    0% {
+      opacity: 0;
+      transform: rotate(45deg) scale(0.5);
+    }
+    100% {
+      opacity: 1;
+      transform: rotate(45deg) scale(1);
+    }
+  }
+
   /* Animation styles for bulk actions */
   .bulk-actions-container {
     max-height: 0;
@@ -32,6 +110,67 @@
   .bulk-action-btn {
     transform: translateY(0);
     transition: transform 0.3s ease-in-out;
+  }
+
+  /* Dropdown menu styles */
+  .action-dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .dropdown-toggle {
+    background: none;
+    border: none;
+    color: #6c757d;
+    padding: 0.375rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .dropdown-toggle:hover {
+    color: #343a40;
+  }
+
+  .dropdown-menu {
+    min-width: 120px;
+  }
+
+  .dropdown-item {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .dropdown-item i {
+    width: 1rem;
+    margin-right: 0.5rem;
+    text-align: center;
+  }
+
+  /* Modal styles */
+  .modal-confirm .modal-content {
+    padding: 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+  }
+
+  .modal-confirm .modal-header {
+    border: none;
+    padding: 0 0 1rem 0;
+  }
+
+  .modal-confirm .modal-body {
+    padding: 0 0 1.5rem 0;
+  }
+
+  .modal-confirm .modal-footer {
+    border: none;
+    padding: 0;
+    justify-content: flex-start;
+  }
+
+  .modal-confirm .btn-modal {
+    padding: 0.5rem 1.5rem;
+    margin-right: 0.5rem;
   }
 </style>
 
@@ -82,13 +221,17 @@
           <th>ID</th>
           <th>Total Messages</th>
           <th>Date</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         <% @conversations.each do |conversation| %>
           <tr>
-            <td>
-              <%= check_box_tag "conversation_ids[]", conversation.id, false, class: 'conversation-checkbox' %>
+            <td class="checkbox-cell">
+              <label class="custom-checkbox-container">
+                <%= check_box_tag "conversation_ids[]", conversation.id, false, class: 'conversation-checkbox' %>
+                <span class="checkmark"></span>
+              </label>
             </td>
             <td>
               <%= link_to (conversation.title.presence || "Untitled").gsub(/\A"|"\Z/, ''), show_conversation_for_review_path(conversation, search: params[:search]), class: "text-danger fw-bold text-decoration-underline" %>
@@ -101,6 +244,44 @@
             </td>
             <td>
               <%= conversation.created_at.strftime("#{conversation.created_at.day.ordinalize} %B %Y") %>
+            </td>
+            <td class="text-end">
+              <div class="action-dropdown">
+                <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <%= link_to show_conversation_for_review_path(conversation), class: "dropdown-item" do %>
+                      <i class="fas fa-eye"></i> View
+                    <% end %>
+                  </li>
+                  <li>
+                    <%= form_with url: mark_resolved_conversations_path, method: :patch, local: true, id: "resolve-form-#{conversation.id}" do %>
+                      <%= hidden_field_tag "conversation_ids[]", conversation.id %>
+                      <%= button_tag type: :button, class: "dropdown-item w-100 text-start text-success", data: { bs_toggle: "modal", bs_target: "#resolveModal#{conversation.id}" } do %>
+                        <i class="fas fa-check"></i> Mark Resolved
+                      <% end %>
+                    <% end %>
+                  </li>
+                  <li>
+                    <%= form_with url: dismiss_conversations_path, method: :patch, local: true, id: "dismiss-form-#{conversation.id}" do %>
+                      <%= hidden_field_tag "conversation_ids[]", conversation.id %>
+                      <%= button_tag type: :button, class: "dropdown-item w-100 text-start", data: { bs_toggle: "modal", bs_target: "#dismissModal#{conversation.id}" } do %>
+                        <i class="fas fa-times"></i> Dismiss
+                      <% end %>
+                    <% end %>
+                  </li>
+                  <li>
+                    <%= form_with url: delete_selected_conversations_path, method: :delete, local: true, id: "delete-form-#{conversation.id}" do %>
+                      <%= hidden_field_tag "conversation_ids[]", conversation.id %>
+                      <%= button_tag type: :button, class: "dropdown-item w-100 text-start text-danger", data: { bs_toggle: "modal", bs_target: "#deleteModal#{conversation.id}" } do %>
+                        <i class="fas fa-trash"></i> Delete
+                      <% end %>
+                    <% end %>
+                  </li>
+                </ul>
+              </div>
             </td>
           </tr>
         <% end %>
@@ -134,6 +315,66 @@
     <p class="mt-4">No conversations flagged for review.</p>
   <% end %>
 </div>
+
+<!-- Confirmation Modals -->
+<% @conversations.each do |conversation| %>
+  <!-- Resolve Confirmation Modal -->
+  <div class="modal fade modal-confirm" id="resolveModal<%= conversation.id %>" tabindex="-1" aria-labelledby="resolveModalLabel<%= conversation.id %>" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="resolveModalLabel<%= conversation.id %>">Mark Conversation as Resolved</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to mark this conversation as resolved?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-modal" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success btn-modal" onclick="document.getElementById('resolve-form-<%= conversation.id %>').submit()">Mark Resolved</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dismiss Confirmation Modal -->
+  <div class="modal fade modal-confirm" id="dismissModal<%= conversation.id %>" tabindex="-1" aria-labelledby="dismissModalLabel<%= conversation.id %>" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="dismissModalLabel<%= conversation.id %>">Dismiss Conversation</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to dismiss this conversation?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-modal" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary btn-modal" onclick="document.getElementById('dismiss-form-<%= conversation.id %>').submit()">Dismiss</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade modal-confirm" id="deleteModal<%= conversation.id %>" tabindex="-1" aria-labelledby="deleteModalLabel<%= conversation.id %>" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel<%= conversation.id %>">Delete Conversation</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">Are you sure you want to delete this conversation? This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-modal" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger btn-modal" onclick="document.getElementById('delete-form-<%= conversation.id %>').submit()">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
