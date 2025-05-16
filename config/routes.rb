@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   devise_scope :user do
     get 'account', to: 'users/registrations#show', as: :user_show
     get 'account/edit', to: 'users/registrations#edit', as: :user_edit
+    get 'start_free_trial', to: 'users/registrations#new', as: :start_free_trial, defaults: { free_trial: true }
   end
 
   root 'assistants#documents'

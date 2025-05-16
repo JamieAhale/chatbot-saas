@@ -5,6 +5,10 @@ class Users::RegistrationsController < Devise::RegistrationsController
   before_action :configure_account_update_params, only: [:update]
 
   def new
+    # Set a flash message for users coming from the free trial button
+    if params[:free_trial].present?
+      flash.now[:notice] = "Create an account to start your free trial"
+    end
     super
   end
 
