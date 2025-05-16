@@ -12,6 +12,27 @@
   .pagination .page-item .page-link:hover {
     color: #5a6268; /* Slightly darker grey on hover */
   }
+
+  /* Animation styles for bulk actions */
+  .bulk-actions-container {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .bulk-actions-container.visible {
+    max-height: 50px;
+    opacity: 1;
+    margin-bottom: 1rem;
+  }
+
+  .bulk-action-btn {
+    transform: translateY(0);
+    transition: transform 0.3s ease-in-out;
+  }
 </style>
 
 <div>
@@ -36,14 +57,16 @@
   </div>
 
   <% if @conversations.any? %>
-    <div class="d-flex">
-      <%= form_with url: delete_selected_conversations_path, method: :delete, local: true, id: 'delete_conversations_form' do %>
-        <%= submit_tag "Delete Selected", class: "btn btn-danger mb-1 me-2", onClick: "return confirm('Are you sure you want to delete the selected conversations? This cannot be undone.')", id: 'delete_selected_button', style: 'display: none;' %>
-      <% end %>
+    <div class="bulk-actions-container">
+      <div class="d-flex">
+        <%= form_with url: delete_selected_conversations_path, method: :delete, local: true, id: 'delete_conversations_form' do %>
+          <%= submit_tag "Delete Selected", class: "btn btn-danger me-2 bulk-action-btn", onClick: "return confirm('Are you sure you want to delete the selected conversations? This cannot be undone.')", id: 'delete_selected_button' %>
+        <% end %>
 
-      <%= form_with url: flag_selected_conversations_path, method: :patch, local: true, id: 'flag_conversations_form' do %>
-        <%= submit_tag "Flag Selected for Review", class: "btn btn-warning mb-1", onClick: "return confirm('Are you sure you want to flag the selected conversations for review?')", id: 'flag_selected_button', style: 'display: none;' %>
-      <% end %>
+        <%= form_with url: flag_selected_conversations_path, method: :patch, local: true, id: 'flag_conversations_form' do %>
+          <%= submit_tag "Flag Selected for Review", class: "btn btn-warning bulk-action-btn", onClick: "return confirm('Are you sure you want to flag the selected conversations for review?')", id: 'flag_selected_button' %>
+        <% end %>
+      </div>
     </div>
 
     <table class="table table-striped mt-1 uniform-table">
@@ -111,17 +134,15 @@
   document.addEventListener('DOMContentLoaded', function() {
     const checkboxes = document.querySelectorAll('.conversation-checkbox');
     const forms = document.querySelectorAll('form');
+    const bulkActionsContainer = document.querySelector('.bulk-actions-container');
 
     function addSelectedConversationsToForm(form) {
-      // Remove any existing hidden inputs
       form.querySelectorAll('input[name="conversation_ids[]"]').forEach(input => input.remove());
 
-      // Get selected conversation IDs
       const selectedIds = Array.from(checkboxes)
         .filter(cb => cb.checked)
         .map(cb => cb.value);
 
-      // Add selected IDs as hidden inputs to the form
       selectedIds.forEach(id => {
         const hiddenInput = document.createElement('input');
         hiddenInput.type = 'hidden';
@@ -131,26 +152,21 @@
       });
     }
 
-    // Attach submit event to each form
     forms.forEach(form => {
       form.addEventListener('submit', function(event) {
         addSelectedConversationsToForm(form);
       });
     });
 
-    // Toggle action buttons based on checkbox selection
     function toggleActionButtons() {
       const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
-      document.getElementById('delete_selected_button').style.display = anyChecked ? 'inline-block' : 'none';
-      document.getElementById('flag_selected_button').style.display = anyChecked ? 'inline-block' : 'none';
+      bulkActionsContainer.classList.toggle('visible', anyChecked);
     }
 
-    // Add change event listener to checkboxes
     checkboxes.forEach(checkbox => {
       checkbox.addEventListener('change', toggleActionButtons);
     });
 
-    // Initial check to set button visibility
     toggleActionButtons();
   });
 </script>

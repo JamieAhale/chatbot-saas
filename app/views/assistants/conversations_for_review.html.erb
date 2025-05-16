@@ -12,6 +12,27 @@
   .pagination .page-item .page-link:hover {
     color: #5a6268; /* Slightly darker grey on hover */
   }
+
+  /* Animation styles for bulk actions */
+  .bulk-actions-container {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .bulk-actions-container.visible {
+    max-height: 50px;
+    opacity: 1;
+    margin-bottom: 1rem;
+  }
+
+  .bulk-action-btn {
+    transform: translateY(0);
+    transition: transform 0.3s ease-in-out;
+  }
 </style>
 
 <div>
@@ -37,24 +58,20 @@
 
   <% if @conversations.any? %>
     <!-- Form for deleting selected conversations -->
-    <div class="d-flex">
-      <%= form_with url: delete_selected_conversations_path, method: :delete, local: true, id: 'delete_conversations_form' do %>
-        <div class="d-flex">
-          <%= submit_tag "Delete Selected", class: "btn btn-danger me-2", onClick: "return confirm('Are you sure you want to delete the selected conversations? This cannot be undone.')", id: 'delete_selected_button', style: 'display: none;' %>
-        </div>
-      <% end %>
+    <div class="bulk-actions-container">
+      <div class="d-flex">
+        <%= form_with url: delete_selected_conversations_path, method: :delete, local: true, id: 'delete_conversations_form' do %>
+          <%= submit_tag "Delete Selected", class: "btn btn-danger me-2 bulk-action-btn", onClick: "return confirm('Are you sure you want to delete the selected conversations? This cannot be undone.')", id: 'delete_selected_button' %>
+        <% end %>
 
-      <%= form_with url: mark_resolved_conversations_path, method: :patch, local: true, id: 'mark_resolved_form' do %>
-        <div class="d-flex">
-          <%= submit_tag "Mark Selected as Resolved", class: "btn btn-success me-2", onClick: "return confirm('Are you sure you want to mark the selected conversations as resolved?')", id: 'mark_resolved_button', style: 'display: none;' %>
-        </div>
-      <% end %>
+        <%= form_with url: mark_resolved_conversations_path, method: :patch, local: true, id: 'mark_resolved_form' do %>
+          <%= submit_tag "Mark Selected as Resolved", class: "btn btn-success me-2 bulk-action-btn", onClick: "return confirm('Are you sure you want to mark the selected conversations as resolved?')", id: 'mark_resolved_button' %>
+        <% end %>
 
-      <%= form_with url: dismiss_conversations_path, method: :patch, local: true, id: 'dismiss_conversations_form' do %>
-        <div class="d-flex">
-          <%= submit_tag "Dismiss Selected", class: "btn btn-secondary", onClick: "return confirm('Are you sure you want to dismiss the selected conversations?')", id: 'dismiss_selected_button', style: 'display: none;' %>
-        </div>
-      <% end %>
+        <%= form_with url: dismiss_conversations_path, method: :patch, local: true, id: 'dismiss_conversations_form' do %>
+          <%= submit_tag "Dismiss Selected", class: "btn btn-secondary bulk-action-btn", onClick: "return confirm('Are you sure you want to dismiss the selected conversations?')", id: 'dismiss_selected_button' %>
+        <% end %>
+      </div>
     </div>
 
     <table class="table table-striped mt-1 uniform-table">
@@ -122,6 +139,7 @@
   document.addEventListener('DOMContentLoaded', function() {
     const checkboxes = document.querySelectorAll('.conversation-checkbox');
     const forms = document.querySelectorAll('form');
+    const bulkActionsContainer = document.querySelector('.bulk-actions-container');
 
     function addSelectedConversationsToForm(form) {
       form.querySelectorAll('input[name="conversation_ids[]"]').forEach(input => input.remove());
@@ -147,9 +165,7 @@
 
     function toggleActionButtons() {
       const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
-      document.getElementById('delete_selected_button').style.display = anyChecked ? 'inline-block' : 'none';
-      document.getElementById('mark_resolved_button').style.display = anyChecked ? 'inline-block' : 'none';
-      document.getElementById('dismiss_selected_button').style.display = anyChecked ? 'inline-block' : 'none';
+      bulkActionsContainer.classList.toggle('visible', anyChecked);
     }
 
     checkboxes.forEach(checkbox => {
