@@ -1,6 +1,6 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h1>Assistant Settings</h1>
-  <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#editInstructionsModal">
+  <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editInstructionsModal">
     Edit Assistant
   </button>
 </div>
@@ -51,8 +51,8 @@
               <%= form.text_area :instructions, value: @assistant_info['instructions'], class: 'form-control', rows: 4 %>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <%= form.submit "Save Changes", class: 'btn btn-primary' %>
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              <%= form.submit "Save Changes", class: 'btn btn-outline-secondary' %>
             </div>
           <% end %>
         </div>

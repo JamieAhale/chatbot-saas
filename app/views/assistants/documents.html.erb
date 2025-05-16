@@ -7,7 +7,7 @@
       <%= form.file_field :file, class: 'form-control' %>
     </div>
     <div class="col-auto col-md-1">
-      <%= form.submit "Upload", class: 'btn btn-primary' %>
+      <%= form.submit "Upload", class: 'btn btn-outline-secondary' %>
     </div>
   </div>
 <% end %>
@@ -18,7 +18,7 @@
       <%= form.text_field :website_url, class: 'form-control', placeholder: 'Enter website URL (include https:// prefix)' %>
     </div>
     <div class="col-auto col-md-1">
-      <%= form.submit "Extract", class: 'btn btn-primary' %>
+      <%= form.submit "Extract", class: 'btn btn-outline-secondary' %>
     </div>
   </div>
 <% end %>
@@ -105,14 +105,32 @@ document.addEventListener('DOMContentLoaded', function() {
 <style>
   .dropdown-toggle {
     background-color: transparent !important;
-    border: none !important; /* Remove the border */
+    border: none !important;
     color: #333 !important;
-    font-size: 10px; /* Keep the font size at 30 */
+    font-size: 10px;
     font-weight: bold;
-    padding: 0; /* Remove padding */
-    text-decoration: none !important; /* Remove underline */
+    padding: 0;
+    text-decoration: none !important;
   }
   .dropdown-toggle::after {
-    display: none !important; /* Remove the default arrow */
+    display: none !important;
+  }
+
+  /* Standard Button Styles */
+  .btn-outline-secondary {
+    color: #6c757d;
+    border-color: #6c757d;
+    background-color: white;
+    transition: all 0.3s ease;
+  }
+
+  .btn-outline-secondary:hover {
+    color: white;
+    background-color: #6c757d;
+    border-color: #6c757d;
+  }
+
+  .btn-outline-secondary:focus {
+    box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25);
   }
 </style>
