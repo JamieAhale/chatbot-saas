@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // Initial styles for chat components
-  chatContainer.style.width = 'min(400px, 95vw)';
+  chatContainer.style.width = 'min(400px, 85vw)';
   chatContainer.style.bottom = '90px';
   chatContainer.style.right = '20px';
   chatContainer.style.display = 'none';
