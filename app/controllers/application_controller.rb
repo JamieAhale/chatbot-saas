@@ -17,8 +17,14 @@ class ApplicationController < ActionController::Base
     # Allow access to controllers that handle account/subscription management and payment processing.
     allowed_controllers = %w[users/registrations subscriptions checkouts payment_processing stripe]
     unless allowed_controllers.any? { |ctrl| controller_path.start_with?(ctrl) }
-      flash[:alert] = "Please purchase a subscription to access this area."
-      redirect_to user_show_path
+      if session[:free_trial]
+        flash[:notice] = "Welcome to Bravik! Please select a plan and click 'Proceed to Payment' to start your free trial! You will not be charged today and you can cancel any time."
+        session[:free_trial] = nil
+        redirect_to user_show_path
+      else
+        flash[:alert] = "Please purchase a subscription to access this area."
+        redirect_to user_show_path
+      end
     end
   end
 end
