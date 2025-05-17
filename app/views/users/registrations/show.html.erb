@@ -43,24 +43,6 @@
       <div class="card-body">
         <div id="plan-options" class="d-flex flex-wrap gap-4 justify-content-center">
           <% plans = {
-               ENV['STRIPE_PRICE_TEST_ID'] => {
-                 name: "Test",
-                 tagline: "Perfect for testing and evaluation",
-                 price: "$0.1/month",
-                 queries: "Full access to all features",
-                 icon: "🧪",
-                 features: [
-                   "24/7 AI support for customers",
-                   "OpenAI powered responses",
-                   "Full brand customisation",
-                   "No code install",
-                   "Conversation history",
-                   "Flagged for review dashboard",
-                   "Priority support",
-                   "Early access to new features"
-                 ],
-                 disabled_features: []
-               },
                ENV['STRIPE_PRICE_BASIC_ID'] => {
                  name: "Basic",
                  tagline: "For side hustlers and solo stores",
