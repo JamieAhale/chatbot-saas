@@ -519,12 +519,8 @@ class AssistantsController < ApplicationController
     config_options = {}
     
     config_options[:primary_color] = params[:primary_color] || '#000000'
-    
-    unless current_user.plan_name == 'Basic'
-      config_options[:font_family] = params[:font_family] || "'Open Sans', sans-serif"
-      config_options[:widget_heading] = params[:widget_heading] || 'AI Assistant'
-    end
-    
+    config_options[:font_family] = params[:font_family] || "'Open Sans', sans-serif"
+    config_options[:widget_heading] = params[:widget_heading] || 'AI Assistant'
     config_options[:adminAccountEmail] = current_user.email
     
     config_script = <<~SCRIPT
@@ -536,7 +532,7 @@ class AssistantsController < ApplicationController
     if Rails.env.development?
       chat_widget_script = '<script src="http://localhost:3000/chat_widget.js"></script>'
     else
-      chat_widget_script = '<script src="https://chatbot-saas-e0691e8fb948.herokuapp.com/chat_widget.js"></script>'
+      chat_widget_script = '<script src="https://app.bravik.com.au/chat_widget.js"></script>'
     end
     
     render json: { code: config_script + "\n" + chat_widget_script }
