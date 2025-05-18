@@ -75,6 +75,8 @@ gem 'stripe'
 
 gem 'rack-attack'
 
+gem 'rollbar'
+
 # gem 'stripe_event'
 
 group :development, :test do

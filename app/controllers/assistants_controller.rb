@@ -176,6 +176,13 @@ class AssistantsController < ApplicationController
         render json: { cleaned_response: cleaned_response, potential_queries: potential_queries }
       else
         error_message = "Error: #{response.status} - #{response.reason_phrase}"
+        Rollbar.error("Chat API error",
+          user_id: current_user.id,
+          assistant_name: assistant_name,
+          status: response.status,
+          reason: response.reason_phrase,
+          conversation_id: conversation.id
+        )
         Rails.logger.error(error_message)
         render json: { error: error_message }, status: :bad_request
       end
@@ -241,9 +248,20 @@ class AssistantsController < ApplicationController
       if response.success?
         flash[:success] = "File uploaded successfully."
       else
+        Rollbar.error("Failed to upload file to Pinecone", 
+          user_id: current_user.id,
+          assistant_name: assistant_name,
+          response_code: response.code,
+          response_message: response.message
+        )
         flash[:error] = "Failed to upload file: #{response.code} - #{response.message}"
       end
     rescue => e
+      Rollbar.error(e, 
+        user_id: current_user.id, 
+        assistant_name: assistant_name,
+        file_name: file.original_filename
+      )
       flash[:error] = "An error occurred during upload: #{e.message}"
     end
 
@@ -261,15 +279,31 @@ class AssistantsController < ApplicationController
     assistant_name = "#{current_user.pinecone_assistant_name}"
     url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}/#{file_id}"
 
-    response = HTTParty.delete(
-      url,
-      headers: { 'Api-Key' => api_key }
-    )
+    begin
+      response = HTTParty.delete(
+        url,
+        headers: { 'Api-Key' => api_key }
+      )
 
-    if response.success?
-      flash[:success] = "Document deleted successfully."
-    else
-      flash[:error] = "Failed to delete document: #{response.code} - #{response.message}"
+      if response.success?
+        flash[:success] = "Document deleted successfully."
+      else
+        Rollbar.error("Failed to delete file from Pinecone",
+          user_id: current_user.id,
+          assistant_name: assistant_name,
+          file_id: file_id,
+          response_code: response.code,
+          response_message: response.message
+        )
+        flash[:error] = "Failed to delete document: #{response.code} - #{response.message}"
+      end
+    rescue => e
+      Rollbar.error(e,
+        user_id: current_user.id,
+        assistant_name: assistant_name,
+        file_id: file_id
+      )
+      flash[:error] = "An error occurred while deleting the document: #{e.message}"
     end
 
     redirect_to documents_path

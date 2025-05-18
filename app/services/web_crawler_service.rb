@@ -5,6 +5,7 @@ require 'uri'
 require 'set'
 require 'tempfile'
 require 'multipart/post'
+require 'rollbar'
 
 class WebCrawlerService
   def initialize(root_url, user = nil)
@@ -132,6 +133,11 @@ class WebCrawlerService
     response = HTTParty.get(url)
     response.body if response.success?
   rescue StandardError => e
+    Rollbar.error(e, 
+      url: url, 
+      user_id: @user.id,
+      service: 'WebCrawlerService'
+    )
     puts "Error fetching #{url}: #{e.message}"
     nil
   end
