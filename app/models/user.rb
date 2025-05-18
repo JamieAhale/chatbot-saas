@@ -38,7 +38,12 @@ class User < ApplicationRecord
 
   # Create a Stripe customer without immediately subscribing to a plan
   def create_stripe_customer_only
-    customer = Stripe::Customer.create(email: self.email)
+    customer = Stripe::Customer.create(
+      email: self.email,
+      metadata: {
+        user_id: self.id
+      }
+    )
     update(stripe_customer_id: customer.id, subscription_status: 'incomplete')
   rescue Stripe::StripeError => e
     Rails.logger.error "Stripe Error in create_stripe_customer_only: #{e.message}"
