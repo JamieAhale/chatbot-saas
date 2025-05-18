@@ -3,7 +3,7 @@ require 'redis'
 redis_url = ENV.fetch('REDIS_URL') { 'redis://localhost:6379/1' }
 
 # Configure Redis connection
-Redis.current = if redis_url.start_with?('rediss://')
+$redis = if redis_url.start_with?('rediss://')
   # For SSL/TLS connections (production)
   Redis.new(
     url: redis_url,
@@ -20,7 +20,7 @@ end
 
 # Verify connection
 begin
-  Redis.current.ping
+  $redis.ping
 rescue Redis::BaseConnectionError => error
   Rails.logger.error("Failed to connect to Redis: #{error.inspect}")
   raise error
