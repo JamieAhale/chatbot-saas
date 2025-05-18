@@ -99,8 +99,18 @@ class Rack::Attack
         if discriminator && discriminator.start_with?("visitor:")
           visitor_id = discriminator.sub("visitor:", "")
           Rack::Attack.block_visitor(visitor_id, 24.hours) if visitor_id.present?
+          Rollbar.info("Blocked visitor due to excessive requests", 
+            visitor_id: visitor_id,
+            duration: "24 hours",
+            event: 'throttle.rack_attack'
+          )
         end
       rescue => e
+        Rollbar.warning(e, 
+          discriminator: discriminator, 
+          visitor_id: visitor_id,
+          event: 'throttle.rack_attack'
+        )
         Rails.logger.error("Error blocking visitor ID: #{e.message}")
       end
     end

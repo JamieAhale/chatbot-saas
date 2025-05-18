@@ -19,6 +19,7 @@ class CheckoutsController < ApplicationController
     )
     render json: { id: session.id }
   rescue Stripe::StripeError => e
+    Rollbar.error(e, user_id: current_user.id, price_id: price_id)
     render json: { error: e.message }, status: :bad_request
   end
 end 

@@ -22,6 +22,12 @@ class PineconeAssistantCreator
       Rails.logger.info "Successfully created Pinecone assistant for user #{@user.id}"
       return true
     else
+      Rollbar.error("Failed to create Pinecone assistant",
+        user_id: @user.id,
+        assistant_name: assistant_name,
+        status: response.status,
+        reason: response.reason_phrase
+      )
       Rails.logger.error "Failed to create Pinecone assistant for user #{@user.id}. Status: #{response.status} - #{response.reason_phrase}"
       return false
     end

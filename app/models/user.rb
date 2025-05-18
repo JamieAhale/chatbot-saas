@@ -46,6 +46,11 @@ class User < ApplicationRecord
     )
     update(stripe_customer_id: customer.id, subscription_status: 'incomplete')
   rescue Stripe::StripeError => e
+    Rollbar.error(e, 
+      user_id: self.id, 
+      email: self.email, 
+      action: 'create_stripe_customer_only'
+    )
     Rails.logger.error "Stripe Error in create_stripe_customer_only: #{e.message}"
     errors.add(:base, "There was an issue creating your Stripe customer: #{e.message}")
     false

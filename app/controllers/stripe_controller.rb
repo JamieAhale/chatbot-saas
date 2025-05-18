@@ -13,9 +13,11 @@ class StripeController < ApplicationController
         payload, sig_header, endpoint_secret
       )
     rescue JSON::ParserError => e
+      Rollbar.error(e, endpoint: 'stripe_webhook', payload: payload)
       render json: { error: 'Invalid payload' }, status: 400
       return
     rescue Stripe::SignatureVerificationError => e
+      Rollbar.error(e, endpoint: 'stripe_webhook', sig_header: sig_header)
       render json: { error: 'Invalid signature' }, status: 400
       return
     end
@@ -48,8 +50,18 @@ class StripeController < ApplicationController
       user.update!(subscription_status: 'active')
       assistant_creator = PineconeAssistantCreator.new(user)
       unless assistant_creator.create
+        Rollbar.error("Failed to create Pinecone assistant after checkout",
+          user_id: user.id,
+          stripe_customer_id: session.customer,
+          checkout_session_id: session.id
+        )
         Rails.logger.error "Error creating Pinecone assistant for user #{user.id}"
       end
+    else
+      Rollbar.warning("Checkout completed but no user found",
+        stripe_customer_id: session.customer,
+        checkout_session_id: session.id
+      )
     end
   end
 
@@ -70,6 +82,10 @@ class StripeController < ApplicationController
         user.update!(subscription_status: new_status)
       end
     else
+      Rollbar.warning("Subscription updated but no user found",
+        stripe_customer_id: subscription.customer,
+        subscription_id: subscription.id
+      )
       Rails.logger.warn "No user found with Stripe customer ID: #{subscription.customer}"
     end
   end
@@ -78,6 +94,10 @@ class StripeController < ApplicationController
     if user = User.find_by(stripe_customer_id: subscription.customer)
       user.update!(subscription_status: 'inactive')
     else
+      Rollbar.warning("Subscription deleted but no user found",
+        stripe_customer_id: subscription.customer,
+        subscription_id: subscription.id
+      )
       Rails.logger.warn "No user found with Stripe customer ID: #{subscription.customer}"
     end
   end
@@ -94,6 +114,10 @@ class StripeController < ApplicationController
       NotificationMailer.invoice_payment_succeeded(user).deliver_later
       Rails.logger.info "Reset queries for user #{user.id} due to successful payment. Subscription status set to active."
     else
+      Rollbar.warning("Invoice payment succeeded but no user found",
+        stripe_customer_id: customer_id,
+        invoice_id: invoice.id
+      )
       Rails.logger.warn "No user found with Stripe customer ID: #{customer_id}"
     end
   end
@@ -104,8 +128,19 @@ class StripeController < ApplicationController
     if user
       user.update(subscription_status: 'inactive')
       NotificationMailer.invoice_payment_failed(user).deliver_later
+      Rollbar.warning("Invoice payment failed",
+        user_id: user.id,
+        stripe_customer_id: customer_id,
+        invoice_id: invoice.id,
+        amount_due: invoice.amount_due,
+        attempt_count: invoice.attempt_count
+      )
       Rails.logger.info "Invoice payment failed for user #{user.id} with Stripe customer ID: #{customer_id}. Subscription status updated to inactive."
     else
+      Rollbar.warning("Invoice payment failed but no user found",
+        stripe_customer_id: customer_id,
+        invoice_id: invoice.id
+      )
       Rails.logger.warn "No user found with Stripe customer ID: #{customer_id}"
     end
   end
@@ -118,6 +153,10 @@ class StripeController < ApplicationController
       NotificationMailer.refund(user).deliver_later
       Rails.logger.info "Refunded user #{user.id} with Stripe customer ID: #{customer_id}. Subscription status updated to inactive."
     else
+      Rollbar.warning("Refund processed but no user found",
+        stripe_customer_id: customer_id,
+        refund_id: refund.id
+      )
       Rails.logger.warn "No user found with Stripe customer ID: #{customer_id}"
     end
   end

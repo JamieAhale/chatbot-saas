@@ -18,6 +18,11 @@ class SubscriptionsController < ApplicationController
     # allow_other_host: true is needed if the redirect URL is on a different domain.
     redirect_to portal_session.url, allow_other_host: true
   rescue Stripe::StripeError => e
+    Rollbar.error(e, 
+      user_id: current_user.id,
+      customer_id: customer_id,
+      action: 'billing_portal'
+    )
     Rails.logger.error("Stripe billing portal error: #{e.message}")
     flash[:error] = "An error occurred while accessing the billing portal. Please try again."
     redirect_to user_show_path
