@@ -61,44 +61,42 @@
               </div>
             </div>
 
-            <!-- Additional customization fields visible only if the plan is not Basic -->
-            <% unless current_user.plan_name == 'Basic' %>
-              <div class="mb-3">
-                <label class="form-label">Font Family</label>
-                <div class="dropdown">
-                  <button class="form-control text-start dropdown-toggle" type="button" id="fontDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    Select Font
-                  </button>
-                  <ul class="dropdown-menu w-100" aria-labelledby="fontDropdown">
-                    <li><h6 class="dropdown-header">Google Fonts</h6></li>
-                    <li><a class="dropdown-item" href="#" data-value="'Roboto', sans-serif" style="font-family: 'Roboto', sans-serif">Roboto</a></li>
-                    <li><a class="dropdown-item" href="#" data-value="'Open Sans', sans-serif" style="font-family: 'Open Sans', sans-serif">Open Sans</a></li>
-                    <li><a class="dropdown-item" href="#" data-value="'Lato', sans-serif" style="font-family: 'Lato', sans-serif">Lato</a></li>
-                    <li><a class="dropdown-item" href="#" data-value="'Poppins', sans-serif" style="font-family: 'Poppins', sans-serif">Poppins</a></li>
-                    <li><a class="dropdown-item" href="#" data-value="'Montserrat', sans-serif" style="font-family: 'Montserrat', sans-serif">Montserrat</a></li>
-                    <li><a class="dropdown-item" href="#" data-value="'Source Sans Pro', sans-serif" style="font-family: 'Source Sans Pro', sans-serif">Source Sans Pro</a></li>
-                    <li><a class="dropdown-item" href="#" data-value="'Nunito', sans-serif" style="font-family: 'Nunito', sans-serif">Nunito</a></li>
-                    <li><a class="dropdown-item" href="#" data-value="'Inter', sans-serif" style="font-family: 'Inter', sans-serif">Inter</a></li>
-                    <li><a class="dropdown-item" href="#" data-value="'Ubuntu', sans-serif" style="font-family: 'Ubuntu', sans-serif">Ubuntu</a></li>
-                    <li><a class="dropdown-item" href="#" data-value="'Playfair Display', serif" style="font-family: 'Playfair Display', serif">Playfair Display</a></li>
-                    <li><a class="dropdown-item" href="#" data-value="'Quicksand', sans-serif" style="font-family: 'Quicksand', sans-serif">Quicksand</a></li>
-                    <li><a class="dropdown-item" href="#" data-value="'Raleway', sans-serif" style="font-family: 'Raleway', sans-serif">Raleway</a></li>
+            <!-- Additional customization fields -->
+            <div class="mb-3">
+              <label class="form-label">Font Family</label>
+              <div class="dropdown">
+                <button class="form-control text-start dropdown-toggle" type="button" id="fontDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                  Select Font
+                </button>
+                <ul class="dropdown-menu w-100" aria-labelledby="fontDropdown">
+                  <li><h6 class="dropdown-header">Google Fonts</h6></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Roboto', sans-serif" style="font-family: 'Roboto', sans-serif">Roboto</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Open Sans', sans-serif" style="font-family: 'Open Sans', sans-serif">Open Sans</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Lato', sans-serif" style="font-family: 'Lato', sans-serif">Lato</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Poppins', sans-serif" style="font-family: 'Poppins', sans-serif">Poppins</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Montserrat', sans-serif" style="font-family: 'Montserrat', sans-serif">Montserrat</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Source Sans Pro', sans-serif" style="font-family: 'Source Sans Pro', sans-serif">Source Sans Pro</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Nunito', sans-serif" style="font-family: 'Nunito', sans-serif">Nunito</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Inter', sans-serif" style="font-family: 'Inter', sans-serif">Inter</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Ubuntu', sans-serif" style="font-family: 'Ubuntu', sans-serif">Ubuntu</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Playfair Display', serif" style="font-family: 'Playfair Display', serif">Playfair Display</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Quicksand', sans-serif" style="font-family: 'Quicksand', sans-serif">Quicksand</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Raleway', sans-serif" style="font-family: 'Raleway', sans-serif">Raleway</a></li>
 
-                    <li><hr class="dropdown-divider"></li>
-                    <li><h6 class="dropdown-header">System Fonts</h6></li>
-                    <li><a class="dropdown-item" href="#" data-value="Arial, sans-serif" style="font-family: Arial, sans-serif">Arial</a></li>
-                    <li><a class="dropdown-item" href="#" data-value="'Helvetica Neue', Helvetica, sans-serif" style="font-family: 'Helvetica Neue', Helvetica, sans-serif">Helvetica</a></li>
-                    <li><a class="dropdown-item" href="#" data-value="'Segoe UI', Tahoma, Geneva, sans-serif" style="font-family: 'Segoe UI', Tahoma, Geneva, sans-serif">Segoe UI</a></li>
-                    <li><a class="dropdown-item" href="#" data-value="'Times New Roman', serif" style="font-family: 'Times New Roman', serif">Times New Roman</a></li>
-                  </ul>
-                </div>
-                <input type="hidden" id="font-family" value="'Roboto', sans-serif">
+                  <li><hr class="dropdown-divider"></li>
+                  <li><h6 class="dropdown-header">System Fonts</h6></li>
+                  <li><a class="dropdown-item" href="#" data-value="Arial, sans-serif" style="font-family: Arial, sans-serif">Arial</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Helvetica Neue', Helvetica, sans-serif" style="font-family: 'Helvetica Neue', Helvetica, sans-serif">Helvetica</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Segoe UI', Tahoma, Geneva, sans-serif" style="font-family: 'Segoe UI', Tahoma, Geneva, sans-serif">Segoe UI</a></li>
+                  <li><a class="dropdown-item" href="#" data-value="'Times New Roman', serif" style="font-family: 'Times New Roman', serif">Times New Roman</a></li>
+                </ul>
               </div>
-              <div class="mb-3">
-                <label class="form-label">Widget Heading</label>
-                <input type="text" class="form-control" id="widget-heading" placeholder="Enter widget heading" value="AI Assistant" maxlength="25">
-              </div>
-            <% end %>
+              <input type="hidden" id="font-family" value="'Roboto', sans-serif">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Widget Heading</label>
+              <input type="text" class="form-control" id="widget-heading" placeholder="Enter widget heading" value="AI Assistant" maxlength="25">
+            </div>
 
             <button type="submit" class="btn btn-outline-secondary">Generate Code</button>
           </form>
