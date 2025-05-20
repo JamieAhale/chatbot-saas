@@ -344,6 +344,15 @@ document.addEventListener('DOMContentLoaded', function () {
           hasLoadedMessages = true;
         }
       }
+    } else {
+      // Close the widget if it's already open
+      chatContainer.style.transform = 'translateY(20px)';
+      chatContainer.style.opacity = '0';
+      
+      // Wait for animation to complete before hiding
+      setTimeout(() => {
+        chatContainer.style.display = 'none';
+      }, 300);
     }
   });
 
