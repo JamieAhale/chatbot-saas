@@ -16,9 +16,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const apiBaseUrl = isProduction 
     ? 'https://chatbot-saas-e0691e8fb948.herokuapp.com' 
     : 'http://localhost:3000';
-  
-  console.log('Environment:', isProduction ? 'Production' : 'Development');
-  console.log('API Base URL:', apiBaseUrl);
 
   // Initialize FingerprintJS
   let visitorId = null;
@@ -26,7 +23,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const fpPromise = import('https://openfpcdn.io/fingerprintjs/v4')
     .then(FingerprintJS => FingerprintJS.load())
     .catch(error => {
-      console.error('Error loading FingerprintJS:', error);
       return null;
     });
 
@@ -36,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function () {
     .then(result => {
       if (result) {
         visitorId = result.visitorId;
-        console.log('FingerprintJS Visitor ID:', visitorId);
       }
     })
     .catch(error => {
@@ -141,7 +136,6 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   const fontName = extractFontName(font_family);
-  console.log("Extracted font name:", fontName);
 
   // Known Google Fonts options based on your widget generator dropdown:
   const googleFonts = ["Roboto", "Open Sans", "Lato", "Poppins", "Montserrat", "Source Sans Pro", "Nunito", "Inter", "Ubuntu", "Playfair Display", "Quicksand", "Raleway"];
@@ -175,7 +169,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const assistantName = 'example-assistant';
   let hasLoadedMessages = false;
-  console.log('uniqueIdentifierData: ', localStorage.getItem('uniqueIdentifierData'));
 
   // Create the chat icon
   const chatIcon = document.createElement('div');
@@ -294,13 +287,11 @@ document.addEventListener('DOMContentLoaded', function () {
       chatContainer.style.opacity = '1';
       
       if (!hasLoadedMessages) {
-        console.log('Loading messages...');
         if (localStorage.getItem('initialMessageShown') === 'true' && uniqueIdentifier) {
           // Fetch the last 10 messages for the conversation
           fetch(`${apiBaseUrl}/api/v1/chat/${uniqueIdentifier.id}/last_messages`)
             .then(response => response.json())
             .then(data => {
-              console.log('Fetched data:', data);
               if (data.messages && data.messages.length > 0) {
                 data.messages.forEach(message => {
                   // Process formatting for each message using our safe formatter
@@ -332,10 +323,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 displayInitialMessage();
               }
               hasLoadedMessages = true;
-              console.log('Messages loaded, flag set to true');
             })
             .catch(error => {
-              console.error('Error fetching messages:', error);
               displayInitialMessage();
               hasLoadedMessages = true;
             });
@@ -346,18 +335,12 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     } else {
       // Close the widget if it's already open
-      console.log('Chat icon clicked - attempting to close the widget');
-      console.log('Current display state:', chatContainer.style.display);
-      console.log('Current opacity:', chatContainer.style.opacity);
-      
       chatContainer.style.transform = 'translateY(20px)';
       chatContainer.style.opacity = '0';
       
       // Wait for animation to complete before hiding
       setTimeout(() => {
-        console.log('Timeout callback executing - hiding widget');
         chatContainer.style.display = 'none';
-        console.log('Widget display set to none');
       }, 300);
     }
   });
@@ -414,8 +397,6 @@ document.addEventListener('DOMContentLoaded', function () {
    };
    localStorage.setItem('uniqueIdentifierData', JSON.stringify(uniqueIdentifier));
   }
-
-  console.log('uniqueIdentifier: ', uniqueIdentifier);
 
   const closeChat = document.getElementById('close-chat');
   closeChat.style.transition = 'all 0.3s ease';
@@ -682,19 +663,10 @@ document.addEventListener('DOMContentLoaded', function () {
     userInput.style.height = 'auto'; // Reset height after sending
   });
 
-  // Adjust chat window height based on potential queries
-  //function adjustChatWindowHeight() {
-    //const hasQueries = potentialQueriesContainer.children.length > 0;
-    //chatWindow.style.height = hasQueries ? '400px' : '480px';
-  //}
-
   // Clear the initial message flag on page reload
   window.addEventListener('beforeunload', function () {
-    //localStorage.removeItem('initialMessageShown');
-    //localStorage.removeItem('uniqueIdentifierData');
     chatContainer.style.display = 'none';
     hasLoadedMessages = false;
-    console.log('Reset hasLoadedMessages on unload');
   });
 
   // Add this CSS to the potential queries buttons
