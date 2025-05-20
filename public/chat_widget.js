@@ -346,12 +346,18 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     } else {
       // Close the widget if it's already open
+      console.log('Chat icon clicked - attempting to close the widget');
+      console.log('Current display state:', chatContainer.style.display);
+      console.log('Current opacity:', chatContainer.style.opacity);
+      
       chatContainer.style.transform = 'translateY(20px)';
       chatContainer.style.opacity = '0';
       
       // Wait for animation to complete before hiding
       setTimeout(() => {
+        console.log('Timeout callback executing - hiding widget');
         chatContainer.style.display = 'none';
+        console.log('Widget display set to none');
       }, 300);
     }
   });
