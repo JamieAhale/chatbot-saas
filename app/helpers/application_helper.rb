@@ -9,6 +9,8 @@ module ApplicationHelper
       'Pro'
     when ENV['STRIPE_PRICE_TEST_ID']
       'Test'
+    when ENV['STRIPE_PRICE_ADMIN_ID']
+      'Admin'
     else
       'Unknown Plan'
     end
@@ -24,6 +26,8 @@ module ApplicationHelper
       ENV['STRIPE_PRICE_PRO_ID']
     when 'Test'
       ENV['STRIPE_PRICE_TEST_ID']
+    when 'Admin'
+      ENV['STRIPE_PRICE_ADMIN_ID']
     else
       nil
     end

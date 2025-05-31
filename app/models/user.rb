@@ -13,7 +13,8 @@ class User < ApplicationRecord
     'Test' => 100,
     'Basic' => 1000,
     'Standard' => 5000,
-    'Pro' => 10000
+    'Pro' => 10000,
+    'Admin' => 1000000
   }.freeze
 
   # Returns the query limit based on the user's current plan
@@ -66,6 +67,8 @@ class User < ApplicationRecord
       'Pro'
     when ENV['STRIPE_PRICE_TEST_ID']
       'Test'
+    when ENV['STRIPE_PRICE_ADMIN_ID']
+      'Admin'
     else
       'No Plan'
     end
