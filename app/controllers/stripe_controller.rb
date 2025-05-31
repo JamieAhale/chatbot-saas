@@ -35,6 +35,8 @@ class StripeController < ApplicationController
       handle_invoice_payment_failed(event.data.object)
     when 'refund.created'
       handle_refund(event.data.object)
+    when 'customer.updated'
+      handle_customer_updated(event.data.object)
     else
       Rails.logger.info "Unhandled event type: #{event.type}"
     end
@@ -92,7 +94,7 @@ class StripeController < ApplicationController
 
   def handle_subscription_deleted(subscription)
     if user = User.find_by(stripe_customer_id: subscription.customer)
-      user.update!(subscription_status: 'inactive')
+      user.update!(subscription_status: 'incomplete')
     else
       Rollbar.warning("Subscription deleted but no user found",
         stripe_customer_id: subscription.customer,
@@ -158,6 +160,23 @@ class StripeController < ApplicationController
         refund_id: refund.id
       )
       Rails.logger.warn "No user found with Stripe customer ID: #{customer_id}"
+    end
+  end
+
+  def handle_customer_updated(customer)
+    user = User.find_by(stripe_customer_id: customer.id)
+
+    if user
+      if customer.metadata && customer.metadata['change_status_to']
+        new_status = customer.metadata['change_status_to']
+        user.update!(subscription_status: new_status)
+        Rails.logger.info "Updated subscription status to #{new_status} for user #{user.id} with Stripe customer ID: #{customer.id}"
+      end
+    else
+      Rollbar.warning("Customer updated but no user found",
+        stripe_customer_id: customer.id
+      )
+      Rails.logger.warn "No user found with Stripe customer ID: #{customer.id}"
     end
   end
 end
