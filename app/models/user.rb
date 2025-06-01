@@ -10,7 +10,6 @@ class User < ApplicationRecord
 
   # Define the maximum number of queries for each plan
   PLAN_QUERY_LIMITS = {
-    'Test' => 100,
     'Basic' => 1000,
     'Standard' => 5000,
     'Pro' => 10000,
@@ -65,8 +64,6 @@ class User < ApplicationRecord
       'Standard'
     when ENV['STRIPE_PRICE_PRO_ID']
       'Pro'
-    when ENV['STRIPE_PRICE_TEST_ID']
-      'Test'
     when ENV['STRIPE_PRICE_ADMIN_ID']
       'Admin'
     else
