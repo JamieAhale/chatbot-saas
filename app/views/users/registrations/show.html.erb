@@ -192,6 +192,48 @@
   <% end %>
 </div>
 
+<!-- Referral Program Section -->
+<div class="card mt-4 mb-5 shadow-sm border-success">
+  <div class="card-header bg-success text-white">
+    <h3 class="mb-0">
+      <i class="fas fa-gift me-2"></i>
+      Refer a Friend, Get a Month Free!
+    </h3>
+  </div>
+  <div class="card-body bg-light">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h5 class="text-success mb-3">
+          <i class="fas fa-users me-2"></i>
+          Know someone who could benefit from AI-powered customer support?
+        </h5>
+        <p class="mb-3">
+          Share the love and get rewarded! When you refer a friend who signs up and completes their first payment, 
+          <strong>you'll receive a full month free</strong> on your subscription.
+        </p>
+        <div class="d-flex align-items-center mb-3">
+          <i class="fas fa-envelope text-success me-2"></i>
+          <span>Simply email us at <strong>jamie@bravik.com.au</strong> when they've signed up and paid</span>
+        </div>
+        <small class="text-muted">
+          <i class="fas fa-info-circle me-1"></i>
+          Make sure to include both your email and your friend's email in the referral notification.
+        </small>
+      </div>
+      <div class="col-md-4 text-center">
+        <div class="referral-icon mb-3">
+          <i class="fas fa-handshake text-success" style="font-size: 3rem;"></i>
+        </div>
+        <a href="mailto:jamie@bravik.com.au?subject=Referral%20Program%20-%20Friend%20Signup&body=Hi%20Jamie,%0A%0AI'd%20like%20to%20report%20a%20successful%20referral.%0A%0AMy%20email:%20<%= @user.email %>%0AFriend's%20email:%20[Please%20enter%20friend's%20email]%0A%0AThanks!" 
+           class="btn btn-success btn-lg">
+          <i class="fas fa-gift me-2"></i>
+          Claim My Free Month
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <style>
   :root {
     --bs-custom-dark: #212529;
