@@ -76,7 +76,7 @@
 
 .plan-card.selected {
   border-color: #0d6efd;
-  background-color: #f8f9ff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .plan-card .badge {
@@ -89,4 +89,46 @@
 
 .plan-card .text-muted {
   opacity: 0.7;
+}
+
+/* Persistent Feedback Widget */
+#feedback-widget {
+  position: fixed;
+  left: 0;
+  top: 80%;
+  transform: translateY(-50%);
+  z-index: 1000;
+}
+
+.feedback-btn {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  padding: 12px 8px 12px 12px;
+  text-decoration: none;
+  border-radius: 0 25px 25px 0;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.feedback-btn:hover {
+  background: linear-gradient(135deg, #0056b3, #004085);
+  color: white;
+  transform: translateX(3px);
+  box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.3);
+}
+
+.feedback-btn i {
+  margin-bottom: 5px;
+  font-size: 16px;
+}
+
+.feedback-btn span {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
 }

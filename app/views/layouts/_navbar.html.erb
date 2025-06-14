@@ -23,6 +23,12 @@
         <li class="nav-item">
           <%= link_to 'Code Generator', widget_generator_path, class: "nav-link #{'active' if current_page?(widget_generator_path)}" %>
         </li>
+        <li class="nav-item">
+          <a href="mailto:jamie@bravik.com.au?subject=Feature%20Request&body=Hi%20Jamie,%0A%0AI'd%20like%20to%20request%20a%20new%20feature:%0A%0A[Please%20describe%20your%20request]%0A%0AMy%20account%20email:%20<%= user_signed_in? ? current_user.email : '[Your%20email]' %>%0A%0AThanks!" 
+             class="nav-link">
+            <i class="fas fa-lightbulb me-1"></i>Feature Requests
+          </a>
+        </li>
       </ul>
       <ul class="navbar-nav ms-auto">
         <% if user_signed_in? %>

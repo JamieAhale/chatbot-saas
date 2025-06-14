@@ -44,6 +44,15 @@
       <%= yield %>
     </div>
 
+    <!-- Persistent Feedback Widget -->
+    <div id="feedback-widget" class="d-none d-md-block">
+      <a href="mailto:jamie@bravik.com.au?subject=Feature%20Request%20or%20Feedback&body=Hi%20Jamie,%0A%0AI'd%20like%20to%20share%20some%20feedback%20or%20request%20a%20feature:%0A%0A[Please%20describe%20your%20request%20or%20feedback]%0A%0A<% if user_signed_in? %>My%20account%20email:%20<%= current_user.email %>%0A<% else %>[Your%20email]%0A<% end %>%0AThanks!" 
+         class="feedback-btn">
+        <i class="fas fa-comment-dots"></i>
+        <span>Feedback</span>
+      </a>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   </body>
 </html>
