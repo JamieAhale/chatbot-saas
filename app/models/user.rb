@@ -66,6 +66,8 @@ class User < ApplicationRecord
       'Pro'
     when ENV['STRIPE_PRICE_ADMIN_ID']
       'Admin'
+    when 'beta_user'
+      'Beta User'
     else
       'No Plan'
     end

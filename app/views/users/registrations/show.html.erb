@@ -48,7 +48,156 @@
   </div>
 
   <!-- Subscription Section -->
-  <% if @user.subscription_status == 'incomplete' %>
+  <% if @user.plan == 'beta_user' %>
+    <!-- Beta User Section -->
+    <div class="card shadow-sm">
+      <div class="card-header bg-warning text-dark">
+        <h3 class="mb-0">
+          <i class="fas fa-flask me-2"></i>Beta Trial Account
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-info">
+          <i class="fas fa-info-circle me-2"></i>
+          You're currently on a <strong>beta trial</strong> with full access to test our platform.
+        </div>
+        
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <div class="d-flex align-items-center mb-3">
+              <i class="fas fa-check-circle text-success me-2"></i>
+              <span class="badge bg-success rounded-pill fs-6 px-3 py-2">
+                Beta Trial Active
+              </span>
+            </div>
+            <div class="d-flex align-items-center mb-3">
+              <i class="fas fa-question-circle text-warning me-2"></i>
+              <span class="badge bg-warning text-dark rounded-pill fs-6 px-3 py-2">
+                Queries Remaining: <%= @user.queries_remaining || 0 %> / 1000
+              </span>
+            </div>
+          </div>
+          <div class="col-md-4 text-md-end">
+            <p class="text-muted mb-2">Ready to upgrade?</p>
+            <button class="btn btn-outline-primary" onclick="document.getElementById('upgrade-plans').scrollIntoView()">
+              <i class="fas fa-arrow-up me-2"></i>View Plans
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upgrade Plans Section for Beta Users -->
+    <div id="upgrade-plans" class="card shadow-sm mt-4">
+      <div class="card-header bg-custom-dark text-white">
+        <h3 class="mb-0">Upgrade to a Paid Plan</h3>
+      </div>
+      <div class="card-body">
+        <div id="plan-options" class="d-flex flex-wrap gap-4 justify-content-center">
+          <% plans = {
+               ENV['STRIPE_PRICE_BASIC_ID'] => {
+                 name: "Basic",
+                 tagline: "For side hustlers and solo stores",
+                 price: "$129/month",
+                 queries: "Up to 1000 queries/month",
+                 icon: "💼",
+                 features: [
+                   "24/7 AI support for customers",
+                   "OpenAI powered responses",
+                   "Full brand customisation",
+                   "No code install",
+                   "Conversation history",
+                   "Flagged for review dashboard"
+                 ],
+                 disabled_features: [
+                   "Priority support",
+                   "Early access to new features"
+                 ]
+               },
+               ENV['STRIPE_PRICE_STANDARD_ID'] => {
+                 name: "Standard",
+                 tagline: "For growing ecommerce brands",
+                 price: "$299/month",
+                 queries: "Up to 5000 queries/month",
+                 icon: "🚀",
+                 features: [
+                   "24/7 AI support for customers",
+                   "OpenAI powered responses",
+                   "Full brand customisation",
+                   "No code install",
+                   "Conversation history",
+                   "Flagged for review dashboard",
+                   "Priority support",
+                   "Early access to new features"
+                 ],
+                 disabled_features: []
+               },
+               ENV['STRIPE_PRICE_PRO_ID'] => {
+                 name: "Pro",
+                 tagline: "For high-volume stores and teams",
+                 price: "$499/month",
+                 queries: "Up to 10,000 queries/month",
+                 icon: "📈",
+                 features: [
+                   "24/7 AI support for customers",
+                   "OpenAI powered responses",
+                   "Full brand customisation",
+                   "No code install",
+                   "Conversation history",
+                   "Flagged for review dashboard",
+                   "Priority support",
+                   "Early access to new features"
+                 ],
+                 disabled_features: []
+               }
+             } %>
+          
+          <% plans.each do |price_id, details| %>
+            <div class="plan-card card <%= 'most-popular' if details[:name] == 'Standard' %>" 
+                 data-plan-id="<%= price_id %>" 
+                 style="cursor: pointer; width: 20rem; transition: all 0.3s ease;">
+              <% if details[:name] == 'Standard' %>
+                <div class="most-popular-badge">
+                  Most Popular
+                </div>
+              <% end %>
+              <div class="card-body p-4">
+                <div class="text-center mb-4">
+                  <div class="display-5 mb-2"><%= details[:icon] %></div>
+                  <h3 class="card-title mb-2"><%= details[:name] %></h3>
+                  <p class="text-muted mb-3"><%= details[:tagline] %></p>
+                  <h4 class="pricing mb-3"><%= details[:price] %></h4>
+                  <p class="fw-medium text-decoration-underline"><%= details[:queries] %></p>
+                </div>
+
+                <ul class="list-unstyled">
+                  <% details[:features].each do |feature| %>
+                    <li class="mb-2">
+                      <i class="fas fa-check text-success me-2"></i>
+                      <%= feature %>
+                    </li>
+                  <% end %>
+                  <% details[:disabled_features].each do |feature| %>
+                    <li class="mb-2 text-muted">
+                      <i class="fas fa-times text-danger me-2"></i>
+                      <%= feature %>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="mt-4">
+          <button id="proceed-to-payment" class="btn btn-primary btn-lg d-block mx-auto" disabled>
+            Upgrade Now (No Additional Trial)
+          </button>
+        </div>
+      </div>
+    </div>
+
+  <% elsif @user.subscription_status == 'incomplete' %>
     <!-- No subscription exists yet. Show plan options and a link to proceed to payment. -->
     <div class="card shadow-sm">
       <div class="card-header bg-custom-dark text-white">
