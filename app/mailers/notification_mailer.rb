@@ -26,5 +26,16 @@ class NotificationMailer < ApplicationMailer
     @user = user
     mail(to: @user.email, subject: 'Refund Processed')
   end
+
+  def beta_user_created(user, temp_password)
+    @user = user
+    @temp_password = temp_password
+    mail(to: @user.email, subject: 'Welcome to Bravik Beta!')
+  end
+
+  def beta_trial_expired(user)
+    @user = user
+    mail(to: @user.email, subject: 'Your Bravik Beta Trial Has Expired')
+  end
   
 end
