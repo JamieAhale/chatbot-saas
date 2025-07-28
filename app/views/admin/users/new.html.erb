@@ -1,0 +1,96 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="mb-0">Create New User</h3>
+        </div>
+        <div class="card-body">
+          <%= form_with model: [@user], url: admin_users_path, local: true do |form| %>
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <%= form.label :first_name, class: "form-label" %>
+                  <%= form.text_field :first_name, class: "form-control", required: true %>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <%= form.label :last_name, class: "form-label" %>
+                  <%= form.text_field :last_name, class: "form-control", required: true %>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <%= form.label :email, class: "form-label" %>
+              <%= form.email_field :email, class: "form-control", required: true %>
+              <div class="form-text">User will receive login credentials at this email address.</div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <%= form.label :role, class: "form-label" %>
+                  <%= form.select :role, 
+                        options_for_select([
+                          ['User', 'user'],
+                          ['Super Admin', 'super_admin']
+                        ], @user.role), 
+                        {}, 
+                        { class: "form-select" } %>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <%= form.label :subscription_status, class: "form-label" %>
+                  <%= form.select :subscription_status, 
+                        options_for_select([
+                          ['Active', 'active'],
+                          ['Inactive', 'inactive'],
+                          ['Cancelled', 'cancelled'],
+                          ['Past Due', 'past_due']
+                        ], 'active'), 
+                        {}, 
+                        { class: "form-select" } %>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <%= form.label :plan, class: "form-label" %>
+                  <%= form.select :plan, 
+                        options_for_select([
+                          ['Basic', ENV['STRIPE_PRICE_BASIC_ID'] || 'basic'],
+                          ['Standard', ENV['STRIPE_PRICE_STANDARD_ID'] || 'standard'],
+                          ['Pro', ENV['STRIPE_PRICE_PRO_ID'] || 'pro'],
+                          ['Admin', ENV['STRIPE_PRICE_ADMIN_ID'] || 'admin'],
+                          ['Beta User', 'beta_user']
+                        ]), 
+                        {}, 
+                        { class: "form-select" } %>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <%= form.label :queries_remaining, class: "form-label" %>
+                  <%= form.number_field :queries_remaining, class: "form-control", value: 1000 %>
+                  <div class="form-text">Number of queries the user can make.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <%= link_to 'Cancel', admin_dashboard_path, class: 'btn btn-secondary me-md-2' %>
+              <%= form.submit 'Create User', class: 'btn btn-primary' %>
+            </div>
+
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

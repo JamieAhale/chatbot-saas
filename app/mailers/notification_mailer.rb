@@ -37,5 +37,20 @@ class NotificationMailer < ApplicationMailer
     @user = user
     mail(to: @user.email, subject: 'Your Bravik Beta Trial Has Expired')
   end
+
+  def new_user_created(user, temp_password)
+    @user = user
+    @temp_password = temp_password
+    @login_url = root_url
+    mail(to: @user.email, subject: 'Welcome to Bravik - Your Account Credentials')
+  end
+
+  def admin_user_created(user, temp_password)
+    @user = user
+    @temp_password = temp_password
+    @login_url = new_user_session_url
+    @reset_password_url = new_user_password_url
+    mail(to: @user.email, subject: 'Welcome to Bravik - Your Account Has Been Created')
+  end
   
 end

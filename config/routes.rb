@@ -15,6 +15,12 @@ Rails.application.routes.draw do
 
   root 'assistants#documents'
 
+  # Admin routes
+  namespace :admin do
+    get 'dashboard', to: 'dashboard#index'
+    resources :users, only: [:show, :new, :create]
+  end
+
   # Define a named route for the chat action
   # get 'assistants/chat', to: 'assistants#chat', as: :chat
 

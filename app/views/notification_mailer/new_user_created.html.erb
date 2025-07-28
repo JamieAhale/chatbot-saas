@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+      .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+      .header { background-color: #343a40; color: white; padding: 20px; text-align: center; }
+      .content { padding: 30px 20px; background-color: #f8f9fa; }
+      .credentials { background-color: #e9ecef; padding: 15px; border-radius: 5px; margin: 20px 0; }
+      .button { display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+      .footer { padding: 20px; text-align: center; color: #666; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Welcome to Bravik!</h1>
+        <p>Your account has been created by an administrator</p>
+      </div>
+      
+      <div class="content">
+        <p><strong>Hello <%= @user.first_name %>,</strong></p>
+        
+        <p>An account has been created for you on Bravik, our AI-powered chatbot platform. Here are your login credentials:</p>
+        
+        <div class="credentials">
+          <p><strong>Email:</strong> <%= @user.email %></p>
+          <p><strong>Temporary Password:</strong> <%= @temp_password %></p>
+        </div>
+        
+        <p><strong>Important:</strong> Please change your password after logging in for the first time for security reasons.</p>
+        
+        <p>To get started:</p>
+        <ol>
+          <li>Click the button below to access your account</li>
+          <li>Log in using the credentials above</li>
+          <li>Change your password by going to Account > Edit Profile</li>
+          <li>Start exploring the platform!</li>
+        </ol>
+        
+        <p style="text-align: center;">
+          <a href="<%= @login_url %>" class="button">Access Your Account</a>
+        </p>
+        
+        <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+        
+        <p>Welcome aboard!</p>
+        <p>The Bravik Team</p>
+      </div>
+      
+      <div class="footer">
+        <p>This email was sent from Bravik. If you have any questions, please contact us at jamie@bravik.com.au</p>
+      </div>
+    </div>
+  </body>
+</html>

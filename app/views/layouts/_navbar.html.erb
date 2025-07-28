@@ -32,6 +32,11 @@
       </ul>
       <ul class="navbar-nav ms-auto">
         <% if user_signed_in? %>
+          <% if current_user.super_admin? %>
+            <li class="nav-item">
+              <%= link_to 'Admin Dashboard', admin_dashboard_path, class: "nav-link #{'active' if request.path.start_with?('/admin')}" %>
+            </li>
+          <% end %>
           <li class="nav-item">
             <%= link_to 'Account', user_show_path, class: "nav-link #{'active' if current_page?(user_show_path)}" %>
           </li>
