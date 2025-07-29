@@ -79,6 +79,10 @@ class User < ApplicationRecord
     "assistant-#{id}"
   end
 
+  def can_be_impersonated_by?(admin_user)
+    admin_user&.super_admin? && !self.super_admin?
+  end
+
   private
 
   def assign_uuid

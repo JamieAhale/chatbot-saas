@@ -13,8 +13,7 @@ class AdminUserCreator
       create_stripe_customer
       create_pinecone_assistant
       send_credentials_email
-      
-      Rails.logger.info "Admin created user: #{@user.email} with role: #{@user.role}"
+
       Rollbar.info("Admin created user", 
         user_id: @user.id, 
         email: @user.email, 
@@ -25,7 +24,6 @@ class AdminUserCreator
     end
   rescue => e
     @errors << "Failed to create user: #{e.message}"
-    Rails.logger.error "Admin user creation failed: #{e.message}"
     Rollbar.error(e, 
       action: 'admin_user_creation', 
       user_params: @user_params.except(:password, :password_confirmation)
@@ -63,8 +61,6 @@ class AdminUserCreator
     if admin_status.present? && admin_status != 'incomplete'
       @user.update!(subscription_status: admin_status)
     end
-    
-    Rails.logger.info "Created Stripe customer for admin user: #{@user.email}"
   rescue => e
     raise "Stripe customer creation failed: #{e.message}"
   end
@@ -74,15 +70,12 @@ class AdminUserCreator
     unless assistant_creator.create
       raise "Failed to create Pinecone assistant for #{@user.email}"
     end
-    
-    Rails.logger.info "Created Pinecone assistant for admin user: #{@user.email}"
   rescue => e
     raise "Pinecone assistant creation failed: #{e.message}"
   end
 
   def send_credentials_email
     NotificationMailer.admin_user_created(@user, @temp_password).deliver_now
-    Rails.logger.info "Sent credentials email to admin user: #{@user.email}"
   rescue => e
     raise "Failed to send credentials email: #{e.message}"
   end

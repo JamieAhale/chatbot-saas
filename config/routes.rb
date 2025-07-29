@@ -19,6 +19,8 @@ Rails.application.routes.draw do
   namespace :admin do
     get 'dashboard', to: 'dashboard#index'
     resources :users, only: [:show, :new, :create]
+    post 'impersonate/:id', to: 'impersonation#start', as: :impersonate_user
+    delete 'stop_impersonation', to: 'impersonation#stop', as: :stop_impersonation
   end
 
   # Define a named route for the chat action

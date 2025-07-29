@@ -1,7 +1,12 @@
 class Admin::DashboardController < Admin::BaseController
   def index
     @users = User.all.includes(:conversations)
-                   .order(:created_at)
+    
+    if params[:search].present?
+      @users = @users.where("email ILIKE ?", "%#{params[:search]}%")
+    end
+    
+    @users = @users.order(:created_at)
                    .page(params[:page])
                    .per(20)
     

@@ -43,7 +43,16 @@
   <!-- Users Table -->
   <div class="card">
     <div class="card-header">
-      <h5 class="card-title mb-0">All Users & Accounts</h5>
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">All Users & Accounts</h5>
+        <%= form_with url: admin_dashboard_path, method: :get, local: true, class: "d-flex" do |f| %>
+          <%= f.text_field :search, placeholder: "Search by email...", value: params[:search], class: "form-control me-2", style: "width: 250px;" %>
+          <%= f.submit "Search", class: "btn btn-outline-secondary btn-sm" %>
+          <% if params[:search].present? %>
+            <%= link_to "Clear", admin_dashboard_path, class: "btn btn-outline-danger btn-sm ms-1" %>
+          <% end %>
+        <% end %>
+      </div>
     </div>
     <div class="card-body">
       <div class="table-responsive">
@@ -53,12 +62,7 @@
               <th>ID</th>
               <th>Name</th>
               <th>Email</th>
-              <th>Role</th>
-              <th>Plan</th>
               <th>Subscription Status</th>
-              <th>Queries Remaining</th>
-              <th>Conversations</th>
-              <th>Created At</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -69,21 +73,15 @@
                 <td><%= "#{user.first_name} #{user.last_name}".strip %></td>
                 <td><%= user.email %></td>
                 <td>
-                  <span class="badge <%= user.super_admin? ? 'bg-danger' : 'bg-secondary' %>">
-                    <%= user.role.humanize %>
-                  </span>
-                </td>
-                <td><%= user.plan_name %></td>
-                <td>
                   <span class="badge <%= user.subscription_status == 'active' ? 'bg-success' : 'bg-warning' %>">
                     <%= user.subscription_status&.humanize || 'N/A' %>
                   </span>
                 </td>
-                <td><%= user.queries_remaining || 'N/A' %></td>
-                <td><%= user.conversations.count %></td>
-                <td><%= user.created_at.strftime('%m/%d/%Y') %></td>
                 <td>
                   <%= link_to 'View', admin_user_path(user), class: 'btn btn-sm btn-outline-primary' %>
+                  <% unless user.super_admin? %>
+                    <%= button_to 'Impersonate', admin_impersonate_user_path(user), method: :post, class: 'btn btn-sm btn-outline-warning ms-1', form: { style: 'display: inline-block;' } %>
+                  <% end %>
                 </td>
               </tr>
             <% end %>
