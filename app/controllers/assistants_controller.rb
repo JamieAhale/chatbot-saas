@@ -6,6 +6,8 @@ class AssistantsController < ApplicationController
   require 'httparty'
 
   before_action :authenticate_user!
+  before_action :ensure_conversation_access, only: [:conversations, :show_conversation, :destroy_conversation, :conversations_for_review, :show_conversation_for_review, :mark_resolved, :dismiss, :delete_selected_conversations, :mark_resolved_conversations, :dismiss_conversations, :flag_for_review, :flag_selected_conversations, :generate_summary]
+  before_action :ensure_full_access, except: [:conversations, :show_conversation, :destroy_conversation, :conversations_for_review, :show_conversation_for_review, :mark_resolved, :dismiss, :delete_selected_conversations, :mark_resolved_conversations, :dismiss_conversations, :flag_for_review, :flag_selected_conversations, :generate_summary]
 
   def chat
     if params[:user_input].present?
@@ -192,6 +194,13 @@ class AssistantsController < ApplicationController
   end
 
   def documents
+    # Handle root path routing based on user role
+    if request.path == '/' && current_user&.super_admin? && !impersonating?
+      redirect_to admin_dashboard_path and return
+    elsif request.path == '/' && current_user && !current_user.super_admin?
+      redirect_to conversations_path and return
+    end
+    
     api_key = ENV['PINECONE_API_KEY']
     assistant_name = "#{current_user.pinecone_assistant_name}"
     url = "https://prod-1-data.ke.pinecone.io/assistant/files/#{assistant_name}"
@@ -563,5 +572,24 @@ class AssistantsController < ApplicationController
     end
 
     redirect_to documents_path
+  end
+
+  private
+
+  def ensure_conversation_access
+    # All authenticated users can access conversation functionality
+    return if user_signed_in?
+    
+    flash[:alert] = "Please log in to access conversations."
+    redirect_to new_user_session_path
+  end
+
+  def ensure_full_access
+    # Only super admins (when impersonating) or regular users with proper access can use full features
+    # Super admins without impersonation should not access user features - redirect to admin
+    if current_user&.super_admin? && !impersonating?
+      flash[:notice] = "Access restricted. Use impersonation to access user features."
+      redirect_to admin_dashboard_path
+    end
   end
 end
