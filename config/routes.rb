@@ -124,4 +124,9 @@ Rails.application.routes.draw do
   get '/payment_processing', to: 'payment_processing#show', as: :payment_processing
   get '/payment_status', to: 'payment_processing#status'
 
+  # Demo pages routes
+  get '/demo/1', to: 'trial_pages#demo1', as: :demo1
+  get '/demo/2', to: 'trial_pages#demo2', as: :demo2
+  get '/demo/3', to: 'trial_pages#demo3', as: :demo3
+
 end
