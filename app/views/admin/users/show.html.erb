@@ -1,0 +1,132 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>User Details</h1>
+    <%= link_to 'Back to Dashboard', admin_dashboard_path, class: 'btn btn-secondary' %>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">User Information</h5>
+        </div>
+        <div class="card-body">
+          <table class="table table-borderless">
+            <tr>
+              <th>ID:</th>
+              <td><%= @user.id %></td>
+            </tr>
+            <tr>
+              <th>Name:</th>
+              <td><%= "#{@user.first_name} #{@user.last_name}".strip %></td>
+            </tr>
+            <tr>
+              <th>Email:</th>
+              <td><%= @user.email %></td>
+            </tr>
+            <tr>
+              <th>Role:</th>
+              <td>
+                <span class="badge <%= @user.super_admin? ? 'bg-danger' : 'bg-secondary' %>">
+                  <%= @user.role.humanize %>
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <th>Plan:</th>
+              <td><%= @user.plan_name %></td>
+            </tr>
+            <tr>
+              <th>Subscription Status:</th>
+              <td>
+                <span class="badge <%= @user.subscription_status == 'active' ? 'bg-success' : 'bg-warning' %>">
+                  <%= @user.subscription_status&.humanize || 'N/A' %>
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <th>Queries Remaining:</th>
+              <td><%= @user.queries_remaining || 'N/A' %></td>
+            </tr>
+            <tr>
+              <th>Email Notifications:</th>
+              <td><%= @user.email_notifications_enabled? ? 'Enabled' : 'Disabled' %></td>
+            </tr>
+            <tr>
+              <th>Created At:</th>
+              <td><%= @user.created_at.strftime('%B %d, %Y at %I:%M %p') %></td>
+            </tr>
+            <tr>
+              <th>Last Updated:</th>
+              <td><%= @user.updated_at.strftime('%B %d, %Y at %I:%M %p') %></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Stripe Information</h5>
+        </div>
+        <div class="card-body">
+          <table class="table table-borderless">
+            <tr>
+              <th>Customer ID:</th>
+              <td><%= @user.stripe_customer_id || 'N/A' %></td>
+            </tr>
+            <tr>
+              <th>Subscription ID:</th>
+              <td><%= @user.stripe_subscription_id || 'N/A' %></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-4">
+    <div class="card-header">
+      <h5 class="mb-0">Recent Conversations (<%= @user.conversations.count %> total)</h5>
+    </div>
+    <div class="card-body">
+      <% if @conversations.any? %>
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Created At</th>
+                <th>Last Message</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @conversations.each do |conversation| %>
+                <tr>
+                  <td><%= truncate(conversation.title || 'Untitled', length: 50) %></td>
+                  <td><%= conversation.created_at.strftime('%m/%d/%Y %I:%M %p') %></td>
+                  <td><%= conversation.last_message_at&.strftime('%m/%d/%Y %I:%M %p') || 'N/A' %></td>
+                  <td>
+                    <% if conversation.flagged_for_review? %>
+                      <span class="badge bg-warning">Flagged for Review</span>
+                    <% else %>
+                      <span class="badge bg-success">Normal</span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <%= link_to 'View', show_conversation_path(conversation.id), class: 'btn btn-sm btn-outline-primary', target: '_blank' %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <p class="text-muted">No conversations found for this user.</p>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -8,6 +8,8 @@ class User < ApplicationRecord
 
   has_many :conversations
 
+  enum role: { user: 10, super_admin: 20 }
+
   # Define the maximum number of queries for each plan
   PLAN_QUERY_LIMITS = {
     'Basic' => 1000,
@@ -75,6 +77,10 @@ class User < ApplicationRecord
 
   def pinecone_assistant_name
     "assistant-#{id}"
+  end
+
+  def can_be_impersonated_by?(admin_user)
+    admin_user&.super_admin? && !self.super_admin?
   end
 
   private

@@ -8,30 +8,52 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <%= link_to 'Documents', documents_path, class: "nav-link #{'active' if current_page?(documents_path)}" %>
-        </li>
-        <li class="nav-item">
-          <%= link_to 'Conversations', conversations_path, class: "nav-link #{'active' if current_page?(conversations_path) || (request.path.include?('/assistants/conversations') && !request.path.include?('/assistants/conversations_for_review'))}" %>
-        </li>
-        <li class="nav-item">
-          <%= link_to 'Conversations for Review', conversations_for_review_path, class: "nav-link #{'active' if current_page?(conversations_for_review_path) || request.path.include?('/assistants/conversations_for_review')}" %>
-        </li>
-        <li class="nav-item">
-          <%= link_to 'Assistant Settings', assistant_settings_path, class: "nav-link #{'active' if current_page?(assistant_settings_path)}" %>
-        </li>
-        <li class="nav-item">
-          <%= link_to 'Code Generator', widget_generator_path, class: "nav-link #{'active' if current_page?(widget_generator_path)}" %>
-        </li>
-        <li class="nav-item">
-          <a href="mailto:jamie@bravik.com.au?subject=Feature%20Request&body=Hi%20Jamie,%0A%0AI'd%20like%20to%20request%20a%20new%20feature:%0A%0A[Please%20describe%20your%20request]%0A%0AMy%20account%20email:%20<%= user_signed_in? ? current_user.email : '[Your%20email]' %>%0A%0AThanks!" 
-             class="nav-link">
-            <i class="fas fa-lightbulb me-1"></i>Feature Requests
-          </a>
-        </li>
+        <% if user_signed_in? && (!current_user.super_admin? || impersonating?) %>
+          <!-- Conversation tabs - shown to regular users and impersonating admins -->
+          <li class="nav-item">
+            <%= link_to 'Conversations', conversations_path, class: "nav-link #{'active' if current_page?(conversations_path) || (request.path.include?('/assistants/conversations') && !request.path.include?('/assistants/conversations_for_review'))}" %>
+          </li>
+          <li class="nav-item">
+            <%= link_to 'Conversations for Review', conversations_for_review_path, class: "nav-link #{'active' if current_page?(conversations_for_review_path) || request.path.include?('/assistants/conversations_for_review')}" %>
+          </li>
+          
+          <!-- Additional tabs - only shown when admin is impersonating -->
+          <% if impersonating? %>
+            <li class="nav-item">
+              <%= link_to 'Documents', documents_path, class: "nav-link #{'active' if current_page?(documents_path)}" %>
+            </li>
+            <li class="nav-item">
+              <%= link_to 'Assistant Settings', assistant_settings_path, class: "nav-link #{'active' if current_page?(assistant_settings_path)}" %>
+            </li>
+            <li class="nav-item">
+              <%= link_to 'Code Generator', widget_generator_path, class: "nav-link #{'active' if current_page?(widget_generator_path)}" %>
+            </li>
+            <li class="nav-item">
+              <a href="mailto:jamie@bravik.com.au?subject=Feature%20Request&body=Hi%20Jamie,%0A%0AI'd%20like%20to%20request%20a%20new%20feature:%0A%0A[Please%20describe%20your%20request]%0A%0AMy%20account%20email:%20<%= user_signed_in? ? current_user.email : '[Your%20email]' %>%0A%0AThanks!" 
+                 class="nav-link">
+                <i class="fas fa-lightbulb me-1"></i>Feature Requests
+              </a>
+            </li>
+          <% end %>
+        <% end %>
       </ul>
       <ul class="navbar-nav ms-auto">
+        <% if impersonating? %>
+          <li class="nav-item">
+            <span class="nav-link text-info fw-bold">
+              <i class="fas fa-user-secret me-1"></i>Viewing: <%= current_user.email %>
+            </span>
+          </li>
+          <li class="nav-item">
+            <%= button_to 'Exit Impersonation', admin_stop_impersonation_path, method: :delete, class: 'nav-link text-warning fw-bold border-0 bg-transparent', form: { style: 'display: inline-block;' } %>
+          </li>
+        <% end %>
         <% if user_signed_in? %>
+          <% if current_user.super_admin? %>
+            <li class="nav-item">
+              <%= link_to 'Admin Dashboard', admin_dashboard_path, class: "nav-link #{'active' if request.path.start_with?('/admin')}" %>
+            </li>
+          <% end %>
           <li class="nav-item">
             <%= link_to 'Account', user_show_path, class: "nav-link #{'active' if current_page?(user_show_path)}" %>
           </li>

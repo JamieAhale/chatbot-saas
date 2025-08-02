@@ -15,6 +15,14 @@ Rails.application.routes.draw do
 
   root 'assistants#documents'
 
+  # Admin routes
+  namespace :admin do
+    get 'dashboard', to: 'dashboard#index'
+    resources :users, only: [:show, :new, :create]
+    post 'impersonate/:id', to: 'impersonation#start', as: :impersonate_user
+    delete 'stop_impersonation', to: 'impersonation#stop', as: :stop_impersonation
+  end
+
   # Define a named route for the chat action
   # get 'assistants/chat', to: 'assistants#chat', as: :chat
 
@@ -115,5 +123,10 @@ Rails.application.routes.draw do
   post '/create_checkout_session', to: 'checkouts#create'
   get '/payment_processing', to: 'payment_processing#show', as: :payment_processing
   get '/payment_status', to: 'payment_processing#status'
+
+  # Demo pages routes
+  get '/demo/1', to: 'trial_pages#demo1', as: :demo1
+  get '/demo/2', to: 'trial_pages#demo2', as: :demo2
+  get '/demo/3', to: 'trial_pages#demo3', as: :demo3
 
 end

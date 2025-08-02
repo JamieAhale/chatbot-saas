@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+      .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+      .header { background-color: #343a40; color: white; padding: 20px; text-align: center; }
+      .content { padding: 30px 20px; background-color: #f8f9fa; }
+      .credentials { background-color: #e9ecef; padding: 15px; border-radius: 5px; margin: 20px 0; }
+      .button { display: inline-block; padding: 12px 24px; color: white; text-decoration: none; border-radius: 5px; margin: 10px 5px; }
+      .button-primary { background-color: #007bff; }
+      .button-secondary { background-color: #6c757d; }
+      .button:hover { opacity: 0.9; }
+      .footer { padding: 20px; text-align: center; color: #666; font-size: 12px; }
+      .important { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Welcome to Bravik!</h1>
+        <p>Your account has been created by an administrator</p>
+      </div>
+      
+      <div class="content">
+        <p><strong>Hello <%= @user.first_name %>,</strong></p>
+        
+        <p>An account has been created for you on Bravik, our AI-powered chatbot platform. You can now log in and see all the conversations your chatbot is having on your behalf.</p>
+
+        <div class="credentials">
+          <h3>Your Login Credentials</h3>
+          <p><strong>Email:</strong> <%= @user.email %></p>
+          <p><strong>Temporary Password:</strong> <%= @temp_password %></p>
+        </div>
+        
+        <div class="important">
+          <p><strong>⚠️ Important Security Notice:</strong></p>
+          <p>For your security, please change your password immediately after logging in. You can do this by going to your Account settings or using the password reset link below.</p>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="<%= @login_url %>" class="button button-primary">Log In to Your Account</a>
+          <a href="<%= @reset_password_url %>" class="button button-secondary">Reset Password</a>
+        </div>
+        
+        <p>If you have any questions or need assistance, please don't hesitate to reach out to our support team.</p>
+        
+        <p>Welcome to the Bravik community!</p>
+        <p><strong>The Bravik Team</strong></p>
+      </div>
+      
+      <div class="footer">
+        <p>This email was sent from Bravik. If you have any questions, please contact us at jamie@bravik.com.au</p>
+        <p>You received this email because an administrator created an account for you on our platform.</p>
+      </div>
+    </div>
+  </body>
+</html>
