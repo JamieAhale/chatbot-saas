@@ -51,11 +51,13 @@
         
         .selling-points {
             margin-bottom: 40px;
+            text-align: center;
         }
         
         .selling-point {
             display: flex;
             align-items: center;
+            justify-content: center;
             margin-bottom: 15px;
             font-size: 1.1rem;
             color: #ffffff;
@@ -149,6 +151,43 @@
         @keyframes float {
             0%, 100% { transform: translateY(0px) scale(1); }
             50% { transform: translateY(-22px) scale(1.1); }
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            body {
+                overflow-y: auto;
+                height: auto;
+            }
+            
+            .container {
+                padding: 60px 20px 20px 20px;
+            }
+            
+            .main-container {
+                min-height: 100vh;
+                height: 100%;
+            }
+            
+            .main-title {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .brand-logo {
+                height: 40px;
+            }
+            
+            .orb {
+                opacity: 0.3;
+            }
+            
+            .powered-by {
+                display: none;
+            }
         }
     </style>
 </head>
