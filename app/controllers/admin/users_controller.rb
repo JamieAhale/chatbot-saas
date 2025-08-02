@@ -14,7 +14,7 @@ class Admin::UsersController < Admin::BaseController
     user_creator = AdminUserCreator.new(user_params)
     
     if user_creator.create
-      flash[:success] = "User created successfully! The user has been set up with Stripe customer, Pinecone assistant, and an email with login credentials has been sent to #{user_creator.user.email}"
+      flash[:success] = "User created successfully! The user has been set up with Stripe customer, Pinecone assistant, and an admin notification has been sent to you with their credentials."
       redirect_to admin_dashboard_path
     else
       # Set @user for form re-rendering
@@ -22,6 +22,29 @@ class Admin::UsersController < Admin::BaseController
       flash.now[:alert] = user_creator.errors.join(', ')
       render :new
     end
+  end
+
+  def send_login_info
+    @user = User.find(params[:id])
+    temp_password = SecureRandom.hex(8)
+    
+    # Update user's password
+    @user.update!(
+      password: temp_password,
+      password_confirmation: temp_password
+    )
+    
+    # Send login info to user
+    NotificationMailer.send_user_login_info(@user, temp_password).deliver_now
+    
+    # Send confirmation to admin
+    NotificationMailer.login_info_sent_confirmation(@user, temp_password).deliver_now
+    
+    flash[:success] = "Login credentials have been sent to #{@user.email} and a confirmation email has been sent to you."
+    redirect_to admin_user_path(@user)
+  rescue => e
+    flash[:alert] = "Failed to send login info: #{e.message}"
+    redirect_to admin_user_path(@user)
   end
 
   private

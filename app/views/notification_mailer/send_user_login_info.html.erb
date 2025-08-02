@@ -10,7 +10,6 @@
       .credentials { background-color: #e9ecef; padding: 15px; border-radius: 5px; margin: 20px 0; }
       .button { display: inline-block; padding: 12px 24px; color: white; text-decoration: none; border-radius: 5px; margin: 10px 5px; }
       .button-primary { background-color: #007bff; }
-      .button-secondary { background-color: #6c757d; }
       .button:hover { opacity: 0.9; }
       .footer { padding: 20px; text-align: center; color: #666; font-size: 12px; }
       .important { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
@@ -20,18 +19,18 @@
     <div class="container">
       <div class="header">
         <h1>Welcome to Bravik!</h1>
-        <p>Your account has been created by an administrator</p>
+        <p>Your login credentials are ready</p>
       </div>
       
       <div class="content">
-        <p><strong>Hello <%= @user.first_name %>,</strong></p>
+        <p><strong>Hi <%= @user.first_name %>,</strong></p>
         
-        <p>An account has been created for you on Bravik, our AI-powered chatbot platform. You can now log in and see all the conversations your chatbot is having on your behalf.</p>
+        <p>Your Bravik account is now ready! You can log in to view all the conversations your chatbot is having on your behalf.</p>
 
         <div class="credentials">
           <h3>Your Login Credentials</h3>
           <p><strong>Email:</strong> <%= @user.email %></p>
-          <p><strong>Temporary Password:</strong> <%= @temp_password %></p>
+          <p><strong>Password:</strong> <%= @temp_password %></p>
         </div>
         
         <div class="important">
@@ -51,7 +50,7 @@
       
       <div class="footer">
         <p>This email was sent from Bravik. If you have any questions, please contact us at jamie@bravik.com.au</p>
-        <p>You received this email because an administrator created an account for you on our platform.</p>
+        <p>You received this email because your account setup has been completed.</p>
       </div>
     </div>
   </body>

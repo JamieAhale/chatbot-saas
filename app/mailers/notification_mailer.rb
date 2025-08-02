@@ -48,9 +48,28 @@ class NotificationMailer < ApplicationMailer
   def admin_user_created(user, temp_password)
     @user = user
     @temp_password = temp_password
-    @login_url = new_user_session_url
-    @reset_password_url = new_user_password_url
+    @login_url = 'https://app.bravik.com.au/users/sign_in'
     mail(to: @user.email, subject: 'Welcome to Bravik - Your Account Has Been Created')
+  end
+
+  def admin_new_user_notification(user, temp_password)
+    @user = user
+    @temp_password = temp_password
+    @login_url = 'https://app.bravik.com.au/users/sign_in'
+    mail(to: 'jamie@bravik.com.au', subject: "New User Created: #{user.email}")
+  end
+
+  def send_user_login_info(user, temp_password)
+    @user = user
+    @temp_password = temp_password
+    @login_url = 'https://app.bravik.com.au/users/sign_in'
+    mail(to: @user.email, bcc: 'jamie@bravik.com.au', subject: 'Welcome to Bravik - Your Login Credentials')
+  end
+
+  def login_info_sent_confirmation(user, temp_password)
+    @user = user
+    @temp_password = temp_password
+    mail(to: 'jamie@bravik.com.au', subject: "Log in details sent for: #{user.email}")
   end
   
 end
