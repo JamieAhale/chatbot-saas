@@ -5,11 +5,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
   before_action :configure_account_update_params, only: [:update]
 
   def new
-    # Set a flash message for users coming from the free trial button
-    if params[:free_trial].present?
-      flash.now[:notice] = "Create an account to start your free trial"
-    end
-    super
+    # Redirect to login page - sign up is now disabled
+    flash[:alert] = "Account registration is currently disabled. Please contact support if you need an account."
+    redirect_to new_user_session_path
   end
 
   def show
@@ -47,21 +45,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
   end
 
   def create
-    session[:free_trial] = params[:free_trial].present?
-    
-    ActiveRecord::Base.transaction do
-      puts "entering create transaction"
-      puts "params: #{params}"
-      super do |resource|
-        if resource.persisted?
-          unless resource.create_stripe_customer_only
-            raise ActiveRecord::Rollback, "Stripe customer creation failed"
-          end
-          puts "stripe customer id: #{resource.stripe_customer_id}"
-          flash[:success] = "Account created successfully. Please purchase a subscription to access the full app."
-        end
-      end
-    end
+    # Redirect to login page - sign up is now disabled
+    flash[:alert] = "Account registration is currently disabled. Please contact support if you need an account."
+    redirect_to new_user_session_path
   end
 
   protected

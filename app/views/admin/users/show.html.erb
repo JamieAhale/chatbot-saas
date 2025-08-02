@@ -11,6 +11,13 @@
           <h5 class="mb-0">User Information</h5>
         </div>
         <div class="card-body">
+          <div class="d-flex justify-content-end mb-3">
+            <%= button_to 'Send Log In Info', send_login_info_admin_user_path(@user), 
+                method: :post, 
+                class: 'btn btn-primary',
+                confirm: "This will generate new login credentials and send them to #{@user.email}. Continue?",
+                data: { disable_with: 'Sending...' } %>
+          </div>
           <table class="table table-borderless">
             <tr>
               <th>ID:</th>

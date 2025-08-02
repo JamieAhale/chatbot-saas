@@ -75,7 +75,7 @@ class AdminUserCreator
   end
 
   def send_credentials_email
-    NotificationMailer.admin_user_created(@user, @temp_password).deliver_now
+    NotificationMailer.admin_new_user_notification(@user, @temp_password).deliver_now
   rescue => e
     raise "Failed to send credentials email: #{e.message}"
   end

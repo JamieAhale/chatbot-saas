@@ -18,7 +18,11 @@ Rails.application.routes.draw do
   # Admin routes
   namespace :admin do
     get 'dashboard', to: 'dashboard#index'
-    resources :users, only: [:show, :new, :create]
+    resources :users, only: [:show, :new, :create] do
+      member do
+        post 'send_login_info'
+      end
+    end
     post 'impersonate/:id', to: 'impersonation#start', as: :impersonate_user
     delete 'stop_impersonation', to: 'impersonation#stop', as: :stop_impersonation
   end
