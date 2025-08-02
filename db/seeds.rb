@@ -9,7 +9,7 @@
 #   end
 
 # Create super admin user
-super_admin = User.find_or_initialize_by(email: 'jamie.w.ahale@gmail.com')
+super_admin = User.find_or_initialize_by(email: 'jamie@bravik.com.au')
 
 # Set attributes whether user is new or existing
 super_admin.assign_attributes(
